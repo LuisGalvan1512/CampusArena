@@ -33,11 +33,47 @@ class ApiClient {
     }
 
     try {
-      const response = await fetch(url, {
+      let response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include', // Includes cookies for Refresh Tokens
       });
+
+      // Automatic Refresh Token Logic
+      if (
+        response.status === 401 && 
+        !endpoint.includes('/auth/login') && 
+        !endpoint.includes('/auth/refresh')
+      ) {
+        try {
+          const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+            method: 'POST',
+            credentials: 'include', // send httpOnly cookie
+          });
+          
+          if (refreshRes.ok) {
+            const refreshData = await refreshRes.json();
+            if (refreshData.success && refreshData.data?.access_token) {
+              const newToken = refreshData.data.access_token;
+              localStorage.setItem('campus_token', newToken);
+              headers['Authorization'] = `Bearer ${newToken}`;
+              
+              // Retry the original request
+              response = await fetch(url, {
+                ...options,
+                headers,
+                credentials: 'include',
+              });
+            } else {
+              localStorage.removeItem('campus_token');
+            }
+          } else {
+            localStorage.removeItem('campus_token');
+          }
+        } catch (refreshErr) {
+          localStorage.removeItem('campus_token');
+        }
+      }
 
       const data = await response.json();
       return data;

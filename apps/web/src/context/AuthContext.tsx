@@ -1,6 +1,7 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
+import { create } from 'zustand';
 import { api, ApiResponse } from '@/lib/api';
 
 export interface User {
@@ -13,7 +14,7 @@ export interface User {
   roles: string[];
 }
 
-interface AuthContextType {
+interface AuthState {
   user: User | null;
   token: string | null;
   isLoading: boolean;
@@ -22,89 +23,71 @@ interface AuthContextType {
   register: (data: any) => Promise<ApiResponse>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  initAuth: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+// 1. Creamos el "Store" global con Zustand
+export const useAuth = create<AuthState>((set) => ({
+  user: null,
+  token: null,
+  isLoading: true,
+  isAuthenticated: false,
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  // Load session on startup
-  useEffect(() => {
-    const initAuth = async () => {
-      const storedToken = localStorage.getItem('campus_token');
-      if (storedToken) {
-        setToken(storedToken);
-        const res = await api.get<User>('/auth/me');
-        if (res.success && res.data) {
-          setUser(res.data);
-        } else {
-          // Token expired, clear
-          localStorage.removeItem('campus_token');
-          setToken(null);
-          setUser(null);
-        }
+  initAuth: async () => {
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('campus_token') : null;
+    if (storedToken) {
+      set({ token: storedToken });
+      const res = await api.get<User>('/auth/me');
+      if (res.success && res.data) {
+        set({ user: res.data, isAuthenticated: true });
+      } else {
+        localStorage.removeItem('campus_token');
+        set({ token: null, user: null, isAuthenticated: false });
       }
-      setIsLoading(false);
-    };
+    }
+    set({ isLoading: false });
+  },
 
-    initAuth();
-  }, []);
-
-  const login = async (email: string, password: string): Promise<ApiResponse> => {
+  login: async (email: string, password: string) => {
     const res = await api.post('/auth/login', { email, password });
     if (res.success && res.data) {
       const accessToken = res.data.access_token;
       localStorage.setItem('campus_token', accessToken);
-      setToken(accessToken);
-      setUser(res.data.user);
+      set({ 
+        token: accessToken, 
+        user: res.data.user, 
+        isAuthenticated: true 
+      });
     }
     return res;
-  };
+  },
 
-  const register = async (formData: any): Promise<ApiResponse> => {
-    const res = await api.post('/auth/register', formData);
-    return res;
-  };
+  register: async (formData: any) => {
+    return api.post('/auth/register', formData);
+  },
 
-  const logout = async () => {
+  logout: async () => {
     await api.post('/auth/logout');
     localStorage.removeItem('campus_token');
-    setToken(null);
-    setUser(null);
-  };
+    set({ token: null, user: null, isAuthenticated: false });
+  },
 
-  const refreshUser = async () => {
+  refreshUser: async () => {
     const res = await api.get<User>('/auth/me');
     if (res.success && res.data) {
-      setUser(res.data);
+      set({ user: res.data, isAuthenticated: true });
     }
-  };
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        token,
-        isLoading,
-        isAuthenticated: !!user,
-        login,
-        register,
-        logout,
-        refreshUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-}
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return context;
+}));
+
+// 2. Mantenemos este Provider solo por retrocompatibilidad con layout.tsx
+// Su única función ahora es arrancar initAuth cuando la app se carga por primera vez.
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const initAuth = useAuth(state => state.initAuth);
+
+  useEffect(() => {
+    initAuth();
+  }, [initAuth]);
+
+  return <>{children}</>;
 }
