@@ -1,0 +1,463 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+  schemas   = ["identity", "profile", "games", "tournament", "registration", "payment", "competition", "community"]
+}
+
+enum Status {
+  ACTIVE
+  SUSPENDED
+  INACTIVE
+
+  @@schema("identity")
+}
+
+enum TournamentStatus {
+  DRAFT
+  PUBLISHED
+  REGISTRATION_OPEN
+  REGISTRATION_CLOSED
+  IN_PROGRESS
+  FINISHED
+  CANCELLED
+  ARCHIVED
+
+  @@schema("tournament")
+}
+
+enum RegistrationStatus {
+  PENDING_PAYMENT
+  PAYMENT_UNDER_REVIEW
+  CORRECTION_REQUIRED
+  CONFIRMED
+  WAITLISTED
+  REJECTED
+  CANCELLED
+
+  @@schema("registration")
+}
+
+enum PaymentStatus {
+  PENDING
+  EVIDENCE_SUBMITTED
+  UNDER_REVIEW
+  CORRECTION_REQUIRED
+  APPROVED
+  REJECTED
+  CANCELLED
+
+  @@schema("payment")
+}
+
+enum PaymentMethod {
+  YAPE
+  PLIN
+  TRANSFER
+
+  @@schema("payment")
+}
+
+enum CompetitionStatus {
+  PENDING_PARTICIPANTS
+  READY_FOR_DRAW
+  DRAFT_BRACKET
+  BRACKET_PUBLISHED
+  IN_PROGRESS
+  FINISHED
+
+  @@schema("competition")
+}
+
+enum MatchupStatus {
+  PENDING
+  READY
+  IN_PROGRESS
+  COMPLETED
+  WALKOVER
+  CANCELLED
+
+  @@schema("competition")
+}
+
+model User {
+  id             String    @id @default(uuid()) @db.Uuid
+  email          String    @unique @db.VarChar
+  first_name     String    @db.VarChar(50)
+  last_name      String    @db.VarChar(50)
+  password_hash  String    @db.VarChar
+  email_verified Boolean   @default(false)
+  status         Status    @default(ACTIVE)
+  created_at     DateTime  @default(now()) @db.Timestamp(6)
+  updated_at     DateTime  @updatedAt @db.Timestamp(6)
+  last_login_at  DateTime? @db.Timestamp(6)
+
+  sessions        Session[]
+  profile         UserProfile?
+  game_profiles   GameProfile[]
+  registrations   Registration[]
+  payment_reviews PaymentReview[]
+  posts           Post[]
+  comments        Comment[]
+  post_reactions  PostReaction[]
+
+  @@map("users")
+  @@schema("identity")
+}
+
+model Session {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String   @db.Uuid
+  ip         String   @db.VarChar(45)
+  device     String   @db.VarChar(255)
+  browser    String   @db.VarChar(100)
+  expires_at DateTime @db.Timestamp(6)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  user           User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  refresh_tokens RefreshToken[]
+
+  @@map("sessions")
+  @@schema("identity")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid()) @db.Uuid
+  session_id String    @db.Uuid
+  token_hash String    @unique @db.VarChar
+  expires_at DateTime  @db.Timestamp(6)
+  revoked_at DateTime? @db.Timestamp(6)
+
+  session Session @relation(fields: [session_id], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+  @@schema("identity")
+}
+
+// ============================================================
+// PROFILE DOMAIN
+// ============================================================
+
+model UserProfile {
+  id         String  @id @default(uuid()) @db.Uuid
+  user_id    String  @unique @db.Uuid
+  biography  String? @db.VarChar(300)
+  career     String? @db.VarChar(100)
+  cycle      Int?
+  avatar_url String? @db.VarChar
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+  @@schema("profile")
+}
+
+// ============================================================
+// GAMES DOMAIN (MULTI-GAME INTEGRATION)
+// Supported: CLASH_ROYALE | BRAWL_STARS | SMASH_ULTIMATE | LEFT_4_DEAD_2 | EFOOTBALL
+// ============================================================
+
+model GameProfile {
+  id           String   @id @default(uuid()) @db.Uuid
+  user_id      String   @db.Uuid
+  game_code    String   @db.VarChar(50) // "CLASH_ROYALE" | "BRAWL_STARS" | "SMASH_ULTIMATE" | "LEFT_4_DEAD_2" | "EFOOTBALL"
+  player_tag   String   @db.VarChar(100) // e.g. "#8YRP92VJ", Steam ID, or username
+  in_game_name String   @db.VarChar(100) // e.g. "Luis_CR"
+  trophies     Int      @default(0)
+  level        Int      @default(1)
+  extra_data   Json?    @db.JsonB // Game-specific: { main_character, team, division, steam_url, hours_played }
+  synced_at    DateTime @default(now()) @db.Timestamp(6)
+
+  user          User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  registrations Registration[]
+  ranking_entries RankingEntry[]
+
+  @@unique([game_code, player_tag])
+  @@unique([user_id, game_code])
+  @@map("game_profiles")
+  @@schema("games")
+}
+
+// ============================================================
+// TOURNAMENT DOMAIN (Tournament.spec.md)
+// ============================================================
+
+model Tournament {
+  id                    String           @id @default(uuid()) @db.Uuid
+  name                  String           @db.VarChar(150)
+  slug                  String           @unique @db.VarChar(200)
+  game_code             String           @db.VarChar(50) // "CLASH_ROYALE" | "BRAWL_STARS" | "SMASH_ULTIMATE" | "LEFT_4_DEAD_2" | "EFOOTBALL"
+  organization_name     String           @default("Tecsup") @db.VarChar(100)
+  campus_name           String           @default("Lima") @db.VarChar(100)
+  description_short     String           @db.VarChar(250)
+  description_full      String           @db.Text
+  banner_url            String           @db.VarChar(255)
+  rules_text            String           @db.Text
+  status                TournamentStatus @default(REGISTRATION_OPEN)
+  max_slots             Int
+  min_slots             Int              @default(8)
+  current_participants  Int              @default(0)
+  cost                  Decimal          @default(0.00) @db.Decimal(10, 2)
+  currency              String           @default("PEN") @db.VarChar(10)
+  prize_pool            String           @db.VarChar(255)
+  format                String           @default("1 vs 1 (BO3 / BO5)") @db.VarChar(100)
+  registration_open_at  DateTime         @db.Timestamp(6)
+  registration_close_at DateTime         @db.Timestamp(6)
+  tournament_start_at   DateTime         @db.Timestamp(6)
+  is_online             Boolean          @default(true)
+  contact_email         String           @db.VarChar(255)
+  created_at            DateTime         @default(now()) @db.Timestamp(6)
+  updated_at            DateTime         @updatedAt @db.Timestamp(6)
+  deleted_at            DateTime?        @db.Timestamp(6)
+
+  registrations Registration[]
+  competition   Competition?
+
+  @@index([slug])
+  @@index([game_code])
+  @@index([status])
+  @@map("tournaments")
+  @@schema("tournament")
+}
+
+// ============================================================
+// REGISTRATION DOMAIN (RegistrationPayment.spec.md)
+// ============================================================
+
+model Registration {
+  id                  String             @id @default(uuid()) @db.Uuid
+  tournament_id       String             @db.Uuid
+  competitor_id       String             @db.Uuid
+  game_profile_id     String             @db.Uuid
+  status              RegistrationStatus @default(PENDING_PAYMENT)
+  rules_version       String             @default("v1.0") @db.VarChar(20)
+  rules_accepted_at   DateTime           @default(now()) @db.Timestamp(6)
+  rules_acceptance_ip String             @default("0.0.0.0") @db.VarChar(45)
+  confirmed_at        DateTime?          @db.Timestamp(6)
+  waitlisted_at       DateTime?          @db.Timestamp(6)
+  cancelled_at        DateTime?          @db.Timestamp(6)
+  created_at          DateTime           @default(now()) @db.Timestamp(6)
+  updated_at          DateTime           @updatedAt @db.Timestamp(6)
+  deleted_at          DateTime?          @db.Timestamp(6)
+
+  tournament   Tournament  @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  competitor   User        @relation(fields: [competitor_id], references: [id], onDelete: Cascade)
+  game_profile GameProfile @relation(fields: [game_profile_id], references: [id], onDelete: Restrict)
+  payment      Payment?
+
+  @@index([tournament_id, competitor_id])
+  @@index([status])
+  @@map("registrations")
+  @@schema("registration")
+}
+
+// ============================================================
+// PAYMENT DOMAIN (RegistrationPayment.spec.md)
+// ============================================================
+
+model Payment {
+  id                  String        @id @default(uuid()) @db.Uuid
+  registration_id     String        @unique @db.Uuid
+  amount              Decimal       @db.Decimal(10, 2)
+  currency            String        @default("PEN") @db.VarChar(10)
+  method              PaymentMethod @default(YAPE)
+  status              PaymentStatus @default(PENDING)
+  operation_reference String?       @db.VarChar(100)
+  evidence_url        String?       @db.Text
+  submitted_at        DateTime?     @db.Timestamp(6)
+  reviewed_at         DateTime?     @db.Timestamp(6)
+  created_at          DateTime      @default(now()) @db.Timestamp(6)
+  updated_at          DateTime      @updatedAt @db.Timestamp(6)
+
+  registration Registration    @relation(fields: [registration_id], references: [id], onDelete: Cascade)
+  reviews      PaymentReview[]
+
+  @@map("payments")
+  @@schema("payment")
+}
+
+// ============================================================
+// COMMUNITY DOMAIN (FORUM)
+// ============================================================
+
+model Post {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String   @db.Uuid
+  category    String   @db.VarChar(50) // "Memes", "Buscando Equipo", "Quejas", "Torneos"
+  title       String   @db.VarChar(200)
+  description String   @db.Text
+  media_url   String?  @db.VarChar(500)
+  created_at  DateTime @default(now()) @db.Timestamp(6)
+  updated_at  DateTime @updatedAt @db.Timestamp(6)
+
+  user      User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  reactions PostReaction[]
+
+  @@map("community_posts")
+  @@schema("community")
+}
+
+model Comment {
+  id         String   @id @default(uuid()) @db.Uuid
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  content    String?  @db.Text
+  media_url  String?  @db.VarChar(500)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("community_comments")
+  @@schema("community")
+}
+
+model PostReaction {
+  id         String   @id @default(uuid()) @db.Uuid
+  post_id    String   @db.Uuid
+  user_id    String   @db.Uuid
+  type       String   @db.VarChar(20) // "LIKE", "HAHA", "WOW", "SAD", "ANGRY"
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  post Post @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([post_id, user_id])
+  @@map("community_post_reactions")
+  @@schema("community")
+}
+
+model PaymentReview {
+  id                   String   @id @default(uuid()) @db.Uuid
+  payment_id           String   @db.Uuid
+  reviewer_id          String   @db.Uuid
+  decision             String   @db.VarChar(50) // "APPROVE" | "REJECT" | "REQUEST_CORRECTION"
+  public_observation   String?  @db.VarChar(500)
+  internal_observation String?  @db.VarChar(500)
+  created_at           DateTime @default(now()) @db.Timestamp(6)
+
+  payment  Payment @relation(fields: [payment_id], references: [id], onDelete: Cascade)
+  reviewer User    @relation(fields: [reviewer_id], references: [id], onDelete: Restrict)
+
+  @@map("payment_reviews")
+  @@schema("payment")
+}
+
+// ============================================================
+// COMPETITION DOMAIN (Competition.spec.md)
+// ============================================================
+
+model Competition {
+  id              String            @id @default(uuid()) @db.Uuid
+  tournament_id   String            @unique @db.Uuid
+  status          CompetitionStatus @default(PENDING_PARTICIPANTS)
+  bracket_size    Int               @default(8)
+  generation_seed String            @default(uuid()) @db.VarChar(100)
+  version         Int               @default(1)
+  created_at      DateTime          @default(now()) @db.Timestamp(6)
+  updated_at      DateTime          @updatedAt @db.Timestamp(6)
+
+  tournament Tournament @relation(fields: [tournament_id], references: [id], onDelete: Cascade)
+  rounds     Round[]
+
+  @@map("competitions")
+  @@schema("competition")
+}
+
+model Round {
+  id             String   @id @default(uuid()) @db.Uuid
+  competition_id String   @db.Uuid
+  round_number   Int
+  name           String   @db.VarChar(100)
+  created_at     DateTime @default(now()) @db.Timestamp(6)
+
+  competition Competition @relation(fields: [competition_id], references: [id], onDelete: Cascade)
+  matchups    Matchup[]
+
+  @@unique([competition_id, round_number])
+  @@map("rounds")
+  @@schema("competition")
+}
+
+model Matchup {
+  id                 String        @id @default(uuid()) @db.Uuid
+  round_id           String        @db.Uuid
+  position           Int
+  participant_a_name String?       @db.VarChar(100)
+  participant_a_tag  String?       @db.VarChar(20)
+  participant_b_name String?       @db.VarChar(100)
+  participant_b_tag  String?       @db.VarChar(20)
+  winner_name        String?       @db.VarChar(100)
+  winner_tag         String?       @db.VarChar(20)
+  status             MatchupStatus @default(PENDING)
+  score_a            Int           @default(0)
+  score_b            Int           @default(0)
+  next_matchup_id    String?       @db.Uuid
+  created_at         DateTime      @default(now()) @db.Timestamp(6)
+  updated_at         DateTime      @updatedAt @db.Timestamp(6)
+
+  round     Round     @relation(fields: [round_id], references: [id], onDelete: Cascade)
+  game_sets GameSet[]
+
+  @@unique([round_id, position])
+  @@map("matchups")
+  @@schema("competition")
+}
+
+model GameSet {
+  id         String   @id @default(uuid()) @db.Uuid
+  matchup_id String   @db.Uuid
+  sequence   Int
+  winner_tag String?  @db.VarChar(20)
+  game_data  Json?    @db.JsonB
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  matchup Matchup @relation(fields: [matchup_id], references: [id], onDelete: Cascade)
+
+  @@unique([matchup_id, sequence])
+  @@map("game_sets")
+  @@schema("competition")
+}
+
+// ============================================================
+// RANKING DOMAIN (Leaderboards)
+// ============================================================
+
+model RankingSeason {
+  id         String   @id @default(uuid()) @db.Uuid
+  game_code  String   @db.VarChar(50)
+  name       String   @db.VarChar(100)
+  start_date DateTime @db.Timestamp(6)
+  end_date   DateTime @db.Timestamp(6)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  ranking_entries RankingEntry[]
+
+  @@map("ranking_seasons")
+  @@schema("games")
+}
+
+model RankingEntry {
+  id                 String   @id @default(uuid()) @db.Uuid
+  ranking_season_id  String   @db.Uuid
+  game_profile_id    String   @db.Uuid
+  score              Int      @default(0)
+  wins               Int      @default(0)
+  losses             Int      @default(0)
+  tournaments_played Int      @default(0)
+  last_updated_at    DateTime @default(now()) @db.Timestamp(6)
+
+  ranking_season RankingSeason @relation(fields: [ranking_season_id], references: [id], onDelete: Cascade)
+  game_profile   GameProfile   @relation(fields: [game_profile_id], references: [id], onDelete: Cascade)
+
+  @@unique([ranking_season_id, game_profile_id])
+  @@map("ranking_entries")
+  @@schema("games")
+}
