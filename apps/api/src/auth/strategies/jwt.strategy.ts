@@ -9,6 +9,7 @@ const ExtractJwt = (passportJwt as any).ExtractJwt || (passportJwt as any).defau
 export interface JwtPayload {
   sub: string;
   email: string;
+  role?: string;
   roles?: string[];
 }
 
@@ -37,7 +38,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return {
       id: payload.sub,
       email: payload.email,
-      roles: payload.roles || ['COMPETITOR'],
+      role: payload.role || 'STUDENT',
+      roles: payload.roles || [payload.role || 'STUDENT'],
     };
   }
 }

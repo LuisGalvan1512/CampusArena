@@ -10,6 +10,8 @@ import { RankingModule } from './ranking/ranking.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { CommunityModule } from './community/community.module.js';
+import { AdminModule } from './admin/admin.module.js';
+import { MailModule } from './mail/mail.module.js';
 
 @Module({
   imports: [
@@ -18,6 +20,7 @@ import { CommunityModule } from './community/community.module.js';
       envFilePath: ['.env', 'apps/api/.env'],
     }),
     PrismaModule,
+    MailModule,
     AuthModule,
     ProfileModule,
     TournamentModule,
@@ -25,6 +28,7 @@ import { CommunityModule } from './community/community.module.js';
     CompetitionModule,
     RankingModule,
     CommunityModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

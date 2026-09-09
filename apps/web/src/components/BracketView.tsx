@@ -56,7 +56,8 @@ interface BracketViewProps {
 }
 
 export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketViewProps) {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin, isOrganizer } = useAuth();
+  const canManage = isAuthenticated && (isAdmin || isOrganizer || user?.role === 'ADMIN' || user?.role === 'ORGANIZER');
   
   // Referee modal state
   const [selectedMatchup, setSelectedMatchup] = useState<MatchupItem | null>(null);
@@ -67,17 +68,77 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   
+  // Generating bracket state
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [genError, setGenError] = useState<string | null>(null);
+  
   // Stage / OBS Mode state
   const [isStageMode, setIsStageMode] = useState(false);
 
+  const handleGenerateBrackets = async (seedingMethod: 'RANDOM' | 'BY_TROPHIES' = 'BY_TROPHIES') => {
+    setIsGenerating(true);
+    setGenError(null);
+    try {
+      const res = await api.post(`/tournaments/${tournamentId}/generate-bracket`, {
+        seeding_method: seedingMethod,
+      });
+      if (res.success) {
+        onUpdate();
+      } else {
+        setGenError(res.error?.message || 'Error al generar llaves.');
+      }
+    } catch (err: any) {
+      setGenError(err.message || 'Error de conexión.');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   if (!initialBracket || !initialBracket.rounds || initialBracket.rounds.length === 0) {
     return (
-      <div className="arena-card p-10 text-center space-y-4">
-        <Swords className="w-10 h-10 text-[#8E92A4] mx-auto opacity-50" />
-        <h3 className="text-lg font-bold text-white">Brackets aún no generados</h3>
-        <p className="text-xs text-[#8E92A4] max-w-md mx-auto">
-          El sorteo oficial de emparejamientos se publicará automáticamente al cerrarse las inscripciones.
-        </p>
+      <div className="arena-card p-10 sm:p-14 text-center space-y-5 border border-white/10 shadow-2xl">
+        <div className="w-16 h-16 rounded-2xl bg-[#E63946]/15 border border-[#E63946]/30 text-[#E63946] flex items-center justify-center mx-auto shadow-lg shadow-[#E63946]/10">
+          <Swords className="w-8 h-8" />
+        </div>
+        
+        <div className="space-y-2 max-w-md mx-auto">
+          <h3 className="text-lg font-black text-white">Llaves de Competición en Espera</h3>
+          <p className="text-xs text-[#8E92A4] leading-relaxed">
+            El sorteo oficial y la estructura de emparejamientos se generarán con los competidores confirmados una vez cerradas las inscripciones.
+          </p>
+        </div>
+
+        {genError && (
+          <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 text-red-400 text-xs font-bold max-w-md mx-auto">
+            {genError}
+          </div>
+        )}
+
+        {canManage && (
+          <div className="pt-4 border-t border-white/5 max-w-md mx-auto space-y-3">
+            <span className="text-[11px] font-bold text-[#A8DADC] uppercase tracking-wider block">
+              🛡️ Herramientas de Organizador / Administrador
+            </span>
+            <div className="flex flex-col sm:flex-row gap-2 justify-center">
+              <button
+                onClick={() => handleGenerateBrackets('BY_TROPHIES')}
+                disabled={isGenerating}
+                className="btn-primary py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                Generar Llaves (Por Copas)
+              </button>
+              <button
+                onClick={() => handleGenerateBrackets('RANDOM')}
+                disabled={isGenerating}
+                className="btn-secondary py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                <Swords className="w-4 h-4 text-[#E63946]" />
+                Sorteo Aleatorio
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

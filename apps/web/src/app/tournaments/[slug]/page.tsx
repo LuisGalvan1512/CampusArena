@@ -8,6 +8,8 @@ import { useAuth } from '@/context/AuthContext';
 import { RegistrationWizardModal } from '@/components/RegistrationWizardModal';
 import { BracketView } from '@/components/BracketView';
 import { CertificateModal } from '@/components/CertificateModal';
+import { EditTournamentModal } from '@/components/EditTournamentModal';
+import { DeleteTournamentModal } from '@/components/DeleteTournamentModal';
 import { 
   Trophy, 
   Swords, 
@@ -29,7 +31,11 @@ import {
   Crown,
   Tv,
   Award,
-  ExternalLink
+  ExternalLink,
+  Edit3,
+  Trash2,
+  Settings,
+  Sparkles
 } from 'lucide-react';
 
 interface TournamentDetail {
@@ -71,7 +77,8 @@ interface Participant {
 export default function TournamentDetailPage() {
   const { slug } = useParams();
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin, isOrganizer } = useAuth();
+  const canManage = isAuthenticated && (isAdmin || isOrganizer || user?.role === 'ADMIN' || user?.role === 'ORGANIZER');
 
   const [tournament, setTournament] = useState<TournamentDetail | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
@@ -80,6 +87,8 @@ export default function TournamentDetailPage() {
   const [activeTab, setActiveTab] = useState<'info' | 'rules' | 'prizes' | 'participants' | 'brackets'>('info');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isCertificateOpen, setIsCertificateOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userRegistration, setUserRegistration] = useState<any>(null);
 
   const fetchTournament = async () => {
@@ -245,6 +254,61 @@ export default function TournamentDetailPage() {
           </a>
         </div>
       </div>
+
+      {/* ORGANIZER / ADMIN MANAGEMENT TOOLBAR */}
+      {canManage && (
+        <div className="arena-card p-4 sm:p-5 bg-gradient-to-r from-[#1D3557]/40 via-[#15161E] to-[#E63946]/20 border border-amber-500/40 rounded-2xl shadow-xl space-y-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-black">
+                <Crown className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black text-amber-400 uppercase tracking-wider">
+                    Panel de Gestión de Torneo
+                  </span>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                    {user?.role === 'ADMIN' ? '👑 Super Admin' : '🛡️ Organizador Oficial'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#8E92A4]">
+                  Tienes privilegios para editar este torneo, gestionar brackets, participantes o eliminarlo en caso de excepción.
+                </p>
+              </div>
+            </div>
+
+            {/* Quick Action Buttons */}
+            <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto">
+              <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="btn-primary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-[#E63946]/20"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                Editar Torneo
+              </button>
+
+              <button
+                onClick={() => {
+                  setActiveTab('brackets');
+                }}
+                className="btn-secondary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer border-white/20 text-white"
+              >
+                <GitBranch className="w-3.5 h-3.5 text-[#E63946]" />
+                Brackets & Llaves
+              </button>
+
+              <button
+                onClick={() => setIsDeleteModalOpen(true)}
+                className="py-2 px-3.5 rounded-xl text-xs font-bold bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 hover:border-red-500 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                Eliminar Torneo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 1. HERO BANNER */}
       <div className="relative rounded-2xl overflow-hidden arena-card border border-white/10 shadow-2xl">
@@ -620,6 +684,25 @@ export default function TournamentDetailPage() {
         tournamentName={tournament.name}
         gameName={isClash ? 'Clash Royale' : 'Brawl Stars'}
         rankTitle="Participante Oficial Destacado"
+      />
+
+      {/* Edit Tournament Modal (Organizers & Admin) */}
+      <EditTournamentModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        tournament={tournament}
+        onSuccess={(updated) => {
+          setTournament(updated);
+          fetchTournament();
+        }}
+      />
+
+      {/* Delete Tournament Modal (Organizers & Admin) */}
+      <DeleteTournamentModal
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        tournamentId={tournament.id}
+        tournamentName={tournament.name}
       />
 
     </div>

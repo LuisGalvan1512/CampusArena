@@ -10,12 +10,23 @@ datasource db {
   schemas   = ["community", "competition", "games", "identity", "payment", "profile", "registration", "tournament"]
 }
 
+enum UserRole {
+  STUDENT
+  ORGANIZER
+  ADMIN
+
+  @@schema("identity")
+}
+
 model User {
   id              String          @id @default(uuid()) @db.Uuid
   email           String          @unique @db.VarChar
-  password_hash   String          @db.VarChar
-  email_verified  Boolean         @default(false)
+  password_hash   String?         @db.VarChar
+  email_verified  Boolean         @default(true)
   status          Status          @default(ACTIVE)
+  role            UserRole        @default(STUDENT)
+  google_id       String?         @unique @db.VarChar
+  avatar_url      String?         @db.VarChar
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
   last_login_at   DateTime?       @db.Timestamp(6)
@@ -58,6 +69,20 @@ model RefreshToken {
   session    Session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
 
   @@map("refresh_tokens")
+  @@schema("identity")
+}
+
+model DeviceOtp {
+  id         String   @id @default(uuid()) @db.Uuid
+  email      String   @db.VarChar
+  code       String   @db.VarChar(6)
+  device     String?  @db.VarChar
+  ip         String?  @db.VarChar
+  expires_at DateTime @db.Timestamp(6)
+  used       Boolean  @default(false)
+  created_at DateTime @default(now()) @db.Timestamp(6)
+
+  @@map("device_otps")
   @@schema("identity")
 }
 

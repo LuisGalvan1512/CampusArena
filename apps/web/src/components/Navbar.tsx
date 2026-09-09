@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 export function Navbar() {
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, isOrganizer, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const pathname = usePathname();
@@ -38,7 +38,8 @@ export function Navbar() {
     { name: 'Comunidad', href: '/community' },
     { name: '🔴 En Vivo', href: '/live' },
     { name: 'Ranking', href: '/ranking' },
-    { name: 'Organizador', href: '/dashboard/organizer' },
+    ...(isOrganizer || isAdmin ? [{ name: '🛡️ Organizador', href: '/dashboard/organizer' }] : []),
+    ...(isAdmin ? [{ name: '👑 Admin', href: '/admin/organizers' }] : []),
   ];
 
   return (
@@ -89,23 +90,33 @@ export function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-3 py-1.5 px-3 rounded-full bg-[#15161E] border border-white/10 hover:border-[#E63946]/50 transition-all text-sm cursor-pointer"
+                    className="flex items-center gap-2.5 py-1.5 px-3 rounded-full bg-[#15161E] border border-white/10 hover:border-[#E63946]/50 transition-all text-sm cursor-pointer"
                   >
                     <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs">
                       {user.first_name[0]}{user.last_name[0]}
                     </div>
-                    <span className="font-semibold text-white">
-                      {user.first_name}
-                    </span>
+                    <div className="text-left leading-tight hidden lg:block">
+                      <p className="font-semibold text-white text-xs">{user.first_name}</p>
+                      <p className="text-[10px] font-bold text-amber-400">
+                        {user.role === 'ADMIN' ? '👑 ADMIN' : user.role === 'ORGANIZER' ? '🛡️ ORGANIZADOR' : 'ESTUDIANTE'}
+                      </p>
+                    </div>
                     <ChevronDown className="w-4 h-4 text-[#8E92A4]" />
                   </button>
 
                   {/* Dropdown Menu */}
                   {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-56 arena-card py-2 shadow-2xl z-50 border border-white/10 animate-in fade-in">
+                    <div className="absolute right-0 mt-2 w-60 arena-card py-2 shadow-2xl z-50 border border-white/10 animate-in fade-in">
                       <div className="px-4 py-2 border-b border-white/5">
-                        <p className="text-xs text-[#8E92A4]">Conectado como</p>
-                        <p className="text-sm font-semibold text-white truncate">{user.email}</p>
+                        <p className="text-[11px] text-[#8E92A4]">Conectado como</p>
+                        <p className="text-xs font-semibold text-white truncate">{user.email}</p>
+                        <span className={`mt-1 inline-block px-2 py-0.5 rounded text-[9px] font-black ${
+                          user.role === 'ADMIN' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
+                          user.role === 'ORGANIZER' ? 'bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30' :
+                          'bg-white/10 text-[#8E92A4]'
+                        }`}>
+                          {user.role === 'ADMIN' ? 'SUPER ADMINISTRADOR' : user.role === 'ORGANIZER' ? 'ORGANIZADOR OFICIAL' : 'ALUMNO COMPETIDOR'}
+                        </span>
                       </div>
 
                       <Link
@@ -126,14 +137,27 @@ export function Navbar() {
                         Ranking Institucional
                       </Link>
 
-                      <Link
-                        href="/dashboard/organizer"
-                        onClick={() => setUserDropdownOpen(false)}
-                        className="w-full px-4 py-2.5 text-xs text-left text-[#8E92A4] hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
-                      >
-                        <ShieldCheck className="w-4 h-4 text-[#457B9D]" />
-                        Panel Organizador
-                      </Link>
+                      {(isAdmin || isOrganizer) && (
+                        <Link
+                          href="/dashboard/organizer"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="w-full px-4 py-2.5 text-xs text-left text-[#8E92A4] hover:text-white hover:bg-white/5 flex items-center gap-2 transition-colors"
+                        >
+                          <ShieldCheck className="w-4 h-4 text-[#457B9D]" />
+                          Panel Organizador
+                        </Link>
+                      )}
+
+                      {isAdmin && (
+                        <Link
+                          href="/admin/organizers"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="w-full px-4 py-2.5 text-xs text-left text-amber-400 hover:bg-white/5 flex items-center gap-2 transition-colors font-semibold"
+                        >
+                          <Crown className="w-4 h-4 text-amber-400" />
+                          Gestión de Organizadores
+                        </Link>
+                      )}
 
                       <div className="border-t border-white/5 my-1" />
 
@@ -152,15 +176,10 @@ export function Navbar() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/auth/login"
-                  className="text-xs font-semibold text-[#8E92A4] hover:text-white transition-colors"
+                  className="btn-primary py-2 px-4 text-xs font-bold flex items-center gap-2 shadow-lg shadow-[#E63946]/20"
                 >
-                  Iniciar Sesión
-                </Link>
-                <Link
-                  href="/auth/register"
-                  className="btn-primary text-xs py-2 px-4 shadow-lg shadow-[#E63946]/20"
-                >
-                  Registrarme
+                  <Crown className="w-3.5 h-3.5" />
+                  Acceso Google Tecsup
                 </Link>
               </div>
             )}

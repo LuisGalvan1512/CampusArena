@@ -13,12 +13,92 @@ import * as express from 'express';
 import { AuthService } from './auth.service.js';
 import { RegisterDto } from './dto/register.dto.js';
 import { LoginDto } from './dto/login.dto.js';
+import { GoogleAuthDto } from './dto/google-auth.dto.js';
 import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  /**
+   * POST /api/v1/auth/google
+   * Google OAuth login and registration with automatic session issuance and onboarding flag.
+   */
+  @Post('google')
+  @HttpCode(HttpStatus.OK)
+  async googleAuth(
+    @Body() dto: GoogleAuthDto,
+    @Req() req: express.Request,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const ip = (req.ip || req.headers['x-forwarded-for'] || '0.0.0.0') as string;
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+
+    const result = await this.authService.loginWithGoogle(dto, ip, userAgent);
+
+    res.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return {
+      is_new_user: result.is_new_user,
+      access_token: result.accessToken,
+      expires_in: result.expiresIn,
+      user: result.user,
+    };
+  }
+
+  /**
+   * POST /api/v1/auth/verify-otp
+   * Validates the 6-digit Device OTP and emits JWT session cookies & token.
+   */
+  @Post('verify-otp')
+  @HttpCode(HttpStatus.OK)
+  async verifyOtp(
+    @Body() dto: { email: string; code: string },
+    @Req() req: express.Request,
+    @Res({ passthrough: true }) res: express.Response,
+  ) {
+    const ip = (req.ip || req.headers['x-forwarded-for'] || '0.0.0.0') as string;
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+
+    const result = await this.authService.verifyDeviceOtp(dto.email, dto.code, ip, userAgent);
+
+    res.cookie('refresh_token', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return {
+      access_token: result.accessToken,
+      expires_in: result.expiresIn,
+      user: result.user,
+    };
+  }
+
+  /**
+   * POST /api/v1/auth/resend-otp
+   * Resends a fresh 6-digit Device OTP code.
+   */
+  @Post('resend-otp')
+  @HttpCode(HttpStatus.OK)
+  async resendOtp(
+    @Body() dto: { email: string },
+    @Req() req: express.Request,
+  ) {
+    const ip = (req.ip || req.headers['x-forwarded-for'] || '0.0.0.0') as string;
+    const userAgent = req.headers['user-agent'] || 'Unknown';
+
+    return this.authService.resendDeviceOtp(dto.email, ip, userAgent);
+  }
 
   /**
    * POST /api/v1/auth/register

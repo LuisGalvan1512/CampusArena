@@ -61,38 +61,12 @@ export class CompetitionService {
 
     const bracketSize = tournament.max_slots >= 16 ? 16 : 8;
 
-    // Prepare participants list
+    // Prepare participants list from confirmed registrations
     let participants: SeedParticipant[] = tournament.registrations.map((r) => ({
       name: `${r.competitor.first_name} ${r.competitor.last_name}`,
       tag: r.game_profile.player_tag,
       trophies: r.game_profile.trophies,
     }));
-
-    // Seed master list
-    const demoNames = [
-      { name: 'Mateo Quispe', tag: '#8YRP92VJ', trophies: 7420 },
-      { name: 'Gabriel Torres', tag: '#2PP009Y9', trophies: 7134 },
-      { name: 'Rodrigo Flores', tag: '#9QJ882LC', trophies: 6980 },
-      { name: 'Alvaro Vega', tag: '#PPR0UL0U', trophies: 6850 },
-      { name: 'Sebastian Cruz', tag: '#2LC990PR', trophies: 6710 },
-      { name: 'Nicolas Reyes', tag: '#8JQC22YU', trophies: 6640 },
-      { name: 'Diego Ramos', tag: '#00YPP289', trophies: 6520 },
-      { name: 'Franco Diaz', tag: '#LC2299QU', trophies: 6490 },
-      { name: 'Valeria Gomez', tag: '#99YPP002', trophies: 6420 },
-      { name: 'Lucas Medina', tag: '#88QJLC22', trophies: 6380 },
-      { name: 'Camila Silva', tag: '#22PR0UL0', trophies: 6310 },
-      { name: 'Joaquin Castro', tag: '#00LC99PR', trophies: 6250 },
-      { name: 'Renzo Paredes', tag: '#88JQC22Y', trophies: 6190 },
-      { name: 'Sofia Benitez', tag: '#PP28900Y', trophies: 6120 },
-      { name: 'Manuel Herrera', tag: '#QQ2299LC', trophies: 6050 },
-      { name: 'Adriana Ortiz', tag: '#8YRP9200', trophies: 6010 },
-    ];
-
-    for (const d of demoNames) {
-      if (participants.length < bracketSize && !participants.some((p) => p.tag === d.tag)) {
-        participants.push(d);
-      }
-    }
 
     const seed = `seed_${Date.now()}`;
 
@@ -245,7 +219,7 @@ export class CompetitionService {
    * Returns complete hierarchy of rounds and matchups for the tournament.
    */
   async getBracket(tournamentId: string) {
-    let competition = await this.prisma.competition.findUnique({
+    return this.prisma.competition.findUnique({
       where: { tournament_id: tournamentId },
       include: {
         rounds: {
@@ -258,26 +232,6 @@ export class CompetitionService {
         },
       },
     });
-
-    // If no competition exists yet, auto-generate initial bracket
-    if (!competition) {
-      await this.generateBracket(tournamentId);
-      competition = await this.prisma.competition.findUnique({
-        where: { tournament_id: tournamentId },
-        include: {
-          rounds: {
-            orderBy: { round_number: 'asc' },
-            include: {
-              matchups: {
-                orderBy: { position: 'asc' },
-              },
-            },
-          },
-        },
-      });
-    }
-
-    return competition;
   }
 
   /**
