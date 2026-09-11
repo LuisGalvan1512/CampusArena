@@ -17,73 +17,96 @@ import {
   CheckCircle2, 
   UserCheck,
   Zap,
-  GraduationCap
+  Mail,
+  Lock
 } from 'lucide-react';
 
 export default function LoginPage() {
-  const { loginWithGoogle } = useAuth();
+  const { user, isAuthenticated, loginWithGoogle, login, register } = useAuth();
   const router = useRouter();
+
+  // Redirigir inmediatamente si ya está autenticado
+  React.useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.role === 'ADMIN' || user.email === 'luis.galvan@tecsup.edu.pe') {
+        router.replace('/admin/organizers');
+      } else {
+        router.replace('/tournaments');
+      }
+    }
+  }, [isAuthenticated, user, router]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [customEmail, setCustomEmail] = useState('');
-  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [activeTab, setActiveTab] = useState<'google' | 'email'>('google');
 
-  // Welcome Onboarding Modal State for New Users
-  const [showWelcomeModal, setShowWelcomeModal] = useState(false);
-  const [newUserData, setNewUserData] = useState<any>(null);
+  // Email form state
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
 
-  // Handle Google OAuth Initiate
-  const handleGoogleLogin = async (emailToUse: string, firstName?: string, lastName?: string) => {
+  // Handle Google OAuth Initiate via Supabase
+  const handleGoogleAuth = async () => {
     setErrorMessage(null);
     setIsLoading(true);
 
-    const emailTrimmed = emailToUse.toLowerCase().trim();
+    try {
+      const res = await loginWithGoogle();
+      if (!res.success && res.error) {
+        setErrorMessage(res.error.message || 'Error al conectar con Google.');
+        setIsLoading(false);
+      }
+      // Google will redirect to Google accounts page and back to /auth/callback
+    } catch (err: any) {
+      setErrorMessage(err?.message || 'Error inesperado al iniciar sesión.');
+      setIsLoading(false);
+    }
+  };
+
+  // Handle Email / Password via Supabase
+  const handleEmailAuth = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    setIsLoading(true);
+
+    const emailTrimmed = email.toLowerCase().trim();
 
     if (!emailTrimmed.endsWith('@tecsup.edu.pe')) {
-      setErrorMessage('Acceso denegado: Solo se admiten correos institucionales con la terminación @tecsup.edu.pe.');
+      setErrorMessage('Acceso restringido: Solo se admiten correos institucionales terminados en @tecsup.edu.pe.');
       setIsLoading(false);
       return;
     }
 
-    // Auto-derive friendly name if not provided
-    let derivedFirst = firstName;
-    let derivedLast = lastName;
-    if (!derivedFirst) {
-      const parts = emailTrimmed.split('@')[0].split('.');
-      derivedFirst = parts[0]?.charAt(0).toUpperCase() + parts[0]?.slice(1) || 'Estudiante';
-      derivedLast = parts[1]?.charAt(0).toUpperCase() + parts[1]?.slice(1) || 'Tecsup';
-    }
+    if (isRegistering) {
+      const res = await register(emailTrimmed, password, {
+        given_name: firstName.trim() || undefined,
+        family_name: lastName.trim() || undefined,
+      });
 
-    const res = await loginWithGoogle({
-      email: emailTrimmed,
-      first_name: derivedFirst,
-      last_name: derivedLast,
-      avatar_url: `https://api.dicebear.com/7.x/bottts/svg?seed=${emailTrimmed}`,
-    });
-
-    if (res.success && res.data) {
-      if (res.data.is_new_user) {
-        // Show celebratory Welcome Modal
-        setNewUserData(res.data.user);
-        setShowWelcomeModal(true);
-      } else {
-        // Returning user - direct redirect
-        redirectPostLogin(res.data.user);
+      if (!res.success) {
+        setErrorMessage(res.error?.message || 'Error al crear la cuenta.');
+        setIsLoading(false);
+        return;
       }
     } else {
-      setErrorMessage(res.error?.message || 'Error al autenticar con la cuenta institucional de Tecsup.');
+      const res = await login(emailTrimmed, password);
+      if (!res.success) {
+        setErrorMessage(res.error?.message || 'Credenciales inválidas.');
+        setIsLoading(false);
+        return;
+      }
     }
 
-    setIsLoading(false);
-  };
-
-  const redirectPostLogin = (userObj: any) => {
-    if (userObj?.role === 'ADMIN' || userObj?.email === 'luis.galvan@tecsup.edu.pe') {
+    // Redirect
+    if (emailTrimmed === 'luis.galvan@tecsup.edu.pe') {
       router.push('/admin/organizers');
     } else {
       router.push('/tournaments');
     }
+
+    setIsLoading(false);
   };
 
   return (
@@ -106,13 +129,13 @@ export default function LoginPage() {
           <div className="space-y-1">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider bg-[#E63946]/10 text-[#E63946] border-[#E63946]/30">
               <ShieldCheck className="w-3.5 h-3.5" />
-              Acceso Institucional Exclusivo
+              Acceso Institucional Supabase Auth
             </span>
             <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight pt-2">
               Campus Arena Tecsup
             </h1>
             <p className="text-sm text-[#8E92A4] max-w-md mx-auto">
-              Plataforma oficial de torneos universitarios. Inicia sesión directamente con tu cuenta institucional de Google Workspace.
+              Plataforma oficial de torneos universitarios. Acceso protegido con tu cuenta institucional de Google Workspace.
             </p>
           </div>
         </div>
@@ -128,10 +151,36 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Mode Switcher Tabs */}
+          <div className="grid grid-cols-2 gap-1 p-1 bg-[#0B0C10] rounded-xl border border-white/10 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => setActiveTab('google')}
+              className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'google'
+                  ? 'bg-white text-zinc-900 shadow-md'
+                  : 'text-[#8E92A4] hover:text-white'
+              }`}
+            >
+              Google Workspace
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('email')}
+              className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
+                activeTab === 'email'
+                  ? 'bg-[#E63946] text-white shadow-md'
+                  : 'text-[#8E92A4] hover:text-white'
+              }`}
+            >
+              Correo / Contraseña
+            </button>
+          </div>
+
           <div className="space-y-6">
             
             {/* Restriction Notice */}
-            <div className="p-4 rounded-xl bg-[#15161E] border border-white/10 flex items-center justify-between text-xs">
+            <div className="p-3.5 rounded-xl bg-[#15161E] border border-white/10 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                 <span className="text-[#8E92A4]">Dominio Permitido:</span>
@@ -141,79 +190,136 @@ export default function LoginPage() {
               </span>
             </div>
 
-            {/* Primary Action: Google Login as Admin Luis Galvan */}
-            <div className="space-y-3">
-              <button
-                onClick={() => handleGoogleLogin('luis.galvan@tecsup.edu.pe', 'Luis', 'Galvan')}
-                disabled={isLoading}
-                className="w-full py-4 px-6 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-extrabold text-sm flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-white/10 cursor-pointer disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin text-zinc-900" />
-                ) : (
-                  <>
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path
-                        fill="#4285F4"
-                        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
-                      />
-                      <path
-                        fill="#34A853"
-                        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
-                      />
-                      <path
-                        fill="#FBBC05"
-                        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
-                      />
-                      <path
-                        fill="#EA4335"
-                        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
-                      />
-                    </svg>
-                    <span>Continuar con Google</span>
-                    <span className="text-xs bg-zinc-200 px-2 py-0.5 rounded text-zinc-700 font-semibold ml-auto">
-                      luis.galvan@tecsup.edu.pe
-                    </span>
-                  </>
-                )}
-              </button>
-
-              {/* Custom Student Email Option */}
-              {!showCustomInput ? (
+            {activeTab === 'google' ? (
+              /* Google OAuth via Supabase */
+              <div className="space-y-4">
                 <button
-                  type="button"
-                  onClick={() => setShowCustomInput(true)}
-                  className="w-full text-center text-xs text-[#8E92A4] hover:text-[#A8DADC] py-2 cursor-pointer transition-colors"
+                  onClick={handleGoogleAuth}
+                  disabled={isLoading}
+                  className="w-full py-4 px-6 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 font-extrabold text-sm flex items-center justify-center gap-3 transition-all transform hover:scale-[1.01] active:scale-[0.99] shadow-xl shadow-white/10 cursor-pointer disabled:opacity-50"
                 >
-                  ¿Ingresar con otro correo @tecsup.edu.pe institucional? &rarr;
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-zinc-900" />
+                  ) : (
+                    <>
+                      <svg className="w-5 h-5" viewBox="0 0 24 24">
+                        <path
+                          fill="#4285F4"
+                          d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"
+                        />
+                        <path
+                          fill="#34A853"
+                          d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+                        />
+                        <path
+                          fill="#FBBC05"
+                          d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+                        />
+                        <path
+                          fill="#EA4335"
+                          d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+                        />
+                      </svg>
+                      <span>Iniciar Sesión con Google</span>
+                    </>
+                  )}
                 </button>
-              ) : (
-                <div className="p-4 bg-[#0B0C10] rounded-xl border border-white/10 space-y-3 animate-in fade-in">
-                  <label className="block text-[11px] font-bold uppercase tracking-wider text-[#8E92A4]">
-                    Ingresar Correo Institucional de Estudiante
+                <p className="text-[11px] text-center text-[#8E92A4]">
+                  Se abrirá la ventana oficial de Google. Elige tu cuenta institucional de Tecsup.
+                </p>
+              </div>
+            ) : (
+              /* Email / Password Form */
+              <form onSubmit={handleEmailAuth} className="space-y-4">
+                {isRegistering && (
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">Nombre</label>
+                      <input
+                        type="text"
+                        required
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Ej. Luis"
+                        className="input-arena text-xs w-full"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">Apellido</label>
+                      <input
+                        type="text"
+                        required
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Ej. Galvan"
+                        className="input-arena text-xs w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">
+                    Correo Institucional (@tecsup.edu.pe)
                   </label>
-                  <div className="flex gap-2">
+                  <div className="relative">
                     <input
                       type="email"
-                      value={customEmail}
-                      onChange={(e) => setCustomEmail(e.target.value)}
-                      placeholder="nombre.apellido@tecsup.edu.pe"
-                      className="input-arena text-xs flex-1"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="tu.nombre@tecsup.edu.pe"
+                      className="input-arena text-xs w-full pl-9"
                     />
-                    <button
-                      onClick={() => handleGoogleLogin(customEmail)}
-                      disabled={isLoading || !customEmail}
-                      className="btn-primary px-4 py-2 text-xs flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                    >
-                      Ingresar
-                    </button>
+                    <Mail className="w-4 h-4 text-[#8E92A4] absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
-                  <p className="text-[10px] text-[#5A5E73]">
-                    * Si eres nuevo alumno, se creará tu perfil de competidor y recibirás la bienvenida oficial a tu bandeja de entrada.
-                  </p>
                 </div>
-              )}
-            </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">
+                    Contraseña
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="input-arena text-xs w-full pl-9"
+                    />
+                    <Lock className="w-4 h-4 text-[#8E92A4] absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isRegistering ? (
+                    'Registrarme en la Arena'
+                  ) : (
+                    'Ingresar a la Plataforma'
+                  )}
+                </button>
+
+                <div className="text-center pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsRegistering(!isRegistering)}
+                    className="text-xs text-[#8E92A4] hover:text-[#A8DADC] cursor-pointer"
+                  >
+                    {isRegistering
+                      ? '¿Ya tienes cuenta? Inicia sesión aquí'
+                      : '¿Nuevo alumno? Regístrate aquí'}
+                  </button>
+                </div>
+              </form>
+            )}
+
           </div>
 
           <div className="pt-4 border-t border-white/5 text-center">
@@ -224,116 +330,6 @@ export default function LoginPage() {
         </div>
 
       </div>
-
-      {/* ========================================================= */}
-      {/* CELEBRATORY WELCOME ONBOARDING MODAL FOR NEW STUDENTS */}
-      {/* ========================================================= */}
-      {showWelcomeModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-300">
-          <div className="arena-card max-w-xl w-full p-6 sm:p-8 space-y-6 relative overflow-hidden shadow-2xl border border-[#E63946]/40 scale-100 animate-in zoom-in-95 duration-200">
-            
-            {/* Top Glowing Ribbon */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#E63946] via-[#F4A261] to-[#2A9D8F]" />
-            
-            {/* Modal Header */}
-            <div className="text-center space-y-3 pt-2">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-tr from-[#E63946] to-[#F4A261] p-0.5 shadow-2xl shadow-[#E63946]/40">
-                <div className="w-full h-full bg-[#0B0C10] rounded-[22px] flex items-center justify-center">
-                  <Sparkles className="w-10 h-10 text-amber-400 animate-bounce" />
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  ¡Cuenta Institucional Activada!
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                  ¡Bienvenido a Campus Arena, {newUserData?.first_name || 'Estudiante'}! 🎉
-                </h2>
-                <p className="text-xs sm:text-sm text-[#8E92A4]">
-                  Tu cuenta institucional <strong className="text-white font-mono">{newUserData?.email}</strong> ya forma parte del ecosistema oficial de esports de Tecsup.
-                </p>
-              </div>
-            </div>
-
-            {/* 3 Quick Step Onboarding Cards */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-amber-400" />
-                Tus Próximos Pasos para Competir:
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                
-                {/* Step 1 */}
-                <div className="p-3.5 rounded-xl bg-[#15161E] border border-white/10 space-y-1.5 hover:border-white/20 transition-colors">
-                  <div className="w-7 h-7 rounded-lg bg-[#E63946]/20 text-[#E63946] flex items-center justify-center font-black text-xs">
-                    1
-                  </div>
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1">
-                    <Gamepad2 className="w-3.5 h-3.5 text-[#E63946]" />
-                    Vincular Tag
-                  </h4>
-                  <p className="text-[11px] text-[#8E92A4] leading-relaxed">
-                    Registra tu Player Tag de Clash Royale o Brawl Stars en tu perfil.
-                  </p>
-                </div>
-
-                {/* Step 2 */}
-                <div className="p-3.5 rounded-xl bg-[#15161E] border border-white/10 space-y-1.5 hover:border-white/20 transition-colors">
-                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-black text-xs">
-                    2
-                  </div>
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1">
-                    <Trophy className="w-3.5 h-3.5 text-amber-400" />
-                    Inscribirte
-                  </h4>
-                  <p className="text-[11px] text-[#8E92A4] leading-relaxed">
-                    Elige los torneos universitarios activos y asegura tu lugar en el bracket.
-                  </p>
-                </div>
-
-                {/* Step 3 */}
-                <div className="p-3.5 rounded-xl bg-[#15161E] border border-white/10 space-y-1.5 hover:border-white/20 transition-colors">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-black text-xs">
-                    3
-                  </div>
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1">
-                    <Award className="w-3.5 h-3.5 text-emerald-400" />
-                    Ganar Diplomas
-                  </h4>
-                  <p className="text-[11px] text-[#8E92A4] leading-relaxed">
-                    Compite por premios, sube en el ranking y obtén diplomas oficiales.
-                  </p>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <button
-                onClick={() => router.push('/profile')}
-                className="btn-primary flex-1 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/30"
-              >
-                <UserCheck className="w-4 h-4" />
-                Configurar mi Perfil de Gamer
-              </button>
-              <button
-                onClick={() => router.push('/tournaments')}
-                className="btn-secondary flex-1 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <Trophy className="w-4 h-4 text-amber-400" />
-                Explorar Torneos Activos
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
-
     </div>
   );
 }

@@ -21,11 +21,9 @@ enum UserRole {
 model User {
   id              String          @id @default(uuid()) @db.Uuid
   email           String          @unique @db.VarChar
-  password_hash   String?         @db.VarChar
   email_verified  Boolean         @default(true)
   status          Status          @default(ACTIVE)
   role            UserRole        @default(STUDENT)
-  google_id       String?         @unique @db.VarChar
   avatar_url      String?         @db.VarChar
   created_at      DateTime        @default(now()) @db.Timestamp(6)
   updated_at      DateTime        @updatedAt @db.Timestamp(6)
@@ -36,53 +34,11 @@ model User {
   post_reactions  PostReaction[]
   posts           Post[]
   game_profiles   GameProfile[]
-  sessions        Session[]
   payment_reviews PaymentReview[]
   profile         UserProfile?
   registrations   Registration[]
 
   @@map("users")
-  @@schema("identity")
-}
-
-model Session {
-  id             String         @id @default(uuid()) @db.Uuid
-  user_id        String         @db.Uuid
-  ip             String         @db.VarChar(45)
-  device         String         @db.VarChar(255)
-  browser        String         @db.VarChar(100)
-  expires_at     DateTime       @db.Timestamp(6)
-  created_at     DateTime       @default(now()) @db.Timestamp(6)
-  refresh_tokens RefreshToken[]
-  user           User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
-  @@schema("identity")
-}
-
-model RefreshToken {
-  id         String    @id @default(uuid()) @db.Uuid
-  session_id String    @db.Uuid
-  token_hash String    @unique @db.VarChar
-  expires_at DateTime  @db.Timestamp(6)
-  revoked_at DateTime? @db.Timestamp(6)
-  session    Session   @relation(fields: [session_id], references: [id], onDelete: Cascade)
-
-  @@map("refresh_tokens")
-  @@schema("identity")
-}
-
-model DeviceOtp {
-  id         String   @id @default(uuid()) @db.Uuid
-  email      String   @db.VarChar
-  code       String   @db.VarChar(6)
-  device     String?  @db.VarChar
-  ip         String?  @db.VarChar
-  expires_at DateTime @db.Timestamp(6)
-  used       Boolean  @default(false)
-  created_at DateTime @default(now()) @db.Timestamp(6)
-
-  @@map("device_otps")
   @@schema("identity")
 }
 

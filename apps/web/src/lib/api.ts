@@ -1,3 +1,5 @@
+import { supabase } from './supabase';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api/v1';
 
 export interface ApiResponse<T = any> {
@@ -21,7 +23,20 @@ class ApiClient {
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
     const url = `${API_BASE_URL}${endpoint.startsWith('/') ? endpoint : `/${endpoint}`}`;
-    const token = this.getAuthToken();
+    let token = this.getAuthToken();
+
+    // Fallback: Check active Supabase session
+    if (!token && typeof window !== 'undefined') {
+      try {
+        const { data } = await supabase.auth.getSession();
+        token = data.session?.access_token || null;
+        if (token) {
+          localStorage.setItem('campus_token', token);
+        }
+      } catch (e) {
+        // silent catch
+      }
+    }
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -36,37 +51,22 @@ class ApiClient {
       let response = await fetch(url, {
         ...options,
         headers,
-        credentials: 'include', // Includes cookies for Refresh Tokens
       });
 
-      // Automatic Refresh Token Logic
-      if (
-        response.status === 401 && 
-        !endpoint.includes('/auth/login') && 
-        !endpoint.includes('/auth/refresh')
-      ) {
+      // Automatic Refresh with Supabase on 401
+      if (response.status === 401 && !endpoint.includes('/auth/logout')) {
         try {
-          const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
-            method: 'POST',
-            credentials: 'include', // send httpOnly cookie
-          });
-          
-          if (refreshRes.ok) {
-            const refreshData = await refreshRes.json();
-            if (refreshData.success && refreshData.data?.access_token) {
-              const newToken = refreshData.data.access_token;
-              localStorage.setItem('campus_token', newToken);
-              headers['Authorization'] = `Bearer ${newToken}`;
-              
-              // Retry the original request
-              response = await fetch(url, {
-                ...options,
-                headers,
-                credentials: 'include',
-              });
-            } else {
-              localStorage.removeItem('campus_token');
-            }
+          const { data, error } = await supabase.auth.refreshSession();
+          if (data?.session?.access_token) {
+            const newToken = data.session.access_token;
+            localStorage.setItem('campus_token', newToken);
+            headers['Authorization'] = `Bearer ${newToken}`;
+
+            // Retry request with fresh token
+            response = await fetch(url, {
+              ...options,
+              headers,
+            });
           } else {
             localStorage.removeItem('campus_token');
           }
@@ -105,6 +105,14 @@ class ApiClient {
     return this.request<T>(endpoint, {
       ...options,
       method: 'PATCH',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  }
+
+  put<T = any>(endpoint: string, body?: any, options: RequestInit = {}) {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: 'PUT',
       body: body ? JSON.stringify(body) : undefined,
     });
   }
