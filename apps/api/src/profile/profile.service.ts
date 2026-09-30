@@ -766,12 +766,46 @@ export class ProfileService implements OnModuleInit {
       throw new NotFoundException('El usuario de destino no fue encontrado.');
     }
 
-    await this.prisma.$executeRawUnsafe(`
+    const rows: any[] = await this.prisma.$queryRawUnsafe(`
       INSERT INTO profile.profile_signatures (profile_user_id, author_id, content, image_url)
       VALUES ($1::uuid, $2::uuid, $3, $4)
+      RETURNING id, profile_user_id, author_id, content, image_url, created_at
     `, profileUserId, authorId, content?.trim() || '', imageUrl?.trim() || null);
 
-    return { message: '¡Firma agregada exitosamente al muro del competidor!' };
+    const inserted = rows[0];
+
+    const author = await this.prisma.user.findUnique({
+      where: { id: authorId },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        email: true,
+        profile: {
+          select: {
+            nickname: true,
+            avatar_url: true,
+            campus: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: inserted.id,
+      content: inserted.content,
+      image_url: inserted.image_url,
+      created_at: inserted.created_at,
+      author: {
+        id: author?.id || authorId,
+        first_name: author?.first_name || 'Usuario',
+        last_name: author?.last_name || '',
+        nickname: author?.profile?.nickname || null,
+        email: author?.email || '',
+        avatar_url: author?.profile?.avatar_url || null,
+        campus: author?.profile?.campus || 'Lima',
+      },
+    };
   }
 
   /**

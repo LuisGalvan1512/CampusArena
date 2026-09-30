@@ -159,8 +159,12 @@ export default function PublicProfilePage() {
         image_url: sigImage || undefined,
       });
 
-      if (res.success && res.data) {
-        setSignatures((prev) => [res.data, ...prev]);
+      if (res.success) {
+        if (res.data && res.data.author) {
+          setSignatures((prev) => [res.data, ...prev]);
+        } else {
+          fetchSignatures();
+        }
         setSigContent('');
         setSigImage(null);
         setSigFeedback({ type: 'success', message: '¡Firma agregada exitosamente!' });
@@ -719,12 +723,22 @@ export default function PublicProfilePage() {
         ) : (
           <div className="space-y-4">
             {signatures.map((sig) => {
+              const author = sig.author || {
+                id: '',
+                first_name: 'Usuario',
+                last_name: '',
+                nickname: null,
+                email: '',
+                avatar_url: null,
+                campus: 'Lima',
+              };
+
               const canDelete =
-                currentUser?.id === sig.author.id ||
+                (Boolean(currentUser?.id && author.id) && currentUser?.id === author.id) ||
                 isOwnProfile ||
                 currentUser?.role === 'ADMIN';
 
-              const authorInitial = (sig.author.nickname || sig.author.first_name || 'U')[0].toUpperCase();
+              const authorInitial = (author.nickname || author.first_name || 'U')[0].toUpperCase();
 
               return (
                 <div
@@ -734,14 +748,14 @@ export default function PublicProfilePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-3">
                       <Link
-                        href={`/profile/${sig.author.id}`}
+                        href={author.id ? `/profile/${author.id}` : '#'}
                         className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#E63946] to-[#1D3557] p-0.5 shrink-0 overflow-hidden group"
-                        title={`Ver perfil de ${sig.author.nickname || sig.author.first_name}`}
+                        title={`Ver perfil de ${author.nickname || author.first_name}`}
                       >
-                        {sig.author.avatar_url ? (
+                        {author.avatar_url ? (
                           <img
-                            src={sig.author.avatar_url}
-                            alt={sig.author.nickname || sig.author.first_name}
+                            src={author.avatar_url}
+                            alt={author.nickname || author.first_name}
                             className="w-full h-full object-cover rounded-[10px] group-hover:scale-105 transition-transform"
                           />
                         ) : (
@@ -754,13 +768,13 @@ export default function PublicProfilePage() {
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <Link
-                            href={`/profile/${sig.author.id}`}
+                            href={author.id ? `/profile/${author.id}` : '#'}
                             className="text-xs font-black text-white hover:text-[#E63946] transition-colors"
                           >
-                            {sig.author.nickname || capitalizeWords(sig.author.first_name)}
+                            {author.nickname || capitalizeWords(author.first_name)}
                           </Link>
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#8E92A4]">
-                            Tecsup {sig.author.campus || 'Lima'}
+                            Tecsup {author.campus || 'Lima'}
                           </span>
                         </div>
                         <p className="text-[10px] text-[#5A5E73]">
