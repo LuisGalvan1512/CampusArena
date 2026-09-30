@@ -104,18 +104,19 @@ export default function HomePage() {
             ) : (
               <>
                 <Link
-                  href="/auth/register"
-                  className="btn-primary px-10 py-4 text-lg flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl"
+                  href="/auth/login"
+                  className="btn-primary px-9 py-4 text-base sm:text-lg flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl shadow-[0_0_35px_rgba(230,57,70,0.35)] hover:scale-105 transition-all"
                 >
-                  <Swords className="w-5 h-5" />
-                  Crear Cuenta de Competidor
+                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-5 h-5 object-contain" />
+                  Ingresar con Google Tecsup
                   <ArrowRight className="w-5 h-5" />
                 </Link>
                 <Link
-                  href="/auth/login"
-                  className="btn-secondary px-10 py-4 text-lg w-full sm:w-auto text-center rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all"
+                  href="/tournaments"
+                  className="btn-secondary px-8 py-4 text-base sm:text-lg w-full sm:w-auto text-center rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all flex items-center justify-center gap-2"
                 >
-                  Iniciar Sesión
+                  <Trophy className="w-5 h-5 text-amber-500" />
+                  Explorar Torneos
                 </Link>
               </>
             )}
@@ -431,11 +432,11 @@ export default function HomePage() {
           </p>
           <div className="pt-6">
             <Link
-              href="/auth/register"
+              href="/auth/login"
               className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
             >
-              <Swords className="w-6 h-6" />
-              Unirse a Campus Arena
+              <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-6 h-6 object-contain" />
+              Ingresar con Google Tecsup
             </Link>
           </div>
         </motion.div>

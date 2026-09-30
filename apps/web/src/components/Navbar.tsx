@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { NotificationCenterDrawer } from '@/components/NotificationCenterDrawer';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import { SoundToggle } from '@/components/SoundToggle';
 import { 
   Trophy, 
   Gamepad2, 
@@ -18,8 +17,7 @@ import {
   Sparkles, 
   ChevronDown, 
   ShieldCheck, 
-  Crown,
-  Search
+  Crown
 } from 'lucide-react';
 
 export function Navbar() {
@@ -39,10 +37,12 @@ export function Navbar() {
     { name: 'Inicio', href: '/' },
     { name: 'Torneos', href: '/tournaments' },
     { name: 'Comunidad', href: '/community' },
-    { name: '🔴 En Vivo', href: '/live' },
+    { 
+      name: 'En Vivo', 
+      href: '/live',
+      badge: <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+    },
     { name: 'Ranking', href: '/ranking' },
-    ...(isOrganizer || isAdmin ? [{ name: '🛡️ Organizador', href: '/dashboard/organizer' }] : []),
-    ...(isAdmin ? [{ name: '👑 Admin', href: '/admin/organizers' }] : []),
   ];
 
   return (
@@ -51,66 +51,41 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform overflow-hidden p-1.5 border border-white/10">
-                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
-              </div>
+          <Link href="/" className="flex items-center gap-3 group shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform overflow-hidden p-1.5 border border-white/10">
+              <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 leading-none">
+              <span className="text-base font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 leading-none">
                 CAMPUS <span className="text-[#E63946]">ARENA</span>
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#002B49] text-sky-300 font-black border border-sky-400/30">TECSUP</span>
               </span>
-              <span className="text-[10px] tracking-widest text-[var(--text-secondary)] uppercase font-semibold mt-1">
-                Esports Universitarios
+              <span className="text-[9px] tracking-widest text-sky-400 font-bold uppercase mt-1">
+                TECSUP ESPORTS
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-[#E63946] ${
+                  className={`text-sm font-medium transition-colors hover:text-[#E63946] flex items-center gap-1.5 ${
                     isActive ? 'text-[#E63946] font-bold' : 'text-[var(--text-secondary)]'
                   }`}
                 >
-                  {link.name}
+                  {link.badge}
+                  <span>{link.name}</span>
                 </Link>
               );
             })}
           </div>
 
-          {/* Auth & Notification Action Buttons (Desktop) */}
-          <div className="hidden md:flex items-center gap-2">
-            {/* Quick Command Palette Button */}
-            <button
-              onClick={() => {
-                const event = new KeyboardEvent('keydown', {
-                  key: 'k',
-                  ctrlKey: true,
-                  bubbles: true,
-                });
-                window.dispatchEvent(event);
-              }}
-              title="Buscar o comandos (Ctrl + K)"
-              className="flex items-center gap-2 py-1.5 px-2.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-card)] text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[#E63946]/50 transition-all cursor-pointer shadow-sm"
-            >
-              <Search className="w-3.5 h-3.5" />
-              <span className="hidden xl:inline text-[11px]">Buscar...</span>
-              <kbd className="px-1.5 py-0.5 text-[9px] font-mono font-bold bg-[var(--bg-arena)] border border-[var(--border-card)] rounded-md">
-                ⌘K
-              </kbd>
-            </button>
-
-            {/* Sound Toggle */}
-            <SoundToggle />
-
+          {/* Auth & Quick Action Buttons (Desktop) */}
+          <div className="hidden md:flex items-center gap-3">
             {/* Theme Toggle (Light / Dark) */}
             <ThemeToggle />
 
@@ -124,7 +99,7 @@ export function Navbar() {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-2.5 py-1.5 px-3 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#E63946]/50 transition-all text-sm cursor-pointer shadow-sm"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0 shadow-sm">
+                    <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0 shadow-sm">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover" />
                       ) : (
