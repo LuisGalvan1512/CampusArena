@@ -101,7 +101,154 @@ export class MailService {
 </html>
     `;
 
-    this.logger.log(`\n======================================================\n📨 [ENVÍO DE CORREO INSTITUCIONAL]\nDestinatario: ${email}\nAsunto: ${subject}\nCódigo OTP: ${code}\nDispositivo: ${deviceInfo}\n======================================================\n`);
+    return this.dispatchEmail(email, firstName, subject, htmlContent);
+  }
+
+  /**
+   * Sends transactional email when an organizer approves a student's payment voucher.
+   */
+  async sendPaymentApprovedEmail(options: {
+    email: string;
+    firstName: string;
+    tournamentName: string;
+    amount: number | string;
+    campusName?: string;
+    hasSlot: boolean;
+    slug?: string;
+  }) {
+    const { email, firstName, tournamentName, amount, campusName = 'Tecsup Lima', hasSlot, slug = '' } = options;
+    const subject = hasSlot
+      ? `🎉 ¡Inscripción Confirmada! Torneo "${tournamentName}" - Campus Arena`
+      : `⏳ Cupo en Espera: Torneo "${tournamentName}" - Campus Arena`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #07080B; color: #FFFFFF; margin: 0; padding: 20px; }
+    .container { max-width: 580px; margin: 0 auto; background-color: #15161E; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; }
+    .header { background: linear-gradient(135deg, #10B981 0%, #1D3557 100%); padding: 30px 24px; text-align: center; }
+    .logo-title { font-size: 24px; font-weight: 900; color: #FFFFFF; margin: 0; letter-spacing: 1px; }
+    .subtitle { font-size: 13px; color: #A8DADC; margin-top: 6px; }
+    .content { padding: 32px 24px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background-color: rgba(16,185,129,0.15); color: #10B981; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; border: 1px solid rgba(16,185,129,0.3); }
+    .greeting { font-size: 18px; font-weight: bold; color: #FFFFFF; margin-bottom: 12px; }
+    .text { font-size: 14px; color: #8E92A4; line-height: 1.6; margin-bottom: 20px; }
+    .summary-box { background-color: #0B0C10; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 20px; margin-bottom: 24px; }
+    .summary-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 13px; }
+    .summary-label { color: #8E92A4; }
+    .summary-value { color: #FFFFFF; font-weight: bold; }
+    .btn { display: inline-block; background-color: #E63946; color: #FFFFFF; text-decoration: none; font-weight: bold; font-size: 13px; padding: 12px 24px; border-radius: 8px; text-align: center; margin-top: 8px; }
+    .footer { padding: 20px; text-align: center; font-size: 11px; color: #5A5E73; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="logo-title">CAMPUS ARENA TECSUP</h1>
+      <p class="subtitle">Validación Oficial de Participación</p>
+    </div>
+    <div class="content">
+      <span class="badge">${hasSlot ? '✅ Cupo Oficial Confirmado' : '⏳ Lista de Espera'}</span>
+      <div class="greeting">¡Hola, ${firstName}!</div>
+      <p class="text">
+        ${hasSlot 
+          ? `Tu comprobante de pago ha sido revisado y verificado por el comité organizador de <strong>${campusName}</strong>. Tu inscripción en <strong>${tournamentName}</strong> está 100% confirmada.`
+          : `Tu comprobante para <strong>${tournamentName}</strong> fue verificado. El torneo ha alcanzado el límite de cupos directos y has quedado registrado con prioridad en la <strong>lista de espera</strong>.`}
+      </p>
+      <div class="summary-box">
+        <div class="summary-row"><span class="summary-label">Torneo:</span><span class="summary-value">${tournamentName}</span></div>
+        <div class="summary-row"><span class="summary-label">Monto Verificado:</span><span class="summary-value">S/ ${amount} PEN</span></div>
+        <div class="summary-row"><span class="summary-label">Sede:</span><span class="summary-value">${campusName}</span></div>
+        <div class="summary-row" style="border: none;"><span class="summary-label">Estado:</span><span class="summary-value" style="color: ${hasSlot ? '#10B981' : '#F59E0B'};">${hasSlot ? 'Confirmado' : 'En Espera'}</span></div>
+      </div>
+      <div style="text-align: center;">
+        <a href="https://campusarena.tecsup.edu.pe/tournaments/${slug}" class="btn">Ver Mi Torneo y Llaves &rarr;</a>
+      </div>
+    </div>
+    <div class="footer">
+      Tecsup Sede Lima • Plataforma Oficial de Esports &copy; 2026 Campus Arena.
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    return this.dispatchEmail(email, firstName, subject, htmlContent);
+  }
+
+  /**
+   * Sends transactional email notifying a player that their match is ready.
+   */
+  async sendMatchReadyEmail(options: {
+    email: string;
+    firstName: string;
+    tournamentName: string;
+    roundName: string;
+    opponentName: string;
+    matchPosition: number;
+    slug: string;
+  }) {
+    const { email, firstName, tournamentName, roundName, opponentName, matchPosition, slug } = options;
+    const subject = `⚔️ ¡Tu partida está lista! ${roundName} vs ${opponentName} - Campus Arena`;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #07080B; color: #FFFFFF; margin: 0; padding: 20px; }
+    .container { max-width: 580px; margin: 0 auto; background-color: #15161E; border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; overflow: hidden; }
+    .header { background: linear-gradient(135deg, #E63946 0%, #1D3557 100%); padding: 30px 24px; text-align: center; }
+    .logo-title { font-size: 24px; font-weight: 900; color: #FFFFFF; margin: 0; }
+    .content { padding: 32px 24px; }
+    .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; background-color: rgba(230,57,70,0.15); color: #E63946; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 12px; }
+    .greeting { font-size: 18px; font-weight: bold; color: #FFFFFF; margin-bottom: 12px; }
+    .text { font-size: 14px; color: #8E92A4; line-height: 1.6; margin-bottom: 20px; }
+    .match-box { background-color: #0B0C10; border: 2px dashed #E63946; border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 24px; }
+    .vs-text { font-size: 18px; font-weight: 900; color: #FFFFFF; }
+    .btn { display: inline-block; background-color: #E63946; color: #FFFFFF; text-decoration: none; font-weight: bold; font-size: 13px; padding: 12px 24px; border-radius: 8px; }
+    .footer { padding: 20px; text-align: center; font-size: 11px; color: #5A5E73; border-top: 1px solid rgba(255,255,255,0.05); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1 class="logo-title">CAMPUS ARENA TECSUP</h1>
+    </div>
+    <div class="content">
+      <span class="badge">⚔️ Llamado a Partida Oficial</span>
+      <div class="greeting">¡Prepárate, ${firstName}!</div>
+      <p class="text">
+        Se ha habilitado tu enfrentamiento en <strong>${tournamentName}</strong>. Preséntate con tu oponente y sigue las instrucciones de la sala oficial.
+      </p>
+      <div class="match-box">
+        <div style="font-size: 11px; color: #8E92A4; text-transform: uppercase; margin-bottom: 8px;">${roundName} • Match #${matchPosition}</div>
+        <div class="vs-text">${firstName} <span style="color: #E63946;">VS</span> ${opponentName}</div>
+      </div>
+      <div style="text-align: center;">
+        <a href="https://campusarena.tecsup.edu.pe/tournaments/${slug}#bracket" class="btn">Entrar a la Sala / Ver Bracket &rarr;</a>
+      </div>
+    </div>
+    <div class="footer">
+      Tecsup Sede Lima • Plataforma Oficial de Esports &copy; 2026 Campus Arena.
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
+    return this.dispatchEmail(email, firstName, subject, htmlContent);
+  }
+
+  /**
+   * Internal dispatcher supporting Brevo REST API, Nodemailer SMTP, and console logging.
+   */
+  private async dispatchEmail(email: string, firstName: string, subject: string, htmlContent: string) {
+    this.logger.log(`\n======================================================\n📨 [ENVÍO DE CORREO INSTITUCIONAL]\nDestinatario: ${email}\nAsunto: ${subject}\n======================================================\n`);
 
     const brevoApiKey = this.config.get<string>('BREVO_API_KEY');
     const senderEmail = this.config.get<string>('SMTP_FROM') || 'luis.galvan@tecsup.edu.pe';

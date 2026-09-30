@@ -36,6 +36,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
           details = res['message'];
         }
       }
+    } else {
+      console.error('[HttpExceptionFilter Internal Error]:', exception);
     }
 
     // Normalize error codes

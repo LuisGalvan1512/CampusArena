@@ -13,9 +13,16 @@ interface SeedParticipant {
   trophies: number;
 }
 
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { MailService } from '../mail/mail.service.js';
+
 @Injectable()
 export class CompetitionService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly mail: MailService,
+  ) {}
 
   /**
    * Deterministic Fisher-Yates shuffle
@@ -62,11 +69,14 @@ export class CompetitionService {
     const bracketSize = tournament.max_slots >= 16 ? 16 : 8;
 
     // Prepare participants list from confirmed registrations
-    let participants: SeedParticipant[] = tournament.registrations.map((r) => ({
-      name: `${r.competitor.first_name} ${r.competitor.last_name}`,
-      tag: r.game_profile.player_tag,
-      trophies: r.game_profile.trophies,
-    }));
+    let participants: SeedParticipant[] = tournament.registrations.map((r) => {
+      const isTeam = (tournament.team_size && tournament.team_size > 1) && !!r.team_name;
+      return {
+        name: isTeam ? r.team_name! : `${r.competitor.first_name} ${r.competitor.last_name}`,
+        tag: isTeam ? `[Cap: ${r.game_profile.player_tag}]` : r.game_profile.player_tag,
+        trophies: r.game_profile.trophies,
+      };
+    });
 
     const seed = `seed_${Date.now()}`;
 
@@ -85,8 +95,12 @@ export class CompetitionService {
       await this.prisma.competition.delete({ where: { id: existingComp.id } });
     }
 
+    const tournamentName = tournament.name;
+    const tournamentSlug = tournament.slug;
+    const confirmedUserIds = tournament.registrations.map((r) => r.competitor_id);
+
     // Create Competition, Rounds, and Matchups in Transaction
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       const competition = await tx.competition.create({
         data: {
           tournament_id: tournamentId,
@@ -147,20 +161,58 @@ export class CompetitionService {
         ];
 
         for (let i = 0; i < 8; i++) {
+          const pA = participants[i * 2];
+          const pB = participants[i * 2 + 1];
+          const hasA = Boolean(pA);
+          const hasB = Boolean(pB);
+
+          let status: any = 'READY';
+          let winnerName: string | null = null;
+          let winnerTag: string | null = null;
+          let scoreA = 0;
+          let scoreB = 0;
+
+          if (hasA && !hasB) {
+            status = 'WALKOVER';
+            winnerName = pA.name;
+            winnerTag = pA.tag;
+            scoreA = 1;
+          } else if (!hasA && hasB) {
+            status = 'WALKOVER';
+            winnerName = pB.name;
+            winnerTag = pB.tag;
+            scoreB = 1;
+          } else if (!hasA && !hasB) {
+            status = 'PENDING';
+          }
+
           await tx.matchup.create({
             data: {
               round_id: rOctavos.id,
               position: i + 1,
-              participant_a_name: participants[i * 2]?.name || 'TBD',
-              participant_a_tag: participants[i * 2]?.tag || '#TBD',
-              participant_b_name: participants[i * 2 + 1]?.name || 'TBD',
-              participant_b_tag: participants[i * 2 + 1]?.tag || '#TBD',
+              participant_a_name: pA?.name || 'TBD',
+              participant_a_tag: pA?.tag || '#TBD',
+              participant_b_name: hasA && !hasB ? 'BYE (Pase directo)' : (pB?.name || 'TBD'),
+              participant_b_tag: hasA && !hasB ? '#BYE' : (pB?.tag || '#TBD'),
               next_matchup_id: octavosNext[i],
-              status: 'READY',
-              score_a: 0,
-              score_b: 0,
+              status,
+              score_a: scoreA,
+              score_b: scoreB,
+              winner_name: winnerName,
+              winner_tag: winnerTag,
             },
           });
+
+          // Advance BYE winner to Cuartos de Final immediately
+          if (winnerName && winnerTag) {
+            const isSlotA = (i + 1) % 2 !== 0;
+            await tx.matchup.update({
+              where: { id: octavosNext[i] },
+              data: isSlotA
+                ? { participant_a_name: winnerName, participant_a_tag: winnerTag }
+                : { participant_b_name: winnerName, participant_b_tag: winnerTag },
+            });
+          }
         }
       } else {
         // --- 8 PLAYERS: 3 ROUNDS (Cuartos, Semis, Final) ---
@@ -188,20 +240,58 @@ export class CompetitionService {
         const cuartosNext = [mSemi1.id, mSemi1.id, mSemi2.id, mSemi2.id];
 
         for (let i = 0; i < 4; i++) {
+          const pA = participants[i * 2];
+          const pB = participants[i * 2 + 1];
+          const hasA = Boolean(pA);
+          const hasB = Boolean(pB);
+
+          let status: any = 'READY';
+          let winnerName: string | null = null;
+          let winnerTag: string | null = null;
+          let scoreA = 0;
+          let scoreB = 0;
+
+          if (hasA && !hasB) {
+            status = 'WALKOVER';
+            winnerName = pA.name;
+            winnerTag = pA.tag;
+            scoreA = 1;
+          } else if (!hasA && hasB) {
+            status = 'WALKOVER';
+            winnerName = pB.name;
+            winnerTag = pB.tag;
+            scoreB = 1;
+          } else if (!hasA && !hasB) {
+            status = 'PENDING';
+          }
+
           await tx.matchup.create({
             data: {
               round_id: rCuartos.id,
               position: i + 1,
-              participant_a_name: participants[i * 2]?.name || 'TBD',
-              participant_a_tag: participants[i * 2]?.tag || '#TBD',
-              participant_b_name: participants[i * 2 + 1]?.name || 'TBD',
-              participant_b_tag: participants[i * 2 + 1]?.tag || '#TBD',
+              participant_a_name: pA?.name || 'TBD',
+              participant_a_tag: pA?.tag || '#TBD',
+              participant_b_name: hasA && !hasB ? 'BYE (Pase directo)' : (pB?.name || 'TBD'),
+              participant_b_tag: hasA && !hasB ? '#BYE' : (pB?.tag || '#TBD'),
               next_matchup_id: cuartosNext[i],
-              status: 'READY',
-              score_a: 0,
-              score_b: 0,
+              status,
+              score_a: scoreA,
+              score_b: scoreB,
+              winner_name: winnerName,
+              winner_tag: winnerTag,
             },
           });
+
+          // Advance BYE winner to Semifinales immediately
+          if (winnerName && winnerTag) {
+            const isSlotA = (i + 1) % 2 !== 0;
+            await tx.matchup.update({
+              where: { id: cuartosNext[i] },
+              data: isSlotA
+                ? { participant_a_name: winnerName, participant_a_tag: winnerTag }
+                : { participant_b_name: winnerName, participant_b_tag: winnerTag },
+            });
+          }
         }
       }
 
@@ -212,6 +302,37 @@ export class CompetitionService {
         bracket_size: bracketSize,
       };
     });
+
+    // Notify all confirmed participants (In-App + Email)
+    try {
+      for (const reg of tournament.registrations) {
+        if (reg.competitor_id) {
+          await this.notifications.create({
+            user_id: reg.competitor_id,
+            type: 'MATCH_CALL',
+            title: '⚔️ ¡Bracket Oficial Generado!',
+            message: `Las llaves del torneo "${tournamentName}" han sido publicadas. ¡Revisa tu llave y tu rival!`,
+            link: `/tournaments/${tournamentSlug}`,
+            link_label: 'Ver mi llave en Brackets',
+          });
+        }
+        if (reg.competitor?.email) {
+          await this.mail.sendMatchReadyEmail({
+            email: reg.competitor.email,
+            firstName: reg.competitor.first_name,
+            tournamentName,
+            roundName: 'Ronda Inicial (Brackets)',
+            opponentName: 'Rival Asignado en Llaves',
+            matchPosition: 1,
+            slug: tournamentSlug,
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error enviando notificaciones de bracket:', e);
+    }
+
+    return result;
   }
 
   /**
@@ -274,7 +395,7 @@ export class CompetitionService {
       throw new BadRequestException('El tag del ganador no coincide con ninguno de los dos participantes.');
     }
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // 1. Update current matchup
       const updatedMatchup = await tx.matchup.update({
         where: { id: matchupId },
@@ -345,5 +466,48 @@ export class CompetitionService {
         is_championship: !matchup.next_matchup_id,
       };
     });
+
+    // Notify winner in real-time
+    try {
+      const tournament = matchup?.round?.competition?.tournament;
+      if (tournament && winnerTag) {
+        const winnerRegistration = await this.prisma.registration.findFirst({
+          where: {
+            tournament_id: tournament.id,
+            game_profile: { player_tag: winnerTag },
+          },
+          include: { competitor: true },
+        });
+
+        if (winnerRegistration) {
+          await this.notifications.create({
+            user_id: winnerRegistration.competitor_id,
+            type: result.is_championship ? 'TOURNAMENT' : 'MATCH_CALL',
+            title: result.is_championship ? '🏆 ¡ERES EL CAMPEÓN DEL TORNEO!' : '🎉 ¡Victoria en el Bracket!',
+            message: result.is_championship
+              ? `¡Felicitaciones! Has ganado la Gran Final de "${tournament.name}". Tu medalla de Oro ya está registrada en tu perfil de honor.`
+              : `¡Has vencido en tu enfrentamiento de "${tournament.name}" (${result.score})! Tu siguiente partida ya está programada.`,
+            link: `/tournaments/${tournament.slug}`,
+            link_label: result.is_championship ? 'Ver Torneo' : 'Ver Bracket',
+          });
+
+          if (winnerRegistration.competitor?.email && !result.is_championship) {
+            await this.mail.sendMatchReadyEmail({
+              email: winnerRegistration.competitor.email,
+              firstName: winnerRegistration.competitor.first_name,
+              tournamentName: tournament.name,
+              roundName: 'Siguiente Ronda de Brackets',
+              opponentName: 'Próximo Rival en Llaves',
+              matchPosition: matchup.position,
+              slug: tournament.slug,
+            });
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error enviando notificación de victoria en bracket:', e);
+    }
+
+    return result;
   }
 }

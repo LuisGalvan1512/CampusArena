@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { api } from '@/lib/api';
+import { useAuth } from '@/context/AuthContext';
 import { 
   Bell, 
   X, 
@@ -12,76 +14,106 @@ import {
   Clock, 
   ExternalLink,
   Flame,
-  ShieldCheck,
-  Award
+  ShieldCheck, 
+  Award,
+  Loader2,
+  Info
 } from 'lucide-react';
 
 interface NotificationItem {
   id: string;
-  type: 'PAYMENT' | 'MATCH_CALL' | 'DIPLOMA' | 'STREAM';
+  type: string;
   title: string;
   message: string;
-  timestamp: string;
+  link?: string | null;
+  link_label?: string | null;
   is_read: boolean;
-  link?: string;
-  link_label?: string;
+  created_at: string;
+}
+
+function formatRelativeTime(dateString: string): string {
+  try {
+    const now = new Date();
+    const date = new Date(dateString);
+    const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffSec < 60) return 'Justo ahora';
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `Hace ${diffMin} min`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Hace ${diffHours} h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 7) return `Hace ${diffDays} d`;
+    return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+  } catch {
+    return 'Reciente';
+  }
 }
 
 export function NotificationCenterDrawer() {
+  const { isAuthenticated, user } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'notif-1',
-      type: 'PAYMENT',
-      title: '¡Inscripción Validada y Confirmada!',
-      message: 'Tu comprobante de pago de S/ 5.00 para la Liga Relámpago Clash Royale fue aprobado oficialmente por el organizador.',
-      timestamp: 'Hace 5 minutos',
-      is_read: false,
-      link: '/tournaments/liga-relampago-clash-royale-noche-de-mazos',
-      link_label: 'Ver mi cupo en el torneo',
-    },
-    {
-      id: 'notif-2',
-      type: 'MATCH_CALL',
-      title: '⚔️ ¡Llamado a Partida Presencial / Online!',
-      message: 'Tu enfrentamiento de Cuartos de Final está listo. Prepárate con tu mazo oficial en el escenario / lobby.',
-      timestamp: 'Hace 15 minutos',
-      is_read: false,
-      link: '/tournaments/torneo-inter-sedes-brawl-stars-2026',
-      link_label: 'Ver enfrentamiento en Brackets',
-    },
-    {
-      id: 'notif-3',
-      type: 'STREAM',
-      title: '🔴 Transmisión Oficial en Vivo',
-      message: 'Los casters de Tecsup están transmitiendo la jornada en directo por Kick y TikTok Live.',
-      timestamp: 'Hace 30 minutos',
-      is_read: false,
-      link: 'https://kick.com',
-      link_label: 'Ir a la transmisión',
-    },
-    {
-      id: 'notif-4',
-      type: 'DIPLOMA',
-      title: '🏆 Diploma Oficial Disponible',
-      message: 'Se ha emitido tu Certificado Oficial de Participación y Mérito Deportivo de Tecsup Esports.',
-      timestamp: 'Hace 1 hora',
-      is_read: true,
-      link: '/profile',
-      link_label: 'Ver en mi perfil',
-    },
-  ]);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const fetchNotifications = useCallback(async () => {
+    if (!isAuthenticated) return;
+    try {
+      const res = await api.get<{ notifications: NotificationItem[]; unreadCount: number }>('/notifications');
+      if (res.success && res.data) {
+        setNotifications(res.data.notifications || []);
+        setUnreadCount(res.data.unreadCount || 0);
+      }
+    } catch (e) {
+      console.warn('Error al sincronizar notificaciones:', e);
+    }
+  }, [isAuthenticated]);
 
-  const markAllAsRead = () => {
+  // Initial fetch and polling every 25 seconds
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 25000);
+      return () => clearInterval(interval);
+    } else {
+      setNotifications([]);
+      setUnreadCount(0);
+    }
+  }, [isAuthenticated, fetchNotifications]);
+
+  // Refetch when drawer opens
+  useEffect(() => {
+    if (isOpen && isAuthenticated) {
+      fetchNotifications();
+    }
+  }, [isOpen, isAuthenticated, fetchNotifications]);
+
+  const markAllAsRead = async () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+    setUnreadCount(0);
+    try {
+      await api.patch('/notifications/read-all');
+    } catch (e) {
+      console.error('Error marcando todas como leídas:', e);
+    }
   };
 
-  const markAsRead = (id: string) => {
+  const markAsRead = async (id: string) => {
+    const target = notifications.find((n) => n.id === id);
+    if (!target || target.is_read) return;
+
     setNotifications((prev) =>
       prev.map((n) => (n.id === id ? { ...n, is_read: true } : n))
     );
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+
+    try {
+      await api.patch(`/notifications/${id}/read`);
+    } catch (e) {
+      console.error('Error marcando notificación como leída:', e);
+    }
   };
 
   // Close on Escape key
@@ -95,7 +127,7 @@ export function NotificationCenterDrawer() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
 
-  const getIcon = (type: NotificationItem['type']) => {
+  const getIcon = (type: string) => {
     switch (type) {
       case 'PAYMENT':
         return <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />;
@@ -105,8 +137,14 @@ export function NotificationCenterDrawer() {
         return <Tv className="w-4 h-4 text-[#A8DADC] shrink-0" />;
       case 'DIPLOMA':
         return <Trophy className="w-4 h-4 text-amber-400 shrink-0" />;
+      case 'TOURNAMENT':
+        return <Flame className="w-4 h-4 text-amber-500 shrink-0" />;
+      default:
+        return <Info className="w-4 h-4 text-[#A8DADC] shrink-0" />;
     }
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <>
@@ -118,8 +156,8 @@ export function NotificationCenterDrawer() {
       >
         <Bell className="w-4 h-4" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#E63946] text-white text-[10px] font-black flex items-center justify-center animate-pulse">
-            {unreadCount}
+          <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-[#E63946] text-white text-[10px] font-black flex items-center justify-center animate-pulse shadow-lg shadow-[#E63946]/50">
+            {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
       </button>
@@ -144,7 +182,7 @@ export function NotificationCenterDrawer() {
                 </div>
                 <div>
                   <h2 className="text-sm font-black text-white">Centro de Notificaciones</h2>
-                  <p className="text-[11px] text-[#8E92A4]">Avisos de partidas, pagos y diplomas en vivo</p>
+                  <p className="text-[11px] text-[#8E92A4]">Avisos de partidas, pagos y brackets en vivo</p>
                 </div>
               </div>
 
@@ -175,7 +213,8 @@ export function NotificationCenterDrawer() {
               {notifications.length === 0 ? (
                 <div className="p-12 text-center text-[#8E92A4] text-xs space-y-2">
                   <Bell className="w-8 h-8 text-[#5A5E73] mx-auto" />
-                  <p>No tienes notificaciones por el momento.</p>
+                  <p className="font-semibold text-white">Bandeja al día</p>
+                  <p className="text-[11px]">No tienes notificaciones pendientes. Aquí recibirás avisos de tus inscripciones y partidas.</p>
                 </div>
               ) : (
                 notifications.map((n) => (
@@ -196,7 +235,7 @@ export function NotificationCenterDrawer() {
                         </span>
                       </div>
                       <span className="text-[10px] text-[#5A5E73] font-mono shrink-0">
-                        {n.timestamp}
+                        {formatRelativeTime(n.created_at)}
                       </span>
                     </div>
 

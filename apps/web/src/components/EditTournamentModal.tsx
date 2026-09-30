@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { GAME_CATALOG } from '@/lib/games';
 import { 
   X, 
   Save, 
@@ -25,45 +26,95 @@ interface EditTournamentModalProps {
   onSuccess: (updated: any) => void;
 }
 
+const formatDateForInput = (dateVal: any) => {
+  if (!dateVal) return '';
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return '';
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  } catch {
+    return '';
+  }
+};
+
 export function EditTournamentModal({
   isOpen,
   onClose,
   tournament,
   onSuccess,
 }: EditTournamentModalProps) {
-  if (!isOpen || !tournament) return null;
-
   const [formData, setFormData] = useState({
-    name: tournament.name || '',
-    game_code: tournament.game_code || 'CLASH_ROYALE',
-    organization_name: tournament.organization_name || 'Tecsup',
-    campus_name: tournament.campus_name || 'Lima',
-    description_short: tournament.description_short || '',
-    description_full: tournament.description_full || '',
-    rules_text: tournament.rules_text || '',
-    banner_url: tournament.banner_url || '',
-    status: tournament.status || 'REGISTRATION_OPEN',
-    format: tournament.format || '1 vs 1 (BO3 / BO5)',
-    max_slots: tournament.max_slots || 16,
-    min_slots: tournament.min_slots || 8,
-    cost: tournament.cost || 0,
-    currency: tournament.currency || 'PEN',
-    prize_pool: tournament.prize_pool || 'S/ 500.00 en Premios',
-    contact_email: tournament.contact_email || 'esports@tecsup.edu.pe',
-    registration_open_at: tournament.registration_open_at 
-      ? new Date(tournament.registration_open_at).toISOString().slice(0, 16) 
-      : '',
-    registration_close_at: tournament.registration_close_at 
-      ? new Date(tournament.registration_close_at).toISOString().slice(0, 16) 
-      : '',
-    tournament_start_at: tournament.tournament_start_at 
-      ? new Date(tournament.tournament_start_at).toISOString().slice(0, 16) 
-      : '',
+    name: '',
+    game_code: 'CLASH_ROYALE',
+    organization_name: 'Tecsup',
+    campus_name: 'Lima',
+    event_modality: 'PRESENTIAL',
+    description_short: '',
+    description_full: '',
+    rules_text: '',
+    banner_url: '',
+    status: 'REGISTRATION_OPEN',
+    format: '1 vs 1 (BO3 / BO5)',
+    team_size: 1,
+    stream_url: '',
+    stream_platform: 'KICK',
+    max_slots: 16,
+    min_slots: 8,
+    cost: 0,
+    currency: 'PEN',
+    prize_pool: 'S/ 500.00 en Premios',
+    prize_1: '100% del pozo acumulado',
+    prize_2: '',
+    prize_3: '',
+    contact_email: 'esports@tecsup.edu.pe',
+    registration_open_at: '',
+    registration_close_at: '',
+    tournament_start_at: '',
   });
+
+  useEffect(() => {
+    if (tournament) {
+      setFormData({
+        name: tournament.name || '',
+        game_code: tournament.game_code || 'CLASH_ROYALE',
+        organization_name: tournament.organization_name || 'Tecsup',
+        campus_name: tournament.campus_name || 'Lima',
+        event_modality: tournament.event_modality || (tournament.is_online ? 'ONLINE' : 'PRESENTIAL'),
+        description_short: tournament.description_short || '',
+        description_full: tournament.description_full || '',
+        rules_text: tournament.rules_text || '',
+        banner_url: tournament.banner_url || '',
+        status: tournament.status || 'REGISTRATION_OPEN',
+        format: tournament.format || '1 vs 1 (BO3 / BO5)',
+        team_size: tournament.team_size || 1,
+        stream_url: tournament.stream_url || '',
+        stream_platform: tournament.stream_platform || 'KICK',
+        max_slots: tournament.max_slots || 16,
+        min_slots: tournament.min_slots || 8,
+        cost: tournament.cost || 0,
+        currency: tournament.currency || 'PEN',
+        prize_pool: tournament.prize_pool || 'S/ 500.00 en Premios',
+        prize_1: tournament.prize_distribution?.first_place || tournament.prize_pool || '100% del pozo acumulado',
+        prize_2: tournament.prize_distribution?.second_place || '',
+        prize_3: tournament.prize_distribution?.third_place || '',
+        contact_email: tournament.contact_email || 'esports@tecsup.edu.pe',
+        registration_open_at: formatDateForInput(tournament.registration_open_at),
+        registration_close_at: formatDateForInput(tournament.registration_close_at),
+        tournament_start_at: formatDateForInput(tournament.tournament_start_at),
+      });
+    }
+  }, [tournament, isOpen]);
 
   const [isSaving, setIsSaving] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+
+  if (!isOpen || !tournament) return null;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -80,14 +131,25 @@ export function EditTournamentModal({
     setSuccessMsg(null);
 
     try {
+      const { prize_1, prize_2, prize_3, ...cleanFormData } = formData;
       const payload: any = {
-        ...formData,
+        ...cleanFormData,
         cost: Number(formData.cost),
         max_slots: Number(formData.max_slots),
         min_slots: Number(formData.min_slots),
-        registration_open_at: new Date(formData.registration_open_at).toISOString(),
-        registration_close_at: new Date(formData.registration_close_at).toISOString(),
-        tournament_start_at: new Date(formData.tournament_start_at).toISOString(),
+        team_size: Number(formData.team_size),
+        event_modality: formData.event_modality,
+        is_online: formData.event_modality === 'ONLINE',
+        prize_distribution: {
+          first_place: formData.prize_1?.trim() || undefined,
+          second_place: formData.prize_2?.trim() || undefined,
+          third_place: formData.prize_3?.trim() || undefined,
+        },
+        stream_url: formData.stream_url?.trim() || null,
+        stream_platform: formData.stream_platform,
+        registration_open_at: formData.registration_open_at ? new Date(formData.registration_open_at).toISOString() : undefined,
+        registration_close_at: formData.registration_close_at ? new Date(formData.registration_close_at).toISOString() : undefined,
+        tournament_start_at: formData.tournament_start_at ? new Date(formData.tournament_start_at).toISOString() : undefined,
       };
 
       const res = await api.patch(`/tournaments/${tournament.id}`, payload);
@@ -175,8 +237,11 @@ export function EditTournamentModal({
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
                 >
-                  <option value="CLASH_ROYALE">Clash Royale (Supercell)</option>
-                  <option value="BRAWL_STARS">Brawl Stars (Supercell)</option>
+                  {Object.values(GAME_CATALOG).map((g) => (
+                    <option key={g.code} value={g.code}>
+                      {g.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
@@ -210,14 +275,31 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Sede / Campus</label>
-                <input
-                  type="text"
+                <label className="text-xs font-bold text-white">Modalidad del Evento</label>
+                <select
+                  name="event_modality"
+                  value={formData.event_modality}
+                  onChange={handleChange}
+                  className="input-arena w-full text-xs"
+                >
+                  <option value="PRESENTIAL">📍 100% Presencial (Campus Tecsup)</option>
+                  <option value="ONLINE">🌐 100% Virtual / Remoto</option>
+                  <option value="HYBRID">⚡ Híbrido (Previas Online • Final Presencial)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-white">Sede / Campus Tecsup</label>
+                <select
                   name="campus_name"
                   value={formData.campus_name}
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
-                />
+                >
+                  <option value="Lima">Sede Lima (Santa Anita)</option>
+                  <option value="Arequipa">Sede Arequipa</option>
+                  <option value="Trujillo">Sede Trujillo</option>
+                </select>
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
@@ -352,14 +434,58 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white">Pozo de Premios Oficial</label>
+                <label className="text-xs font-bold text-white">Pozo Acumulado Oficial</label>
                 <input
                   type="text"
                   name="prize_pool"
                   value={formData.prize_pool}
                   onChange={handleChange}
+                  placeholder="Ej. Pozo (S/.9 por equipo) o S/ 500"
                   className="input-arena w-full text-xs text-amber-400 font-bold"
                 />
+              </div>
+
+              {/* Manual Prize Breakdown per Place */}
+              <div className="sm:col-span-3 space-y-2.5 p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
+                <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5" />
+                  Distribución Manual de Premios por Puesto
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-bold text-white flex items-center gap-1">🥇 1er Lugar</span>
+                    <input
+                      type="text"
+                      name="prize_1"
+                      value={formData.prize_1}
+                      onChange={handleChange}
+                      placeholder="Ej. 100% del pozo acumulado"
+                      className="input-arena w-full text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1">🥈 2do Lugar</span>
+                    <input
+                      type="text"
+                      name="prize_2"
+                      value={formData.prize_2}
+                      onChange={handleChange}
+                      placeholder="Opcional (dejar vacío si no aplica)"
+                      className="input-arena w-full text-xs"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1">🥉 3er Lugar</span>
+                    <input
+                      type="text"
+                      name="prize_3"
+                      value={formData.prize_3}
+                      onChange={handleChange}
+                      placeholder="Opcional (dejar vacío si no aplica)"
+                      className="input-arena w-full text-xs"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-1.5">
@@ -381,6 +507,59 @@ export function EditTournamentModal({
                   value={formData.rules_text}
                   onChange={handleChange}
                   className="input-arena w-full text-xs font-mono leading-relaxed"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Teams & Streaming */}
+          <div className="space-y-4 pt-4 border-t border-white/5">
+            <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5" />
+              4. Modalidad de Equipos & Transmisión Oficial
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-white">Tamaño de Equipo</label>
+                <select
+                  name="team_size"
+                  value={formData.team_size}
+                  onChange={handleChange}
+                  className="input-arena w-full text-xs"
+                >
+                  <option value={1}>1 vs 1 (Individual / Solos)</option>
+                  <option value={2}>2 vs 2 (Dúos)</option>
+                  <option value={3}>3 vs 3 (Tríos / Brawl Stars)</option>
+                  <option value={4}>4 vs 4 (Escuadras Fortnite / L4D2)</option>
+                  <option value={5}>5 vs 5 (Equipos Dota 2 / CS2)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-white">Plataforma de Stream</label>
+                <select
+                  name="stream_platform"
+                  value={formData.stream_platform}
+                  onChange={handleChange}
+                  className="input-arena w-full text-xs"
+                >
+                  <option value="KICK">Kick</option>
+                  <option value="TWITCH">Twitch</option>
+                  <option value="YOUTUBE">YouTube</option>
+                  <option value="TIKTOK">TikTok Live</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-white">Canal o URL del Stream</label>
+                <input
+                  type="text"
+                  name="stream_url"
+                  placeholder="Ej. lusen15 o https://kick.com/lusen15"
+                  value={formData.stream_url}
+                  onChange={handleChange}
+                  className="input-arena w-full text-xs"
                 />
               </div>
             </div>

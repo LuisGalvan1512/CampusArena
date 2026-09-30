@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { 
   Trophy, 
@@ -21,10 +22,13 @@ import {
   CircleDot,
 } from 'lucide-react';
 import { GAME_LIST, type GameCode, GAME_CATALOG } from '@/lib/games';
+import { capitalizeWords } from '../profile/page';
 
 interface LeaderboardEntry {
   id: string;
+  user_id?: string;
   rank: number;
+  nickname?: string;
   player_name: string;
   in_game_name: string;
   player_tag: string;
@@ -138,8 +142,14 @@ export default function RankingPage() {
                   2°
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-lg font-black text-white">{topPodium[1].player_name}</h3>
-                  <p className="text-xs text-[#A8DADC] font-semibold">{topPodium[1].in_game_name}</p>
+                  <Link
+                    href={`/profile/${topPodium[1].user_id || topPodium[1].id}`}
+                    className="text-lg font-black text-white hover:text-[#E63946] transition-colors block"
+                    title="Ver perfil y medallero"
+                  >
+                    {topPodium[1].nickname || topPodium[1].in_game_name || capitalizeWords(topPodium[1].player_name)}
+                  </Link>
+                  <p className="text-xs text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[1].player_name)}</p>
                   <p className="text-[11px] text-[#8E92A4] font-mono">{topPodium[1].player_tag}</p>
                 </div>
                 <div className="p-3 bg-[#0B0C10] rounded-xl border border-white/5 space-y-1">
@@ -167,8 +177,14 @@ export default function RankingPage() {
                 </div>
 
                 <div className="space-y-1">
-                  <h3 className="text-2xl font-black text-white">{topPodium[0].player_name}</h3>
-                  <p className="text-sm text-amber-400 font-bold">{topPodium[0].in_game_name}</p>
+                  <Link
+                    href={`/profile/${topPodium[0].user_id || topPodium[0].id}`}
+                    className="text-2xl font-black text-white hover:text-amber-400 transition-colors block tracking-tight"
+                    title="Ver perfil y medallero"
+                  >
+                    {topPodium[0].nickname || topPodium[0].in_game_name || capitalizeWords(topPodium[0].player_name)}
+                  </Link>
+                  <p className="text-sm text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[0].player_name)}</p>
                   <p className="text-xs text-[#8E92A4] font-mono">{topPodium[0].player_tag}</p>
                 </div>
 
@@ -192,8 +208,14 @@ export default function RankingPage() {
                   3°
                 </div>
                 <div className="space-y-1">
-                  <h3 className="text-lg font-black text-white">{topPodium[2].player_name}</h3>
-                  <p className="text-xs text-[#A8DADC] font-semibold">{topPodium[2].in_game_name}</p>
+                  <Link
+                    href={`/profile/${topPodium[2].user_id || topPodium[2].id}`}
+                    className="text-lg font-black text-white hover:text-[#E63946] transition-colors block"
+                    title="Ver perfil y medallero"
+                  >
+                    {topPodium[2].nickname || topPodium[2].in_game_name || capitalizeWords(topPodium[2].player_name)}
+                  </Link>
+                  <p className="text-xs text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[2].player_name)}</p>
                   <p className="text-[11px] text-[#8E92A4] font-mono">{topPodium[2].player_tag}</p>
                 </div>
                 <div className="p-3 bg-[#0B0C10] rounded-xl border border-white/5 space-y-1">
@@ -261,11 +283,15 @@ export default function RankingPage() {
                       
                       <td className="py-3.5 px-3">
                         <div className="space-y-0.5">
-                          <p className="font-bold text-white group-hover:text-[#E63946] transition-colors">
-                            {player.in_game_name}
-                          </p>
+                          <Link
+                            href={`/profile/${player.user_id || player.id}`}
+                            className="font-black text-white hover:text-[#E63946] transition-colors block text-sm"
+                            title="Ver perfil y medallero"
+                          >
+                            {player.nickname || player.in_game_name || capitalizeWords(player.player_name)}
+                          </Link>
                           <p className="text-[11px] text-[#8E92A4]">
-                            {player.player_name} • <span className="font-mono text-[#A8DADC]">{player.player_tag}</span>
+                            <span className="text-[#A8DADC] font-semibold">{capitalizeWords(player.player_name)}</span> • <span className="font-mono text-[#5A5E73]">{player.player_tag}</span>
                           </p>
                         </div>
                       </td>

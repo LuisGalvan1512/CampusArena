@@ -18,13 +18,17 @@ import {
   ArrowLeft,
   FileCheck,
   Trophy,
-  ExternalLink
+  ExternalLink,
+  Users
 } from 'lucide-react';
+
+import { uploadPaymentVoucher } from '@/lib/storage';
+import { GAME_CATALOG, GameCode } from '@/lib/games';
 
 interface GameProfile {
   id: string;
-  game_code: 'CLASH_ROYALE' | 'BRAWL_STARS';
-  game_name: string;
+  game_code: string;
+  game_name?: string;
   player_tag: string;
   in_game_name: string;
   trophies: number;
@@ -36,11 +40,12 @@ interface RegistrationWizardModalProps {
   tournament: {
     id: string;
     name: string;
-    game_code: 'CLASH_ROYALE' | 'BRAWL_STARS';
+    game_code: string;
     cost: number | string;
     currency: string;
     prize_pool: string;
     rules_text: string;
+    team_size?: number;
   };
   onSuccess: () => void;
 }
@@ -60,8 +65,30 @@ export function RegistrationWizardModal({
   const [paymentMethod, setPaymentMethod] = useState<'YAPE' | 'PLIN' | 'TRANSFER'>('YAPE');
   const [operationReference, setOperationReference] = useState('');
   const [evidenceUrl, setEvidenceUrl] = useState('');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploadingFile, setIsUploadingFile] = useState(false);
   const [manualTag, setManualTag] = useState('');
   const [isCreatingProfile, setIsCreatingProfile] = useState(false);
+
+  // Dynamic Team / Squad registration state
+  const teamSize = Number(tournament.team_size) || (tournament.game_code === 'DOTA_2' ? 5 : tournament.game_code === 'LEFT_4_DEAD_2' ? 4 : 1);
+  const isTeamTournament = teamSize > 1;
+  const defaultTeammateCount = Math.max(1, teamSize - 1);
+  const [teamName, setTeamName] = useState('');
+  const [teamEmblem, setTeamEmblem] = useState('🐉');
+  const [rosterMembers, setRosterMembers] = useState<{ name: string; email: string; player_tag: string; role: string }[]>([]);
+
+  useEffect(() => {
+    if (isOpen && isTeamTournament) {
+      const initial = Array.from({ length: defaultTeammateCount }, (_, i) => ({
+        name: '',
+        email: '',
+        player_tag: '',
+        role: `Compañero ${i + 1}`,
+      }));
+      setRosterMembers(initial);
+    }
+  }, [isOpen, defaultTeammateCount, isTeamTournament]);
   
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -88,20 +115,82 @@ export function RegistrationWizardModal({
 
   if (!isOpen) return null;
 
-  const isClash = tournament.game_code === 'CLASH_ROYALE';
+  const gameDef = GAME_CATALOG[tournament.game_code as GameCode];
+  const gameName = gameDef?.name || (tournament.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars');
   const matchingGameProfile = gameProfiles.find(
     (gp) => gp.game_code === tournament.game_code
   );
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setErrorMessage('Por favor selecciona un archivo de imagen válido (PNG, JPG o WEBP).');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setErrorMessage('La imagen no debe superar los 5MB.');
+      return;
+    }
+
+    const localUrl = URL.createObjectURL(file);
+    setPreviewUrl(localUrl);
+    setErrorMessage(null);
+
+    setIsUploadingFile(true);
+    const res = await uploadPaymentVoucher(file, user?.id || 'guest');
+    setIsUploadingFile(false);
+
+    if (res.url) {
+      setEvidenceUrl(res.url);
+    } else {
+      setErrorMessage(res.error || 'No se pudo subir la imagen.');
+    }
+  };
+
   const handleCreateRegistration = async () => {
     setErrorMessage(null);
+
+    if (isTeamTournament) {
+      if (!teamName.trim()) {
+        setErrorMessage('Debes ingresar el nombre oficial de tu escuadra o equipo.');
+        return;
+      }
+      const invalid = rosterMembers.find(
+        (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
+      );
+      if (invalid) {
+        setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
+        return;
+      }
+    }
+
     setIsLoading(true);
 
-    const res = await api.post(`/tournaments/${tournament.id}/registrations`, {
+    const payload: any = {
       game_profile_id: selectedGameProfileId,
       payment_method: paymentMethod,
       rules_version: 'v1.0',
-    });
+    };
+
+    if (isTeamTournament) {
+      payload.team_name = teamName.trim();
+      payload.roster_members = {
+        team_emblem: teamEmblem,
+        captain: {
+          name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Capitán',
+          email: user?.email,
+          player_tag: matchingGameProfile?.player_tag || manualTag,
+          avatar_url: user?.avatar_url || null,
+          role: 'Capitán',
+        },
+        members: rosterMembers.filter((m) => m.name.trim() || m.email.trim()),
+      };
+    }
+
+    const res = await api.post(`/tournaments/${tournament.id}/registrations`, payload);
 
     if (res.success && res.data) {
       setRegistrationResult(res.data);
@@ -149,6 +238,13 @@ export function RegistrationWizardModal({
     setAcceptedRules(false);
     setOperationReference('');
     setEvidenceUrl('');
+    setTeamName('');
+    setRosterMembers([
+      { name: '', email: '', player_tag: '', role: 'Jugador 2' },
+      { name: '', email: '', player_tag: '', role: 'Jugador 3' },
+      { name: '', email: '', player_tag: '', role: 'Jugador 4' },
+      { name: '', email: '', player_tag: '', role: 'Jugador 5' },
+    ]);
     onClose();
   };
 
@@ -204,7 +300,7 @@ export function RegistrationWizardModal({
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-white">1. Confirmar Cuenta de Videojuego</h4>
               <p className="text-xs text-[#8E92A4]">
-                Para competir en este torneo de {isClash ? 'Clash Royale' : 'Brawl Stars'}, utilizaremos tu Player Tag oficial vinculado.
+                Para competir en este torneo de {gameName}, utilizaremos tu cuenta o Tag oficial vinculado.
               </p>
             </div>
 
@@ -212,10 +308,8 @@ export function RegistrationWizardModal({
               <div className="p-4 bg-[#0B0C10] rounded-xl border border-emerald-500/30 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                      isClash ? 'bg-[#E63946]/20 text-[#E63946]' : 'bg-[#457B9D]/20 text-[#457B9D]'
-                    }`}>
-                      {isClash ? <Swords className="w-5 h-5" /> : <Gamepad2 className="w-5 h-5" />}
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#E63946]/20 text-[#E63946]">
+                      <Gamepad2 className="w-5 h-5" />
                     </div>
                     <div>
                       <p className="text-sm font-bold text-white">{matchingGameProfile.in_game_name}</p>
@@ -223,7 +317,7 @@ export function RegistrationWizardModal({
                     </div>
                   </div>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                    Autónomo
+                    Vinculado
                   </span>
                 </div>
               </div>
@@ -247,10 +341,163 @@ export function RegistrationWizardModal({
               </div>
             )}
 
+            {/* TEAM SQUAD SETUP (Dynamic size: 2v2, 3v3, 4v4, 5v5) */}
+            {isTeamTournament && (
+              <div className="p-4 bg-[#0B0C10] rounded-xl border border-indigo-500/30 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-indigo-400" />
+                    <h5 className="text-xs font-bold text-white uppercase tracking-wider">
+                      {teamSize === 2 ? 'Registro de Dúo (2v2)' : teamSize === 3 ? 'Registro de Trío (3v3)' : teamSize === 4 ? 'Registro de Escuadra (4v4)' : `Registro de Equipo (${teamSize}v${teamSize})`}
+                    </h5>
+                  </div>
+                  <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                    👑 Tú eres el Capitán
+                  </span>
+                </div>
+
+                {/* Auto-populated Captain Card */}
+                <div className="p-3 bg-white/[0.03] border border-white/10 rounded-xl space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                      Capitán Oficial (Tus Datos de Perfil)
+                    </span>
+                    <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                      {matchingGameProfile?.player_tag || manualTag || 'Tag Vinculado'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
+                      {user?.avatar_url ? (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{user?.first_name?.charAt(0) || 'C'}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-white truncate">
+                        {user?.first_name} {user?.last_name}
+                      </p>
+                      <p className="text-[11px] text-[#8E92A4] truncate font-mono">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Team Name and Emblem Selector */}
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-semibold text-[#8E92A4]">
+                    Nombre del Equipo e Icono Representativo *
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1 bg-[#15161E] p-1 rounded-xl border border-white/10 shrink-0">
+                      {['🐉', '⚡', '🐺', '🛡️', '👑', '🦅', '⚔️'].map((emb) => (
+                        <button
+                          key={emb}
+                          type="button"
+                          onClick={() => setTeamEmblem(emb)}
+                          className={`w-6 h-6 rounded-md text-xs flex items-center justify-center transition-all cursor-pointer ${
+                            teamEmblem === emb ? 'bg-indigo-500/30 border border-indigo-500 shadow-sm scale-110' : 'hover:bg-white/5 opacity-70 hover:opacity-100'
+                          }`}
+                        >
+                          {emb}
+                        </button>
+                      ))}
+                    </div>
+                    <input
+                      type="text"
+                      value={teamName}
+                      onChange={(e) => setTeamName(e.target.value)}
+                      placeholder="Ej. Tecsup Dragons"
+                      className="input-arena flex-1 text-xs"
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Remaining Teammates inputs */}
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-[11px] font-semibold text-[#8E92A4]">
+                      Compañeros restantes ({defaultTeammateCount} requeridos • Correos @tecsup.edu.pe)
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRosterMembers([
+                          ...rosterMembers,
+                          { name: '', email: '', player_tag: '', role: `Suplente ${rosterMembers.length - defaultTeammateCount + 1}` }
+                        ]);
+                      }}
+                      className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold cursor-pointer transition-colors"
+                    >
+                      + Añadir Suplente
+                    </button>
+                  </div>
+                  {rosterMembers.map((member, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                        <input
+                          type="text"
+                          placeholder={`Nombre ${member.role || `Compañero ${idx + 1}`}`}
+                          value={member.name}
+                          onChange={(e) => {
+                            const updated = [...rosterMembers];
+                            updated[idx].name = e.target.value;
+                            setRosterMembers(updated);
+                          }}
+                          className="input-arena text-xs py-2"
+                        />
+                        <input
+                          type="email"
+                          placeholder={`correo${idx + 1}@tecsup.edu.pe`}
+                          value={member.email}
+                          onChange={(e) => {
+                            const updated = [...rosterMembers];
+                            updated[idx].email = e.target.value;
+                            setRosterMembers(updated);
+                          }}
+                          className="input-arena text-xs py-2"
+                        />
+                      </div>
+                      {idx >= defaultTeammateCount && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setRosterMembers(rosterMembers.filter((_, i) => i !== idx));
+                          }}
+                          className="text-[#8E92A4] hover:text-red-400 p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                          title="Eliminar suplente"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <button
               type="button"
               disabled={isCreatingProfile || (!matchingGameProfile && !manualTag.trim())}
               onClick={async () => {
+                if (isTeamTournament) {
+                  if (!teamName.trim()) {
+                    setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
+                    return;
+                  }
+                  const invalid = rosterMembers.find(
+                    (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
+                  );
+                  if (invalid) {
+                    setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
+                    return;
+                  }
+                }
+
                 if (matchingGameProfile) {
                   setStep(2);
                 } else {
@@ -415,28 +662,87 @@ export function RegistrationWizardModal({
                 />
               </div>
 
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
-                  Comprobante / Captura del Voucher
+                  Comprobante / Captura del Voucher (Yape o Plin)
                 </label>
-                <div className="p-4 bg-[#0B0C10] border border-dashed border-white/20 rounded-xl text-center space-y-2">
-                  <UploadCloud className="w-6 h-6 text-[#457B9D] mx-auto" />
-                  <p className="text-xs text-[#8E92A4]">
-                    Arrastra tu captura o ingresa el enlace del voucher
-                  </p>
+                
+                {previewUrl ? (
+                  <div className="relative p-3 bg-[#0B0C10] border border-emerald-500/40 rounded-xl space-y-3">
+                    <div className="relative w-full h-44 rounded-lg overflow-hidden bg-black/60 border border-white/10 flex items-center justify-center">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img 
+                        src={previewUrl} 
+                        alt="Comprobante de pago" 
+                        className="w-full h-full object-contain"
+                      />
+                      {isUploadingFile && (
+                        <div className="absolute inset-0 bg-black/75 backdrop-blur-xs flex flex-col items-center justify-center gap-2 text-white">
+                          <Loader2 className="w-6 h-6 animate-spin text-[#E63946]" />
+                          <span className="text-xs font-bold">Subiendo a Supabase Storage...</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                        Captura lista para revisión
+                      </span>
+                      <label className="text-[#A8DADC] hover:underline cursor-pointer font-medium">
+                        Cambiar captura
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleFileChange}
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-6 bg-[#0B0C10] border-2 border-dashed border-white/20 hover:border-[#E63946]/50 rounded-xl text-center space-y-2 cursor-pointer transition-all group">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+                    <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-[#E63946]/10 flex items-center justify-center transition-colors">
+                      <UploadCloud className="w-5 h-5 text-[#457B9D] group-hover:text-[#E63946] transition-colors" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">
+                        Haz clic o arrastra tu captura de Yape / Plin
+                      </p>
+                      <p className="text-[11px] text-[#8E92A4] mt-0.5">
+                        PNG, JPG o WEBP (máximo 5MB)
+                      </p>
+                    </div>
+                    <span className="px-3 py-1 bg-white/10 group-hover:bg-[#E63946] group-hover:text-white rounded-lg text-[10px] font-bold text-[#A8DADC] transition-colors">
+                      Seleccionar archivo
+                    </span>
+                  </label>
+                )}
+
+                {!evidenceUrl.startsWith('data:') && (
                   <input
                     type="text"
                     value={evidenceUrl}
-                    onChange={(e) => setEvidenceUrl(e.target.value)}
-                    placeholder="https://storage.supabase.co/voucher.png (o dejar en blanco para demo)"
-                    className="input-arena text-xs"
+                    onChange={(e) => {
+                      setEvidenceUrl(e.target.value);
+                      if (e.target.value.startsWith('http')) {
+                        setPreviewUrl(e.target.value);
+                      }
+                    }}
+                    placeholder="O pega el enlace público de la imagen si prefieres..."
+                    className="input-arena text-[11px] py-1.5 w-full text-[#8E92A4] bg-transparent border-white/5"
                   />
-                </div>
+                )}
               </div>
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isLoading || isUploadingFile || (!evidenceUrl && !previewUrl)}
                 className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {isLoading ? (

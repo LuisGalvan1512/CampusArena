@@ -12,6 +12,7 @@ import { AppService } from './app.service.js';
 import { CommunityModule } from './community/community.module.js';
 import { AdminModule } from './admin/admin.module.js';
 import { MailModule } from './mail/mail.module.js';
+import { NotificationsModule } from './notifications/notifications.module.js';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { MailModule } from './mail/mail.module.js';
     }),
     PrismaModule,
     MailModule,
+    NotificationsModule,
     AuthModule,
     ProfileModule,
     TournamentModule,

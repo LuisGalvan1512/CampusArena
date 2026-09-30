@@ -20,4 +20,12 @@ export class CreateRegistrationDto {
   @IsOptional()
   @IsString()
   rules_version?: string = 'v1.0';
+
+  @IsOptional()
+  @IsString()
+  team_name?: string;
+
+  @IsOptional()
+  roster_members?: any;
 }
+

@@ -31,6 +31,36 @@ export class ProfileController {
   }
 
   /**
+   * GET /api/v1/profile/me/sanctions
+   * Returns active sanctions on the current user and their appeals.
+   */
+  @Get('me/sanctions')
+  async getMySanctions(@CurrentUser('id') userId: string) {
+    return this.profileService.getMySanctions(userId);
+  }
+
+  /**
+   * POST /api/v1/profile/me/appeals
+   * Submits an appeal for an active sanction.
+   */
+  @Post('me/appeals')
+  async submitAppeal(
+    @CurrentUser('id') userId: string,
+    @Body() dto: { sanction_id: string; appeal_text: string },
+  ) {
+    return this.profileService.submitAppeal(userId, dto);
+  }
+
+  /**
+   * GET /api/v1/profile/:id
+   * Returns public profile, game accounts, and dynamic medals for any competitor.
+   */
+  @Get(':id')
+  async getProfileById(@Param('id') id: string) {
+    return this.profileService.getProfileById(id);
+  }
+
+  /**
    * PATCH /api/v1/profile/me
    * Updates the authenticated user's editable profile fields.
    */
@@ -75,5 +105,41 @@ export class ProfileController {
     @Param('id') gameProfileId: string,
   ) {
     return this.profileService.unlinkGame(userId, gameProfileId);
+  }
+
+  /**
+   * GET /api/v1/profile/:id/signatures
+   * Returns community signatures on a competitor's wall.
+   */
+  @Get(':id/signatures')
+  async getSignatures(@Param('id') profileUserId: string) {
+    return this.profileService.getSignatures(profileUserId);
+  }
+
+  /**
+   * POST /api/v1/profile/:id/signatures
+   * Signs a competitor's wall.
+   */
+  @Post(':id/signatures')
+  @HttpCode(HttpStatus.CREATED)
+  async createSignature(
+    @Param('id') profileUserId: string,
+    @CurrentUser('id') authorId: string,
+    @Body() dto: { content: string; image_url?: string },
+  ) {
+    return this.profileService.createSignature(profileUserId, authorId, dto.content, dto.image_url);
+  }
+
+  /**
+   * DELETE /api/v1/profile/signatures/:id
+   * Removes a signature.
+   */
+  @Delete('signatures/:id')
+  @HttpCode(HttpStatus.OK)
+  async deleteSignature(
+    @Param('id') signatureId: string,
+    @CurrentUser('id') currentUserId: string,
+  ) {
+    return this.profileService.deleteSignature(signatureId, currentUserId);
   }
 }

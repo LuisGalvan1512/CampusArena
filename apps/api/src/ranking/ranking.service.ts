@@ -20,9 +20,25 @@ export class RankingService {
       orderBy: { trophies: 'desc' },
     });
 
+    const userIds = realProfiles.map((gp) => gp.user.id);
+    const nicknamesMap: Record<string, string> = {};
+    if (userIds.length > 0) {
+      try {
+        const rows: any[] = await this.prisma.$queryRawUnsafe(
+          `SELECT user_id, nickname FROM profile.user_profiles WHERE user_id = ANY($1::uuid[]) AND nickname IS NOT NULL`,
+          userIds
+        );
+        for (const r of rows) {
+          if (r.nickname) nicknamesMap[r.user_id] = r.nickname;
+        }
+      } catch (err) {}
+    }
+
     const leaderboard = realProfiles.map((gp, idx) => ({
       id: gp.id,
+      user_id: gp.user.id,
       rank: idx + 1,
+      nickname: nicknamesMap[gp.user.id] || gp.in_game_name || gp.user.first_name,
       player_name: `${gp.user.first_name} ${gp.user.last_name}`,
       in_game_name: gp.in_game_name,
       player_tag: gp.player_tag,
@@ -31,7 +47,7 @@ export class RankingService {
       level: gp.level,
       career: gp.user.profile?.career || 'Diseño y Desarrollo de Software',
       cycle: gp.user.profile?.cycle || 4,
-      tournaments_won: idx === 0 ? 3 : idx === 1 ? 2 : 1,
+      tournaments_won: 0,
       winrate: Math.min(88, Math.max(52, 75 - idx * 3)),
       is_online: idx < 3,
     }));

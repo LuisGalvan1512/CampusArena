@@ -3,7 +3,7 @@ import type { LucideIcon } from 'lucide-react';
 /**
  * Game type codes supported by Campus Arena.
  */
-export type GameCode = 'CLASH_ROYALE' | 'BRAWL_STARS' | 'SMASH_ULTIMATE' | 'LEFT_4_DEAD_2' | 'EFOOTBALL' | 'DOTA_2';
+export type GameCode = 'CLASH_ROYALE' | 'BRAWL_STARS' | 'SMASH_ULTIMATE' | 'LEFT_4_DEAD_2' | 'EFOOTBALL' | 'DOTA_2' | 'FORTNITE';
 
 /**
  * How the game account is linked / verified.
@@ -144,6 +144,23 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     description: 'Torneos clásicos 5vs5 en modo Capitán. Únete con tu equipo y domina el mapa.',
     badge: '5 vs 5 Oficial',
   },
+  FORTNITE: {
+    code: 'FORTNITE',
+    name: 'Fortnite',
+    shortName: 'FN',
+    iconName: 'Crosshair',
+    color: '#9C27B0',
+    colorSecondary: '#4A148C',
+    bgGradient: 'from-[#9C27B0] to-[#4A148C]',
+    shadowColor: 'rgba(156, 39, 176, 0.3)',
+    tagType: 'manual',
+    tagLabel: 'Epic Games ID',
+    tagPlaceholder: 'Ej: Ninja_Tecsup',
+    statLabel: 'Plataforma / Rango',
+    statIcon: 'Zap',
+    description: 'Battle Royale en modalidades Individual (Solos), Dúos (2v2), Tríos (3v3) o Escuadras (4v4). Puntos por victoria y eliminaciones.',
+    badge: 'Solos, Dúos y Escuadras',
+  },
 };
 
 /**
@@ -156,6 +173,7 @@ export const GAME_LIST: GameDefinition[] = [
   GAME_CATALOG.LEFT_4_DEAD_2,
   GAME_CATALOG.EFOOTBALL,
   GAME_CATALOG.DOTA_2,
+  GAME_CATALOG.FORTNITE,
 ];
 
 /**

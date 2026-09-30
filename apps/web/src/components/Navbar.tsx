@@ -92,8 +92,12 @@ export function Navbar() {
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                     className="flex items-center gap-2.5 py-1.5 px-3 rounded-full bg-[#15161E] border border-white/10 hover:border-[#E63946]/50 transition-all text-sm cursor-pointer"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs">
-                      {user.first_name[0]}{user.last_name[0]}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0">
+                      {user.avatar_url ? (
+                        <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover" />
+                      ) : (
+                        `${user.first_name[0]}${user.last_name[0]}`
+                      )}
                     </div>
                     <div className="text-left leading-tight hidden lg:block">
                       <p className="font-semibold text-white text-xs">{user.first_name}</p>

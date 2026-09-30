@@ -10,9 +10,16 @@ import { CreateRegistrationDto } from './dto/create-registration.dto.js';
 import { SubmitEvidenceDto } from './dto/submit-evidence.dto.js';
 import { ReviewPaymentDto, ReviewDecision } from './dto/review-payment.dto.js';
 
+import { NotificationsService } from '../notifications/notifications.service.js';
+import { MailService } from '../mail/mail.service.js';
+
 @Injectable()
 export class RegistrationService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly mail: MailService,
+  ) {}
 
   /**
    * POST /tournaments/:tournamentId/registrations
@@ -31,6 +38,20 @@ export class RegistrationService {
 
     if (!tournament || tournament.deleted_at) {
       throw new NotFoundException('Torneo no encontrado.');
+    }
+
+    // Verify user is not suspended or banned
+    const userBan: any[] = await this.prisma.$queryRawUnsafe(
+      `SELECT type, reason, ends_at FROM identity.user_sanctions 
+       WHERE user_id = $1::uuid AND status = 'ACTIVE' AND type IN ('BAN_TEMPORARY', 'BAN_PERMANENT') AND (ends_at IS NULL OR ends_at > NOW()) LIMIT 1`,
+      userId
+    );
+    if (userBan && userBan.length > 0) {
+      const b = userBan[0];
+      const endStr = b.ends_at ? ` hasta el ${new Date(b.ends_at).toLocaleDateString()}` : ' de forma permanente';
+      throw new ForbiddenException(
+        `Tu cuenta se encuentra suspendida de torneos${endStr}. Motivo: "${b.reason}". Puedes enviar una apelación desde tu perfil.`
+      );
     }
 
     if (tournament.status !== 'REGISTRATION_OPEN') {
@@ -53,7 +74,7 @@ export class RegistrationService {
 
     if (gameProfile.game_code !== tournament.game_code) {
       throw new BadRequestException(
-        `Este torneo es de ${tournament.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars'}, pero seleccionaste una cuenta de otro juego.`
+        `Este torneo es de ${tournament.game_code}, pero seleccionaste una cuenta de otro juego.`
       );
     }
 
@@ -82,6 +103,8 @@ export class RegistrationService {
           tournament_id: tournamentId,
           competitor_id: userId,
           game_profile_id: dto.game_profile_id,
+          team_name: dto.team_name || null,
+          roster_members: dto.roster_members ? dto.roster_members : null,
           status: isFree ? 'CONFIRMED' : 'PENDING_PAYMENT',
           rules_version: dto.rules_version || 'v1.0',
           rules_acceptance_ip: ip,
@@ -236,6 +259,7 @@ export class RegistrationService {
       prize_pool: r.tournament.prize_pool,
       player_tag: r.game_profile.player_tag,
       in_game_name: r.game_profile.in_game_name,
+      team_name: r.team_name || null,
       status: r.status,
       payment: r.payment
         ? {
@@ -268,8 +292,18 @@ export class RegistrationService {
       include: {
         competitor: {
           select: {
+            id: true,
+            email: true,
             first_name: true,
             last_name: true,
+            avatar_url: true,
+            profile: {
+              select: {
+                nickname: true,
+                avatar_url: true,
+                campus: true,
+              },
+            },
           },
         },
         game_profile: {
@@ -286,11 +320,18 @@ export class RegistrationService {
 
     return registrations.map((r) => ({
       id: r.id,
+      user_id: r.competitor.id,
       competitor_name: `${r.competitor.first_name} ${r.competitor.last_name}`,
+      nickname: r.competitor.profile?.nickname || null,
+      email: r.competitor.email,
+      avatar_url: r.competitor.profile?.avatar_url || r.competitor.avatar_url || null,
+      campus: r.competitor.profile?.campus || 'Lima',
       in_game_name: r.game_profile.in_game_name,
       player_tag: r.game_profile.player_tag,
       trophies: r.game_profile.trophies,
       level: r.game_profile.level,
+      team_name: r.team_name,
+      roster_members: r.roster_members,
       status: r.status,
       confirmed_at: r.confirmed_at,
     }));
@@ -309,7 +350,10 @@ export class RegistrationService {
       where: { id: paymentId },
       include: {
         registration: {
-          include: { tournament: true },
+          include: { 
+            tournament: true,
+            competitor: true,
+          },
         },
       },
     });
@@ -321,7 +365,7 @@ export class RegistrationService {
     const { registration } = payment;
     const { tournament } = registration;
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       // 1. Lock and count confirmed slots
       const confirmedCount = await tx.registration.count({
         where: {
@@ -349,11 +393,11 @@ export class RegistrationService {
         data: {
           status: targetRegistrationStatus,
           confirmed_at: hasSlot ? new Date() : null,
-          waitlisted_at: hasSlot ? null : new Date(),
+          waitlisted_at: !hasSlot ? new Date() : null,
         },
       });
 
-      // 4. Update Tournament slots counter if confirmed
+      // 4. Update Tournament current count if has direct slot
       if (hasSlot) {
         await tx.tournament.update({
           where: { id: tournament.id },
@@ -378,8 +422,44 @@ export class RegistrationService {
           : 'Pago aprobado. El cupo directo estaba lleno, el competidor fue agregado a la lista de espera.',
         registration_status: updatedRegistration.status,
         payment_status: updatedPayment.status,
+        hasSlot,
       };
     });
+
+    // 6. Send real in-app notification
+    try {
+      await this.notifications.create({
+        user_id: registration.competitor_id,
+        type: 'PAYMENT',
+        title: result.hasSlot ? '🎉 ¡Inscripción Confirmada!' : '⏳ En Lista de Espera',
+        message: result.hasSlot
+          ? `Tu comprobante de pago para "${tournament.name}" fue verificado exitosamente. ¡Tienes un cupo confirmado!`
+          : `Tu pago para "${tournament.name}" fue verificado. El torneo alcanzó su cupo máximo y quedaste en lista de espera.`,
+        link: `/tournaments/${tournament.slug}`,
+        link_label: 'Ver mi torneo',
+      });
+    } catch (e) {
+      console.error('Error enviando notificación de pago aprobado:', e);
+    }
+
+    // 7. Send transactional email to student
+    try {
+      if (registration.competitor?.email) {
+        await this.mail.sendPaymentApprovedEmail({
+          email: registration.competitor.email,
+          firstName: registration.competitor.first_name,
+          tournamentName: tournament.name,
+          amount: Number(payment.amount),
+          campusName: tournament.campus_name,
+          hasSlot: result.hasSlot,
+          slug: tournament.slug,
+        });
+      }
+    } catch (mailErr) {
+      console.error('Error enviando correo de pago aprobado:', mailErr);
+    }
+
+    return result;
   }
 
   /**
@@ -404,7 +484,7 @@ export class RegistrationService {
     const targetRegistrationStatus = isCorrection ? 'CORRECTION_REQUIRED' : 'REJECTED';
     const targetPaymentStatus = isCorrection ? 'CORRECTION_REQUIRED' : 'REJECTED';
 
-    return this.prisma.$transaction(async (tx) => {
+    const result = await this.prisma.$transaction(async (tx) => {
       await tx.payment.update({
         where: { id: paymentId },
         data: {
@@ -435,7 +515,28 @@ export class RegistrationService {
           ? 'Se ha solicitado corrección de comprobante al competidor.'
           : 'Pago rechazado.',
         decision: dto.decision,
+        isCorrection,
       };
     });
+
+    // Send real in-app notification
+    try {
+      await this.notifications.create({
+        user_id: payment.registration.competitor_id,
+        type: 'PAYMENT',
+        title: isCorrection ? '⚠️ Comprobante Observado' : '❌ Pago Rechazado',
+        message: dto.public_observation
+          ? `Observación: ${dto.public_observation}`
+          : (isCorrection
+              ? 'El organizador solicitó corregir tu comprobante de pago. Por favor sube una captura más clara.'
+              : 'Tu comprobante de pago ha sido rechazado por el organizador.'),
+        link: '/profile',
+        link_label: 'Ver mis inscripciones',
+      });
+    } catch (e) {
+      console.error('Error enviando notificación de pago rechazado:', e);
+    }
+
+    return result;
   }
 }

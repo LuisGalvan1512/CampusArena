@@ -2,14 +2,24 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTournamentDto } from './dto/create-tournament.dto.js';
 import { QueryTournamentDto, TournamentStatusFilter } from './dto/query-tournament.dto.js';
 
 @Injectable()
-export class TournamentService {
+export class TournamentService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
+
+  async onModuleInit() {
+    try {
+      await this.prisma.$executeRawUnsafe(`ALTER TABLE tournament.tournaments ADD COLUMN IF NOT EXISTS prize_distribution JSONB;`);
+    } catch (err) {}
+    try {
+      await this.prisma.$executeRawUnsafe(`ALTER TABLE tournament.tournaments ADD COLUMN IF NOT EXISTS event_modality VARCHAR(50) DEFAULT 'PRESENTIAL';`);
+    } catch (err) {}
+  }
 
   /**
    * Generates a URL-friendly slug from tournament name.
@@ -84,7 +94,23 @@ export class TournamentService {
       throw new NotFoundException(`El torneo "${slug}" no fue encontrado.`);
     }
 
-    return tournament;
+    let extra: any = {};
+    try {
+      const rows: any[] = await this.prisma.$queryRawUnsafe(
+        `SELECT prize_distribution, event_modality FROM tournament.tournaments WHERE id = $1::uuid LIMIT 1`,
+        tournament.id
+      );
+      if (rows.length > 0) {
+        extra.prize_distribution = rows[0].prize_distribution;
+        extra.event_modality = rows[0].event_modality;
+      }
+    } catch (err) {}
+
+    return {
+      ...tournament,
+      event_modality: extra.event_modality || (tournament.is_online ? 'ONLINE' : 'PRESENTIAL'),
+      prize_distribution: extra.prize_distribution || null,
+    };
   }
 
   /**
@@ -112,32 +138,54 @@ export class TournamentService {
       slug = `${slug}-${Date.now().toString().slice(-4)}`;
     }
 
+    const { prize_distribution, event_modality, ...restDto } = dto;
+    const isOnline = event_modality === 'ONLINE' ? true : event_modality === 'PRESENTIAL' ? false : (restDto.is_online ?? false);
+
     const tournament = await this.prisma.tournament.create({
       data: {
-        name: dto.name,
+        name: restDto.name,
         slug,
-        game_code: dto.game_code,
-        organization_name: dto.organization_name || 'Tecsup',
-        campus_name: dto.campus_name || 'Lima',
-        description_short: dto.description_short,
-        description_full: dto.description_full,
-        banner_url: dto.banner_url,
-        rules_text: dto.rules_text,
-        max_slots: dto.max_slots,
-        min_slots: dto.min_slots || 8,
-        cost: dto.cost || 0.0,
-        currency: dto.currency || 'PEN',
-        prize_pool: dto.prize_pool,
-        format: dto.format || '1 vs 1 (BO3 / BO5)',
+        game_code: restDto.game_code,
+        organization_name: restDto.organization_name || 'Tecsup',
+        campus_name: restDto.campus_name || 'Lima',
+        description_short: restDto.description_short,
+        description_full: restDto.description_full,
+        banner_url: restDto.banner_url,
+        rules_text: restDto.rules_text,
+        max_slots: restDto.max_slots,
+        min_slots: restDto.min_slots || 8,
+        cost: restDto.cost || 0.0,
+        currency: restDto.currency || 'PEN',
+        prize_pool: restDto.prize_pool,
+        format: restDto.format || (restDto.team_size && restDto.team_size > 1 ? `${restDto.team_size} vs ${restDto.team_size} (BO3 / BO5)` : '1 vs 1 (BO3 / BO5)'),
+        team_size: restDto.team_size || 1,
+        stream_url: restDto.stream_url || null,
+        stream_platform: restDto.stream_platform || 'KICK',
         registration_open_at: openAt,
         registration_close_at: closeAt,
         tournament_start_at: startAt,
-        is_online: dto.is_online !== undefined ? dto.is_online : true,
-        contact_email: dto.contact_email,
+        is_online: isOnline,
+        contact_email: restDto.contact_email,
       },
     });
 
-    return tournament;
+    if (prize_distribution !== undefined || event_modality !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE tournament.tournaments SET prize_distribution = $1::jsonb, event_modality = $2 WHERE id = $3::uuid`,
+          prize_distribution ? JSON.stringify(prize_distribution) : null,
+          event_modality || (isOnline ? 'ONLINE' : 'PRESENTIAL'),
+          tournament.id
+        );
+      } catch (err) {}
+    }
+
+    return {
+      ...tournament,
+      is_online: isOnline,
+      event_modality: event_modality || (isOnline ? 'ONLINE' : 'PRESENTIAL'),
+      prize_distribution: prize_distribution || null,
+    };
   }
 
   /**
@@ -168,15 +216,99 @@ export class TournamentService {
       throw new NotFoundException('Torneo no encontrado.');
     }
 
-    const data: any = { ...dto };
-    if (dto.registration_open_at) data.registration_open_at = new Date(dto.registration_open_at);
-    if (dto.registration_close_at) data.registration_close_at = new Date(dto.registration_close_at);
-    if (dto.tournament_start_at) data.tournament_start_at = new Date(dto.tournament_start_at);
+    const { prize_distribution, event_modality, prize_1, prize_2, prize_3, ...restDto } = dto;
 
-    return this.prisma.tournament.update({
+    const allowedFields = [
+      'name',
+      'game_code',
+      'organization_name',
+      'campus_name',
+      'description_short',
+      'description_full',
+      'banner_url',
+      'rules_text',
+      'status',
+      'max_slots',
+      'min_slots',
+      'cost',
+      'currency',
+      'prize_pool',
+      'format',
+      'team_size',
+      'stream_url',
+      'stream_platform',
+      'is_online',
+      'contact_email',
+    ];
+
+    const data: any = {};
+    for (const key of allowedFields) {
+      if (restDto[key] !== undefined) {
+        data[key] = restDto[key];
+      }
+    }
+
+    if (event_modality !== undefined) {
+      data.is_online = event_modality === 'ONLINE';
+    }
+
+    if (restDto.registration_open_at) {
+      const d = new Date(restDto.registration_open_at);
+      if (!isNaN(d.getTime())) data.registration_open_at = d;
+    }
+    if (restDto.registration_close_at) {
+      const d = new Date(restDto.registration_close_at);
+      if (!isNaN(d.getTime())) data.registration_close_at = d;
+    }
+    if (restDto.tournament_start_at) {
+      const d = new Date(restDto.tournament_start_at);
+      if (!isNaN(d.getTime())) data.tournament_start_at = d;
+    }
+
+    if (data.cost !== undefined) data.cost = Number(data.cost);
+    if (data.max_slots !== undefined) data.max_slots = Number(data.max_slots);
+    if (data.min_slots !== undefined) data.min_slots = Number(data.min_slots);
+    if (data.team_size !== undefined) data.team_size = Number(data.team_size);
+
+    const updated = await this.prisma.tournament.update({
       where: { id },
       data,
     });
+
+    if (prize_distribution !== undefined && event_modality !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE tournament.tournaments SET prize_distribution = $1::jsonb, event_modality = $2 WHERE id = $3::uuid`,
+          JSON.stringify(prize_distribution),
+          event_modality,
+          id
+        );
+      } catch (err) {
+        console.error('[TournamentService update prize & modality error]:', err);
+      }
+    } else if (prize_distribution !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE tournament.tournaments SET prize_distribution = $1::jsonb WHERE id = $2::uuid`,
+          JSON.stringify(prize_distribution),
+          id
+        );
+      } catch (err) {
+        console.error('[TournamentService update prize error]:', err);
+      }
+    } else if (event_modality !== undefined) {
+      try {
+        await this.prisma.$executeRawUnsafe(
+          `UPDATE tournament.tournaments SET event_modality = $1 WHERE id = $2::uuid`,
+          event_modality,
+          id
+        );
+      } catch (err) {
+        console.error('[TournamentService update modality error]:', err);
+      }
+    }
+
+    return this.findBySlug(updated.slug);
   }
 
   /**

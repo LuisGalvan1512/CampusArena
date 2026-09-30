@@ -17,14 +17,78 @@ import {
   Swords, 
   Calendar,
   Clock,
-  ArrowRight
+  ArrowRight,
+  VolumeX,
+  AlertTriangle,
+  Scale,
+  X,
+  Send,
+  FileText,
+  Camera,
+  Image as ImageIcon,
+  Sparkles,
+  Trash2,
+  Eye,
+  Mail
 } from 'lucide-react';
 
+export const SYSTEM_AVATARS = [
+  { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
+  { id: 'ninja', name: 'Cyber Ninja', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=ShadowNinja&backgroundColor=b6e3f4,ffd5dc' },
+  { id: 'mecha', name: 'Mecha Titan', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=MechaTitan&backgroundColor=ffd5dc,ffdfbf' },
+  { id: 'pixel', name: 'Pixel Warrior', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=GamerPro' },
+  { id: 'samurai', name: 'Cyber Samurai', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=CyberSamurai&backgroundColor=c0aede,d1d4f9' },
+  { id: 'valkyrie', name: 'Neon Valkyrie', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=ValkyrieNeon' },
+  { id: 'hacker', name: 'Glitch Hacker', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=GlitchHacker' },
+  { id: 'champion', name: 'Golden Champion', url: 'https://api.dicebear.com/7.x/pixel-art/svg?seed=TecsupChampion' },
+  { id: 'sorcerer', name: 'Arcane Mage', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=ArcaneMage' },
+  { id: 'eagle', name: 'Tecsup Eagle', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupEagle' },
+  { id: 'punk', name: 'Cyber Punk', url: 'https://api.dicebear.com/7.x/lorelei/svg?seed=CyberPunk' },
+  { id: 'esports', name: 'Esports Pro', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=TecsupEsports' },
+];
+
 interface ProfileData {
+  nickname?: string | null;
+  campus?: string | null;
   biography: string | null;
   career: string | null;
   cycle: number | null;
   avatar_url: string | null;
+}
+
+export function capitalizeWords(str?: string | null): string {
+  if (!str) return '';
+  return str
+    .toLowerCase()
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
+export interface Medal {
+  id: string;
+  tournament_id: string;
+  tournament_name: string;
+  tournament_slug: string;
+  game_code: string;
+  campus_name: string;
+  banner_url?: string;
+  completed_at: string;
+  place: string;
+  rank: number;
+  medal_type: 'GOLD' | 'SILVER' | 'BRONZE' | 'HONOR' | 'PARTICIPANT';
+  title: string;
+  emoji: string;
+  badge_color: string;
+}
+
+export interface LegacySummary {
+  tournaments_played: number;
+  championships: number;
+  silver_medals: number;
+  bronze_medals: number;
+  total_medals: number;
 }
 
 interface UserRegistration {
@@ -38,6 +102,7 @@ interface UserRegistration {
   prize_pool: string;
   player_tag: string;
   in_game_name: string;
+  team_name?: string | null;
   status: 'PENDING_PAYMENT' | 'PAYMENT_UNDER_REVIEW' | 'CORRECTION_REQUIRED' | 'CONFIRMED' | 'WAITLISTED' | 'REJECTED' | 'CANCELLED';
   payment: {
     id: string;
@@ -54,15 +119,43 @@ export default function ProfilePage() {
   const router = useRouter();
 
   const [profile, setProfile] = useState<ProfileData>({
+    nickname: '',
+    campus: 'Lima',
     biography: '',
     career: '',
     cycle: 1,
     avatar_url: null,
   });
 
+  const [medals, setMedals] = useState<Medal[]>([]);
+  const [legacySummary, setLegacySummary] = useState<LegacySummary>({
+    tournaments_played: 0,
+    championships: 0,
+    silver_medals: 0,
+    bronze_medals: 0,
+    total_medals: 0,
+  });
+
   const [registrations, setRegistrations] = useState<UserRegistration[]>([]);
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Academic role & conditions (Estudiante 1-6 ciclos, Docente, Egresado)
+  const [academicRole, setAcademicRole] = useState<'ESTUDIANTE' | 'DOCENTE' | 'EGRESADO'>('ESTUDIANTE');
+
+  // Avatar selector state
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [avatarTab, setAvatarTab] = useState<'SYSTEM' | 'CUSTOM'>('SYSTEM');
+  const [selectedSystemAvatar, setSelectedSystemAvatar] = useState<string | null>(null);
+  const [customAvatarInput, setCustomAvatarInput] = useState('');
+  const [isSavingAvatar, setIsSavingAvatar] = useState(false);
+
+  // Sanctions and appeals state
+  const [userSanctions, setUserSanctions] = useState<any[]>([]);
+  const [userAppeals, setUserAppeals] = useState<any[]>([]);
+  const [appealModalSanction, setAppealModalSanction] = useState<any | null>(null);
+  const [appealText, setAppealText] = useState('');
+  const [isSubmittingAppeal, setIsSubmittingAppeal] = useState(false);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -76,12 +169,32 @@ export default function ProfilePage() {
     const res = await api.get('/profile/me');
     if (res.success && res.data) {
       if (res.data.profile) {
+        const rawCycle = res.data.profile.cycle;
+        const careerStr = res.data.profile.career || '';
+        
+        // Infer institutional condition
+        if (careerStr.toLowerCase().includes('docente') || careerStr.toLowerCase().includes('profesor') || rawCycle === -1) {
+          setAcademicRole('DOCENTE');
+        } else if (careerStr.toLowerCase().includes('egresado') || rawCycle === 0) {
+          setAcademicRole('EGRESADO');
+        } else {
+          setAcademicRole('ESTUDIANTE');
+        }
+
         setProfile({
+          nickname: res.data.profile.nickname || '',
+          campus: res.data.profile.campus || 'Lima',
           biography: res.data.profile.biography || '',
-          career: res.data.profile.career || 'Diseño y Desarrollo de Software',
-          cycle: res.data.profile.cycle || 4,
-          avatar_url: res.data.profile.avatar_url,
+          career: careerStr || 'Diseño y Desarrollo de Software',
+          cycle: rawCycle !== undefined && rawCycle !== null ? rawCycle : 1,
+          avatar_url: res.data.profile.avatar_url || null,
         });
+      }
+      if (Array.isArray(res.data.medals)) {
+        setMedals(res.data.medals);
+      }
+      if (res.data.legacy_summary) {
+        setLegacySummary(res.data.legacy_summary);
       }
     }
 
@@ -89,6 +202,13 @@ export default function ProfilePage() {
     const regRes = await api.get('/registrations/me');
     if (regRes.success && Array.isArray(regRes.data)) {
       setRegistrations(regRes.data);
+    }
+
+    // Load sanctions and appeals
+    const sancRes = await api.get<{ active_sanctions: any[]; appeals: any[] }>('/profile/me/sanctions');
+    if (sancRes.success && sancRes.data) {
+      setUserSanctions(sancRes.data.active_sanctions || []);
+      setUserAppeals(sancRes.data.appeals || []);
     }
   };
 
@@ -103,19 +223,67 @@ export default function ProfilePage() {
     setFeedback(null);
     setIsSaving(true);
 
+    const cycleToSave = academicRole === 'ESTUDIANTE' ? Number(profile.cycle || 1) : 0;
+
     const res = await api.patch('/profile/me', {
+      nickname: profile.nickname?.trim() || undefined,
+      campus: profile.campus || 'Lima',
       biography: profile.biography,
       career: profile.career,
-      cycle: Number(profile.cycle),
+      cycle: cycleToSave,
+      avatar_url: profile.avatar_url || undefined,
     });
 
     if (res.success) {
-      setFeedback({ type: 'success', message: '¡Perfil académico actualizado correctamente!' });
+      setFeedback({ type: 'success', message: '¡Datos académicos y perfil actualizados correctamente!' });
+      if (user && profile.avatar_url) {
+        user.avatar_url = profile.avatar_url;
+      }
     } else {
       setFeedback({ type: 'error', message: res.error?.message || 'Error al guardar los cambios.' });
     }
 
     setIsSaving(false);
+  };
+
+  const handleSaveAvatar = async (avatarUrlToSave: string | null) => {
+    setIsSavingAvatar(true);
+    const res = await api.patch('/profile/me', {
+      avatar_url: avatarUrlToSave || '',
+    });
+
+    if (res.success) {
+      setProfile((prev) => ({ ...prev, avatar_url: avatarUrlToSave }));
+      setShowAvatarModal(false);
+      setFeedback({ type: 'success', message: '¡Foto de perfil actualizada correctamente!' });
+      if (user) {
+        user.avatar_url = avatarUrlToSave;
+      }
+    } else {
+      alert(res.error?.message || 'Error al actualizar la foto de perfil.');
+    }
+    setIsSavingAvatar(false);
+  };
+
+  const handleSubmitAppeal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!appealModalSanction || !appealText.trim()) return;
+
+    setIsSubmittingAppeal(true);
+    const res = await api.post('/profile/me/appeals', {
+      sanction_id: appealModalSanction.id,
+      appeal_text: appealText.trim(),
+    });
+
+    if (res.success) {
+      setFeedback({ type: 'success', message: '¡Tu apelación fue enviada con éxito y será revisada por los administradores!' });
+      setAppealModalSanction(null);
+      setAppealText('');
+      loadFullProfile();
+    } else {
+      alert(res.error?.message || 'Error al enviar la apelación.');
+    }
+    setIsSubmittingAppeal(false);
   };
 
   if (authLoading || !user) {
@@ -167,22 +335,67 @@ export default function ProfilePage() {
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-xl">
-              <div className="w-full h-full bg-[#0B0C10] rounded-[14px] flex items-center justify-center text-2xl font-black text-white">
-                {user.first_name[0]}{user.last_name[0]}
+            {/* AVATAR WITH CAMERA EDIT BADGE */}
+            <div className="relative group">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-xl shrink-0 overflow-hidden">
+                {profile.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.nickname || 'Avatar'}
+                    className="w-full h-full object-cover rounded-[14px] bg-[#0B0C10]"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-[#0B0C10] rounded-[14px] flex items-center justify-center text-3xl font-black text-white">
+                    {(profile.nickname || user.first_name || 'U')[0].toUpperCase()}
+                  </div>
+                )}
               </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedSystemAvatar(profile.avatar_url);
+                  setCustomAvatarInput(profile.avatar_url?.startsWith('http') ? profile.avatar_url : '');
+                  setShowAvatarModal(true);
+                }}
+                title="Cambiar foto de perfil"
+                className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#E63946] hover:bg-[#ff4353] text-white shadow-lg border border-white/20 transition-all hover:scale-105 active:scale-95 cursor-pointer flex items-center justify-center"
+              >
+                <Camera className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-2xl sm:text-3xl font-black text-white">
-                  {user.first_name} {user.last_name}
+              <div className="flex items-center gap-2 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                  {profile.nickname || capitalizeWords(user.first_name)}
                 </h1>
+
+                {/* Institutional Academic Badge */}
+                {academicRole === 'DOCENTE' ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                    👨‍🏫 Docente Tecsup
+                  </span>
+                ) : academicRole === 'EGRESADO' ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                    🎓 Egresado Tecsup
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    📚 {profile.cycle || 1}° Ciclo (Tecsup)
+                  </span>
+                )}
+
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30 uppercase">
                   Competidor
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-[#8E92A4]">{user.email}</p>
+              <p className="text-sm font-semibold text-[#A8DADC]">
+                {capitalizeWords(`${user.first_name} ${user.last_name}`)}
+              </p>
+              <p className="text-[11px] font-mono text-[#8E92A4]/80 flex items-center gap-1.5 pt-0.5">
+                <Mail className="w-3 h-3 text-[#5A5E73]" />
+                <span>{user.email}</span>
+              </p>
               <div className="flex items-center gap-2 pt-1 text-xs text-[#A8DADC]">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>Cuenta Verificada en Supabase Cloud</span>
@@ -190,12 +403,98 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="bg-[#0B0C10] px-5 py-3 rounded-xl border border-white/10 text-right">
-            <p className="text-xs text-[#8E92A4]">Representando a</p>
-            <p className="text-sm font-bold text-white">Tecsup — Sede Lima</p>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <Link
+              href={`/profile/${user.id}`}
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
+              title="Ver cómo ven tu perfil los demás competidores"
+            >
+              <Eye className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Vista de Visitante</span>
+            </Link>
+
+            <div className="bg-[#0B0C10] px-5 py-3 rounded-xl border border-white/10 text-left sm:text-right">
+              <p className="text-xs text-[#8E92A4]">Representando a</p>
+              <p className="text-sm font-bold text-white flex items-center justify-start sm:justify-end gap-1.5">
+                <span>Tecsup — Sede {profile.campus || 'Lima'}</span>
+                <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* SANCTIONS & APPEALS ALERT BANNER */}
+      {userSanctions.length > 0 && (
+        <div className="space-y-3">
+          {userSanctions.map((sanction) => {
+            const pendingAppeal = userAppeals.find(a => a.sanction_id === sanction.id && a.status === 'PENDING');
+            const rejectedAppeal = userAppeals.find(a => a.sanction_id === sanction.id && a.status === 'REJECTED');
+
+            const isMute = sanction.type === 'MUTE';
+            const isTempBan = sanction.type === 'BAN_TEMPORARY';
+            const endStr = sanction.ends_at ? `hasta el ${new Date(sanction.ends_at).toLocaleDateString()}` : 'de forma permanente';
+
+            return (
+              <div 
+                key={sanction.id}
+                className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in"
+              >
+                <div className="flex items-start gap-3.5">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 mt-0.5">
+                    {isMute ? <VolumeX className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5 text-red-400" />}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-white text-sm">
+                        {isMute ? 'Cuenta Silenciada en la Comunidad' : isTempBan ? 'Suspensión Competitiva Temporal' : 'Suspensión de Cuenta'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        {endStr}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#A8DADC]">
+                      <strong className="text-white">Motivo:</strong> {sanction.reason}
+                    </p>
+                    {isMute && (
+                      <p className="text-[11px] text-[#8E92A4]">
+                        No puedes publicar posts ni comentar en el foro durante este periodo.
+                      </p>
+                    )}
+                    {isTempBan && (
+                      <p className="text-[11px] text-[#8E92A4]">
+                        No puedes inscribirte a torneos oficiales durante este periodo.
+                      </p>
+                    )}
+                    {rejectedAppeal && (
+                      <p className="text-[11px] text-red-400 pt-1">
+                        Tu apelación previa fue rechazada: "{rejectedAppeal.admin_response || 'Sanción confirmada'}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="shrink-0 self-end sm:self-center">
+                  {pendingAppeal ? (
+                    <span className="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold inline-flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5" />
+                      Apelación en Revisión
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => setAppealModalSanction(sanction)}
+                      className="btn-primary py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black flex items-center gap-1.5 cursor-pointer shadow-lg shadow-amber-500/20"
+                    >
+                      <Scale className="w-3.5 h-3.5" />
+                      Enviar Apelación
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* FEEDBACK ALERT */}
       {feedback && (
@@ -211,73 +510,123 @@ export default function ProfilePage() {
 
       {/* 2. MEDALLERO DE HONOR & LEGADO */}
       <div className="arena-card p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-lg font-black text-white">Medallero de Honor & Insignias</h2>
-              <p className="text-xs text-[#8E92A4]">Reconocimientos oficiales ganados en torneos universitarios</p>
+              <p className="text-xs text-[#8E92A4]">
+                Reconocimientos oficiales ganados en torneos culminados de Campus Arena
+              </p>
             </div>
           </div>
 
-          <Link
-            href="/ranking"
-            className="btn-secondary px-3.5 py-1.5 text-xs flex items-center gap-1.5 text-amber-400"
-          >
-            <Trophy className="w-3.5 h-3.5" />
-            Ver Ranking General
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* Medals Counter Badges */}
+            <div className="flex items-center gap-2 text-xs bg-[#0B0C10] px-3 py-1.5 rounded-xl border border-white/10 font-mono">
+              <span title="Medallas de Oro">🥇 {legacySummary.championships}</span>
+              <span className="text-white/20">•</span>
+              <span title="Medallas de Plata">🥈 {legacySummary.silver_medals}</span>
+              <span className="text-white/20">•</span>
+              <span title="Medallas de Bronce">🥉 {legacySummary.bronze_medals}</span>
+            </div>
+
+            <Link
+              href="/ranking"
+              className="btn-secondary px-3.5 py-1.5 text-xs flex items-center gap-1.5 text-amber-400 shrink-0"
+            >
+              <Trophy className="w-3.5 h-3.5" />
+              Ranking
+            </Link>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          
-          {/* Badge 1: Oro */}
-          <div className="p-4 rounded-xl bg-[#0B0C10] border border-amber-500/30 text-center space-y-2 relative group hover:border-amber-500/60 transition-all">
-            <div className="w-12 h-12 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-2xl shadow-lg shadow-amber-500/20">
-              🥇
+        {/* Dynamic Medals List or Clean Empty State */}
+        {medals.length === 0 ? (
+          <div className="p-8 sm:p-10 text-center bg-[#0B0C10] rounded-2xl border border-white/5 space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400/70 flex items-center justify-center mx-auto text-3xl shadow-inner">
+              🏅
             </div>
-            <div className="space-y-0.5">
-              <p className="text-xs font-black text-white">Campeón Tecsup</p>
-              <p className="text-[10px] text-amber-400 font-semibold">1er Lugar Copa 2026</p>
+            <div className="space-y-1.5 max-w-md mx-auto">
+              <h3 className="text-sm sm:text-base font-black text-white">
+                Sin medallas oficiales aún
+              </h3>
+              <p className="text-xs text-[#8E92A4] leading-relaxed">
+                Las medallas de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se asignan automáticamente a tu perfil una vez que el torneo en el que participas culmina oficialmente (estado <span className="text-emerald-400 font-bold">FINALIZADO</span>) según tu posición en las llaves del bracket.
+              </p>
             </div>
-          </div>
-
-          {/* Badge 2: Invicto */}
-          <div className="p-4 rounded-xl bg-[#0B0C10] border border-[#E63946]/30 text-center space-y-2 relative group hover:border-[#E63946]/60 transition-all">
-            <div className="w-12 h-12 rounded-full bg-[#E63946]/20 text-[#E63946] flex items-center justify-center mx-auto text-2xl shadow-lg shadow-[#E63946]/20">
-              🔥
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-xs font-black text-white">Racha Imparable</p>
-              <p className="text-[10px] text-[#E63946] font-semibold">5 Victorias Seguidas</p>
-            </div>
-          </div>
-
-          {/* Badge 3: Maestro de Mazos */}
-          <div className="p-4 rounded-xl bg-[#0B0C10] border border-[#457B9D]/30 text-center space-y-2 relative group hover:border-[#457B9D]/60 transition-all">
-            <div className="w-12 h-12 rounded-full bg-[#457B9D]/20 text-[#A8DADC] flex items-center justify-center mx-auto text-2xl shadow-lg shadow-[#457B9D]/20">
-              ⚔️
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-xs font-black text-white">Estratega Royale</p>
-              <p className="text-[10px] text-[#A8DADC] font-semibold">+7,000 Copas</p>
+            <div className="pt-2">
+              <Link
+                href="/tournaments"
+                className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-xs shadow-lg shadow-[#E63946]/20"
+              >
+                <Swords className="w-3.5 h-3.5" />
+                Explorar Torneos Oficiales
+              </Link>
             </div>
           </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {medals.map((medal) => (
+              <Link
+                key={medal.id}
+                href={`/tournaments/${medal.tournament_slug}`}
+                className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden flex flex-col justify-between ${
+                  medal.medal_type === 'GOLD'
+                    ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-amber-500/15 bg-gradient-to-b from-amber-500/10 via-[#15161E] to-[#0B0C10]'
+                    : medal.medal_type === 'SILVER'
+                    ? 'border-slate-400/40 hover:border-slate-300 hover:shadow-slate-400/15 bg-gradient-to-b from-slate-400/10 via-[#15161E] to-[#0B0C10]'
+                    : medal.medal_type === 'BRONZE'
+                    ? 'border-amber-700/40 hover:border-amber-600 hover:shadow-amber-700/15 bg-gradient-to-b from-amber-700/10 via-[#15161E] to-[#0B0C10]'
+                    : medal.medal_type === 'HONOR'
+                    ? 'border-blue-500/40 hover:border-blue-400 hover:shadow-blue-500/15 bg-gradient-to-b from-blue-500/10 via-[#15161E] to-[#0B0C10]'
+                    : 'border-emerald-500/30 hover:border-emerald-400 hover:shadow-emerald-500/15 bg-gradient-to-b from-emerald-500/10 via-[#15161E] to-[#0B0C10]'
+                }`}
+              >
+                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors" />
 
-          {/* Badge 4: Veterano */}
-          <div className="p-4 rounded-xl bg-[#0B0C10] border border-emerald-500/30 text-center space-y-2 relative group hover:border-emerald-500/60 transition-all">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto text-2xl shadow-lg shadow-emerald-500/20">
-              🛡️
-            </div>
-            <div className="space-y-0.5">
-              <p className="text-xs font-black text-white">Competidor Oficial</p>
-              <p className="text-[10px] text-emerald-400 font-semibold">Perfil Tecsup Verificado</p>
-            </div>
+                <div className="space-y-3 relative z-10">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-[#0B0C10] border border-white/10 flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                      {medal.emoji}
+                    </div>
+                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
+                      medal.medal_type === 'GOLD'
+                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        : medal.medal_type === 'SILVER'
+                        ? 'bg-slate-300/20 text-slate-200 border-slate-300/40'
+                        : medal.medal_type === 'BRONZE'
+                        ? 'bg-amber-700/20 text-amber-400 border-amber-700/40'
+                        : medal.medal_type === 'HONOR'
+                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
+                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                    }`}>
+                      {medal.place}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <p className="text-xs font-black text-white group-hover:text-amber-400 transition-colors line-clamp-1">
+                      {medal.tournament_name}
+                    </p>
+                    <p className="text-[11px] font-semibold text-[#8E92A4]">
+                      {medal.title}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between text-[10px] text-[#5A5E73] relative z-10">
+                  <span className="font-bold text-[#A8DADC]">{medal.game_code}</span>
+                  <span className="inline-flex items-center gap-1 text-[#8E92A4] group-hover:text-white transition-colors">
+                    Ver historial &rarr;
+                  </span>
+                </div>
+              </Link>
+            ))}
           </div>
-
-        </div>
+        )}
       </div>
 
       {/* 3. MIS TORNEOS E INSCRIPCIONES */}
@@ -288,8 +637,13 @@ export default function ProfilePage() {
               <Swords className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white">Mis Torneos e Inscripciones</h2>
-              <p className="text-xs text-[#8E92A4]">Tus competencias activas y estado de validación de pagos</p>
+              <div className="flex items-center gap-2">
+                <h2 className="text-lg font-black text-white">Historial de Torneos y Participaciones</h2>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30">
+                  {registrations.length} {registrations.length === 1 ? 'Participación' : 'Participaciones'}
+                </span>
+              </div>
+              <p className="text-xs text-[#8E92A4]">Registro oficial de competencias, estados y rendimiento en Campus Arena</p>
             </div>
           </div>
 
@@ -317,48 +671,74 @@ export default function ProfilePage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {registrations.map((reg) => (
-              <div
-                key={reg.id}
-                className="p-5 bg-[#0B0C10] rounded-xl border border-white/10 space-y-4 hover:border-white/20 transition-all flex flex-col justify-between"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-[#A8DADC] uppercase tracking-wider">
-                      {reg.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars'}
-                    </span>
-                    {getRegistrationBadge(reg.status)}
+            {registrations.map((reg) => {
+              const earnedMedal = medals.find(
+                (m) => m.tournament_id === reg.tournament_id || m.tournament_slug === reg.tournament_slug
+              );
+
+              return (
+                <div
+                  key={reg.id}
+                  className="p-5 bg-[#0B0C10] rounded-xl border border-white/10 space-y-4 hover:border-white/20 transition-all flex flex-col justify-between"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold text-[#A8DADC] uppercase tracking-wider">
+                        {reg.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars'}
+                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {earnedMedal && (
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${
+                            earnedMedal.medal_type === 'GOLD'
+                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              : earnedMedal.medal_type === 'SILVER'
+                              ? 'bg-slate-300/20 text-slate-200 border-slate-300/40'
+                              : 'bg-amber-700/20 text-amber-400 border-amber-700/40'
+                          }`}>
+                            {earnedMedal.medal_type === 'GOLD' ? '🥇 1° Lugar' : earnedMedal.medal_type === 'SILVER' ? '🥈 2° Lugar' : '🥉 3° Lugar'}
+                          </span>
+                        )}
+                        {getRegistrationBadge(reg.status)}
+                      </div>
+                    </div>
+
+                    <h3 className="text-base font-extrabold text-white line-clamp-1">
+                      {reg.tournament_name}
+                    </h3>
+
+                    <div className="text-xs text-[#8E92A4] space-y-0.5">
+                      <p>
+                        Jugador: <span className="text-white font-semibold">{reg.in_game_name}</span> ({reg.player_tag})
+                      </p>
+                      {reg.team_name && (
+                        <p>
+                          Escuadra: <span className="text-amber-400 font-semibold">{reg.team_name}</span>
+                        </p>
+                      )}
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-extrabold text-white line-clamp-1">
-                    {reg.tournament_name}
-                  </h3>
+                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-[#8E92A4]">
+                      <Calendar className="w-3.5 h-3.5 text-[#E63946]" />
+                      <span>
+                        {new Date(reg.tournament_start_at).toLocaleDateString('es-PE', {
+                          day: 'numeric',
+                          month: 'short',
+                        })}
+                      </span>
+                    </div>
 
-                  <p className="text-xs text-[#8E92A4]">
-                    Jugador: <span className="text-white font-semibold">{reg.in_game_name}</span> ({reg.player_tag})
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-1.5 text-[#8E92A4]">
-                    <Calendar className="w-3.5 h-3.5 text-[#E63946]" />
-                    <span>
-                      {new Date(reg.tournament_start_at).toLocaleDateString('es-PE', {
-                        day: 'numeric',
-                        month: 'short',
-                      })}
-                    </span>
+                    <Link
+                      href={`/tournaments/${reg.tournament_slug}`}
+                      className="text-xs font-bold text-[#A8DADC] hover:text-white flex items-center gap-1"
+                    >
+                      Ver Torneo &rarr;
+                    </Link>
                   </div>
-
-                  <Link
-                    href={`/tournaments/${reg.tournament_slug}`}
-                    className="text-xs font-bold text-[#A8DADC] hover:text-white flex items-center gap-1"
-                  >
-                    Ver Torneo &rarr;
-                  </Link>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -376,6 +756,27 @@ export default function ProfilePage() {
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
+          {/* Apodo / Gamertag */}
+          <div className="space-y-2 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+            <div className="flex items-center justify-between">
+              <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
+                🎮 Apodo / Gamertag (Nombre principal en la Arena)
+              </label>
+              <span className="text-[10px] text-[#8E92A4]">Visible en Comunidad, Torneos y Rankings</span>
+            </div>
+            <input
+              type="text"
+              value={profile.nickname || ''}
+              onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
+              placeholder="Ej. Viper, LuchoPro, Ghost..."
+              maxLength={30}
+              className="input-arena border-amber-500/30 focus:border-amber-400 focus:ring-amber-400/20 text-white font-bold"
+            />
+            <p className="text-[11px] text-[#8E92A4]">
+              Este será el nombre principal grande con el que te identificarán todos en la plataforma. Tu nombre real aparecerá debajo en letra más pequeña.
+            </p>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-1.5">
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
@@ -384,8 +785,8 @@ export default function ProfilePage() {
               <input
                 type="text"
                 disabled
-                value={user.first_name}
-                className="input-arena opacity-60 cursor-not-allowed bg-black/40"
+                value={capitalizeWords(user.first_name)}
+                className="input-arena opacity-70 cursor-not-allowed bg-black/40 font-medium text-white"
               />
             </div>
 
@@ -396,43 +797,161 @@ export default function ProfilePage() {
               <input
                 type="text"
                 disabled
-                value={user.last_name}
-                className="input-arena opacity-60 cursor-not-allowed bg-black/40"
+                value={capitalizeWords(user.last_name)}
+                className="input-arena opacity-70 cursor-not-allowed bg-black/40 font-medium text-white"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div className="sm:col-span-2 space-y-1.5">
+          {/* Sede Institucional Tecsup (Lima, Arequipa, Trujillo) */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
-                Carrera Profesional
+                📍 Sede Institucional Tecsup
+              </label>
+              <span className="text-[10px] text-[#8E92A4]">Representarás a esta sede en torneos y rankings</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+              {[
+                { id: 'Lima', name: 'Sede Lima', desc: 'Campus Principal Santa Anita', flag: '🏛️' },
+                { id: 'Arequipa', name: 'Sede Arequipa', desc: 'Campus Hunter / J.L. Bustamante', flag: '🌋' },
+                { id: 'Trujillo', name: 'Sede Trujillo', desc: 'Campus Víctor Larco Herrera', flag: '🌊' },
+              ].map((c) => {
+                const isSelected = (profile.campus || 'Lima') === c.id;
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setProfile({ ...profile, campus: c.id })}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-3 cursor-pointer ${
+                      isSelected
+                        ? 'bg-[#E63946]/10 text-white border-[#E63946] shadow-sm'
+                        : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                    }`}
+                  >
+                    <span className="text-xl shrink-0">{c.flag}</span>
+                    <div className="space-y-0.5">
+                      <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-[#A8DADC]'}`}>
+                        {c.name}
+                      </p>
+                      <p className="text-[10px] font-normal text-[#8E92A4] leading-tight">
+                        {c.desc}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Institutional Academic Condition in Tecsup */}
+          <div className="space-y-2">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+              Condición Institucional en Tecsup
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAcademicRole('ESTUDIANTE');
+                  if (!profile.cycle || profile.cycle < 1 || profile.cycle > 6) {
+                    setProfile({ ...profile, cycle: 1 });
+                  }
+                }}
+                className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
+                  academicRole === 'ESTUDIANTE'
+                    ? 'bg-[#E63946]/10 text-white border-[#E63946] shadow-sm'
+                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                }`}
+              >
+                <GraduationCap className="w-4 h-4 text-emerald-400" />
+                <div>
+                  <p className="text-white">Estudiante Regular</p>
+                  <p className="text-[10px] font-normal text-[#8E92A4]">Ciclos 1° al 6°</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAcademicRole('DOCENTE');
+                  setProfile({ ...profile, cycle: 0 });
+                }}
+                className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
+                  academicRole === 'DOCENTE'
+                    ? 'bg-indigo-500/10 text-white border-indigo-500 shadow-sm'
+                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                }`}
+              >
+                <span className="text-base">👨‍🏫</span>
+                <div>
+                  <p className="text-white">Docente / Profesor</p>
+                  <p className="text-[10px] font-normal text-[#8E92A4]">Plana Docente Tecsup</p>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAcademicRole('EGRESADO');
+                  setProfile({ ...profile, cycle: 0 });
+                }}
+                className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
+                  academicRole === 'EGRESADO'
+                    ? 'bg-amber-500/10 text-white border-amber-500 shadow-sm'
+                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                }`}
+              >
+                <span className="text-base">🎓</span>
+                <div>
+                  <p className="text-white">Egresado / Graduado</p>
+                  <p className="text-[10px] font-normal text-[#8E92A4]">Comunidad de Alumni</p>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className={academicRole === 'ESTUDIANTE' ? 'sm:col-span-2 space-y-1.5' : 'sm:col-span-3 space-y-1.5'}>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+                {academicRole === 'DOCENTE' 
+                  ? 'Área o Especialidad Docente' 
+                  : academicRole === 'EGRESADO' 
+                  ? 'Carrera de Egreso' 
+                  : 'Carrera Profesional en Tecsup'}
               </label>
               <input
                 type="text"
                 value={profile.career || ''}
                 onChange={(e) => setProfile({ ...profile, career: e.target.value })}
-                placeholder="Ej. Diseño y Desarrollo de Software"
+                placeholder={
+                  academicRole === 'DOCENTE' 
+                    ? 'Ej. Tecnología Digital / Software' 
+                    : 'Ej. Diseño y Desarrollo de Software'
+                }
                 className="input-arena"
                 required
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
-                Ciclo Actual
-              </label>
-              <select
-                value={profile.cycle || 1}
-                onChange={(e) => setProfile({ ...profile, cycle: Number(e.target.value) })}
-                className="input-arena bg-[#15161E]"
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((c) => (
-                  <option key={c} value={c}>
-                    {c}° Ciclo
-                  </option>
-                ))}
-              </select>
-            </div>
+            {academicRole === 'ESTUDIANTE' && (
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+                  Ciclo Académico Actual
+                </label>
+                <select
+                  value={profile.cycle || 1}
+                  onChange={(e) => setProfile({ ...profile, cycle: Number(e.target.value) })}
+                  className="input-arena bg-[#15161E]"
+                >
+                  {[1, 2, 3, 4, 5, 6].map((c) => (
+                    <option key={c} value={c}>
+                      {c}° Ciclo
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1.5">
@@ -469,6 +988,250 @@ export default function ProfilePage() {
           </div>
         </form>
       </div>
+
+      {/* STUDENT APPEAL SUBMISSION MODAL */}
+      {appealModalSanction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="arena-card p-6 sm:p-8 max-w-lg w-full space-y-5 border-amber-500/30">
+            
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                  <Scale className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Solicitud de Apelación Disciplinaria</h3>
+                  <p className="text-xs text-[#8E92A4]">
+                    Envía tu descargo para que el equipo administrativo revise tu sanción
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAppealModalSanction(null)}
+                className="p-1 rounded-lg text-[#8E92A4] hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-black/40 p-3.5 rounded-xl border border-white/5 text-xs space-y-1.5">
+              <p className="text-[#8E92A4]">
+                <strong className="text-white">Tipo de sanción:</strong> {appealModalSanction.type}
+              </p>
+              <p className="text-[#8E92A4]">
+                <strong className="text-white">Motivo aplicado:</strong> {appealModalSanction.reason}
+              </p>
+              {appealModalSanction.ends_at && (
+                <p className="text-[#8E92A4]">
+                  <strong className="text-white">Fecha de expiración:</strong> {new Date(appealModalSanction.ends_at).toLocaleDateString()}
+                </p>
+              )}
+            </div>
+
+            <form onSubmit={handleSubmitAppeal} className="space-y-4 text-xs">
+              <div className="space-y-2">
+                <label className="font-bold text-white">Tu descargo y explicación de los hechos:</label>
+                <textarea
+                  value={appealText}
+                  onChange={(e) => setAppealText(e.target.value)}
+                  placeholder="Explica con respeto y detalle por qué consideras que la sanción debe ser revocada o reducida (mínimo 10 caracteres)..."
+                  rows={4}
+                  required
+                  minLength={10}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/20 focus:outline-none focus:border-amber-400 text-xs leading-relaxed"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setAppealModalSanction(null)}
+                  className="btn-secondary px-4 py-2"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAppeal || appealText.trim().length < 10}
+                  className="btn-primary px-5 py-2 flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold disabled:opacity-50"
+                >
+                  {isSubmittingAppeal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                  Enviar Apelación al Tribunal
+                </button>
+              </div>
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      {/* AVATAR SELECTOR MODAL */}
+      {showAvatarModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
+          <div className="arena-card p-6 sm:p-8 max-w-xl w-full space-y-6 border border-white/10 shadow-2xl">
+            
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#E63946]/10 text-[#E63946] flex items-center justify-center">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">Elegir Foto de Perfil</h3>
+                  <p className="text-xs text-[#8E92A4]">
+                    Selecciona un avatar oficial del sistema o ingresa un enlace web personalizado
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAvatarModal(false)}
+                className="text-[#8E92A4] hover:text-white text-lg font-bold cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div className="grid grid-cols-2 gap-2 bg-[#0B0C10] p-1 rounded-xl border border-white/5">
+              <button
+                type="button"
+                onClick={() => setAvatarTab('SYSTEM')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  avatarTab === 'SYSTEM'
+                    ? 'bg-white/15 text-white shadow-sm'
+                    : 'text-[#8E92A4] hover:text-white'
+                }`}
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                Avatares del Sistema
+              </button>
+              <button
+                type="button"
+                onClick={() => setAvatarTab('CUSTOM')}
+                className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  avatarTab === 'CUSTOM'
+                    ? 'bg-[#E63946] text-white shadow-sm shadow-[#E63946]/20'
+                    : 'text-[#8E92A4] hover:text-white'
+                }`}
+              >
+                <ImageIcon className="w-3.5 h-3.5" />
+                URL Personalizada
+              </button>
+            </div>
+
+            {/* TAB CONTENT: SYSTEM AVATARS */}
+            {avatarTab === 'SYSTEM' ? (
+              <div className="space-y-4">
+                <p className="text-xs text-[#8E92A4]">
+                  Elige entre avatares temáticos de gaming y esports inspirados en Tecsup:
+                </p>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[280px] overflow-y-auto p-1">
+                  {SYSTEM_AVATARS.map((av) => {
+                    const isSelected = selectedSystemAvatar === av.url;
+                    return (
+                      <button
+                        key={av.id}
+                        type="button"
+                        onClick={() => setSelectedSystemAvatar(av.url)}
+                        className={`p-2 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border ${
+                          isSelected
+                            ? 'bg-[#E63946]/20 border-[#E63946] shadow-lg shadow-[#E63946]/30 scale-105'
+                            : 'bg-[#0B0C10] border-white/5 hover:border-white/20 hover:scale-102'
+                        }`}
+                      >
+                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#15161E] flex items-center justify-center">
+                          <img src={av.url} alt={av.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span className="text-[10px] font-semibold text-white/90 text-center truncate max-w-[85px]">
+                          {av.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              /* TAB CONTENT: CUSTOM URL */
+              <div className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-[#8E92A4] block">
+                    URL Directa de la Imagen
+                  </label>
+                  <input
+                    type="url"
+                    value={customAvatarInput}
+                    onChange={(e) => setCustomAvatarInput(e.target.value)}
+                    placeholder="https://ejemplo.com/tu-foto.png"
+                    className="input-arena w-full text-xs"
+                  />
+                  <p className="text-[11px] text-[#8E92A4]">
+                    Puedes pegar un enlace directo de Discord, Gravatar, Imgur, GitHub o cualquier imagen web.
+                  </p>
+                </div>
+
+                {/* Live Preview */}
+                {customAvatarInput.trim() && (
+                  <div className="flex items-center gap-3 p-3 bg-[#0B0C10] rounded-xl border border-white/10">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#15161E] shrink-0 border border-white/10 flex items-center justify-center">
+                      <img
+                        src={customAvatarInput.trim()}
+                        alt="Vista previa"
+                        onError={(e) => {
+                          (e.target as HTMLElement).style.display = 'none';
+                        }}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-white">Vista previa del avatar</p>
+                      <p className="text-[11px] text-[#A8DADC]">Se adaptará automáticamente a tu perfil.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+              {profile.avatar_url ? (
+                <button
+                  type="button"
+                  disabled={isSavingAvatar}
+                  onClick={() => handleSaveAvatar(null)}
+                  className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Quitar Foto Actual
+                </button>
+              ) : (
+                <div />
+              )}
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAvatarModal(false)}
+                  className="btn-secondary px-4 py-2 text-xs cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={isSavingAvatar || (avatarTab === 'SYSTEM' && !selectedSystemAvatar) || (avatarTab === 'CUSTOM' && !customAvatarInput.trim())}
+                  onClick={() => {
+                    const finalUrl = avatarTab === 'SYSTEM' ? selectedSystemAvatar : customAvatarInput.trim();
+                    if (finalUrl) handleSaveAvatar(finalUrl);
+                  }}
+                  className="btn-primary px-5 py-2 text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isSavingAvatar ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                  Guardar Foto
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
 
     </div>
   );

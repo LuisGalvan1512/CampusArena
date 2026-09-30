@@ -10,4 +10,8 @@ export class CreateCommentDto {
   @IsString()
   @IsUrl()
   media_url?: string;
+
+  @IsOptional()
+  @IsString()
+  parent_id?: string;
 }

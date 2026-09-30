@@ -20,6 +20,7 @@ export enum TournamentGame {
   LEFT_4_DEAD_2 = 'LEFT_4_DEAD_2',
   EFOOTBALL = 'EFOOTBALL',
   DOTA_2 = 'DOTA_2',
+  FORTNITE = 'FORTNITE',
 }
 
 export class CreateTournamentDto {
@@ -89,6 +90,20 @@ export class CreateTournamentDto {
   @IsString()
   format?: string;
 
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  team_size?: number;
+
+  @IsOptional()
+  @IsString()
+  stream_url?: string;
+
+  @IsOptional()
+  @IsString()
+  stream_platform?: string;
+
   @IsDateString({}, { message: 'La fecha de apertura de registros no es válida.' })
   registration_open_at: string;
 
@@ -102,6 +117,18 @@ export class CreateTournamentDto {
   @IsBoolean()
   is_online?: boolean;
 
+  @IsOptional()
+  @IsString()
+  event_modality?: string;
+
+  @IsOptional()
+  prize_distribution?: {
+    first_place?: string;
+    second_place?: string;
+    third_place?: string;
+  };
+
   @IsEmail({}, { message: 'El correo de contacto no tiene formato válido.' })
   contact_email: string;
 }
+

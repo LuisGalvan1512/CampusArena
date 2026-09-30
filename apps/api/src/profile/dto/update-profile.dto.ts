@@ -21,11 +21,21 @@ export class UpdateProfileDto {
 
   @IsOptional()
   @IsInt({ message: 'El ciclo debe ser un número entero.' })
-  @Min(1, { message: 'El ciclo mínimo es 1.' })
-  @Max(10, { message: 'El ciclo máximo es 10.' })
+  @Min(0, { message: 'El ciclo mínimo es 0 (para Docentes y Egresados).' })
+  @Max(6, { message: 'Tecsup cuenta con hasta 6 ciclos académicos regulares.' })
   cycle?: number;
 
   @IsOptional()
-  @IsUrl({}, { message: 'La URL del avatar no tiene un formato válido.' })
+  @IsString()
+  @MaxLength(50, { message: 'El apodo no puede tener más de 50 caracteres.' })
+  nickname?: string;
+
+  @IsOptional()
+  @IsString({ message: 'El avatar debe ser una URL válida o identificador del sistema.' })
   avatar_url?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50, { message: 'La sede no puede tener más de 50 caracteres.' })
+  campus?: string;
 }

@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
+import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/context/AuthContext';
 import { 
   Trophy, 
@@ -75,6 +76,47 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   // Stage / OBS Mode state
   const [isStageMode, setIsStageMode] = useState(false);
 
+  // ⚡ Supabase Realtime Channel Subscription for instant bracket updates
+  useEffect(() => {
+    if (!tournamentId) return;
+
+    const channel = supabase
+      .channel(`bracket-sync-${tournamentId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'competition',
+          table: 'matchups',
+        },
+        () => {
+          onUpdate();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'matchups',
+        },
+        () => {
+          onUpdate();
+        }
+      )
+      .subscribe();
+
+    // Secondary safety sync every 15 seconds
+    const interval = setInterval(() => {
+      onUpdate();
+    }, 15000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [tournamentId, onUpdate]);
+
   const handleGenerateBrackets = async (seedingMethod: 'RANDOM' | 'BY_TROPHIES' = 'BY_TROPHIES') => {
     setIsGenerating(true);
     setGenError(null);
@@ -119,22 +161,14 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             <span className="text-[11px] font-bold text-[#A8DADC] uppercase tracking-wider block">
               🛡️ Herramientas de Organizador / Administrador
             </span>
-            <div className="flex flex-col sm:flex-row gap-2 justify-center">
-              <button
-                onClick={() => handleGenerateBrackets('BY_TROPHIES')}
-                disabled={isGenerating}
-                className="btn-primary py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
-              >
-                {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                Generar Llaves (Por Copas)
-              </button>
+            <div className="flex justify-center">
               <button
                 onClick={() => handleGenerateBrackets('RANDOM')}
                 disabled={isGenerating}
-                className="btn-secondary py-2.5 px-4 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                className="btn-primary py-3 px-6 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 shadow-lg shadow-[#E63946]/20"
               >
-                <Swords className="w-4 h-4 text-[#E63946]" />
-                Sorteo Aleatorio
+                {isGenerating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Swords className="w-4 h-4" />}
+                Realizar Sorteo Aleatorio de Llaves
               </button>
             </div>
           </div>
@@ -343,9 +377,12 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             Modo Escenario / OBS
           </button>
 
-          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            En Vivo
+          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-2 shadow-sm shadow-emerald-500/10">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>Realtime Sincronizado</span>
           </span>
         </div>
       </div>
