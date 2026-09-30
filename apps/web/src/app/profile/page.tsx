@@ -29,8 +29,11 @@ import {
   Sparkles,
   Trash2,
   Eye,
-  Mail
+  Mail,
+  Palette
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { fireCelebration } from '@/lib/confetti';
 import { HolographicCard } from '@/components/HolographicCard';
 import { sounds } from '@/lib/sound';
 
@@ -152,6 +155,27 @@ export default function ProfilePage() {
   const [customAvatarInput, setCustomAvatarInput] = useState('');
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
 
+  // Gamer Banner Theme State
+  type BannerTheme = 'cyberpunk' | 'carbon' | 'aurora' | 'gold' | 'obsidian';
+  const [bannerTheme, setBannerTheme] = useState<BannerTheme>('cyberpunk');
+  const [showBannerModal, setShowBannerModal] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('campus_arena_banner_theme') as BannerTheme;
+    if (savedTheme) {
+      setBannerTheme(savedTheme);
+    }
+  }, []);
+
+  const handleSelectBannerTheme = (theme: BannerTheme) => {
+    setBannerTheme(theme);
+    localStorage.setItem('campus_arena_banner_theme', theme);
+    sounds.playSuccess();
+    fireCelebration();
+    toast.success('¡Tema de tarjeta de competidor actualizado!');
+    setShowBannerModal(false);
+  };
+
   // Sanctions and appeals state
   const [userSanctions, setUserSanctions] = useState<any[]>([]);
   const [userAppeals, setUserAppeals] = useState<any[]>([]);
@@ -237,6 +261,9 @@ export default function ProfilePage() {
     });
 
     if (res.success) {
+      sounds.playSuccess();
+      fireCelebration();
+      toast.success('¡Datos académicos y perfil actualizados correctamente!');
       setFeedback({ type: 'success', message: '¡Datos académicos y perfil actualizados correctamente!' });
       if (user && profile.avatar_url) {
         user.avatar_url = profile.avatar_url;
@@ -255,6 +282,8 @@ export default function ProfilePage() {
     });
 
     if (res.success) {
+      sounds.playSuccess();
+      toast.success('¡Foto de perfil actualizada correctamente!');
       setProfile((prev) => ({ ...prev, avatar_url: avatarUrlToSave }));
       setShowAvatarModal(false);
       setFeedback({ type: 'success', message: '¡Foto de perfil actualizada correctamente!' });
@@ -332,7 +361,21 @@ export default function ProfilePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
       {/* 1. HEADER HERO */}
-      <HolographicCard className="p-8 sm:p-10 relative overflow-hidden" glowColor="rgba(230, 57, 70, 0.25)">
+      <HolographicCard 
+        className={`p-8 sm:p-10 relative overflow-hidden transition-all duration-500 ${
+          bannerTheme === 'cyberpunk' ? 'banner-cyberpunk' :
+          bannerTheme === 'carbon' ? 'banner-carbon' :
+          bannerTheme === 'aurora' ? 'banner-aurora' :
+          bannerTheme === 'gold' ? 'banner-gold' : 'banner-obsidian'
+        }`} 
+        glowColor={
+          bannerTheme === 'gold' ? 'rgba(245, 158, 11, 0.35)' :
+          bannerTheme === 'aurora' ? 'rgba(16, 185, 129, 0.3)' :
+          bannerTheme === 'carbon' ? 'rgba(148, 163, 184, 0.25)' :
+          bannerTheme === 'obsidian' ? 'rgba(59, 130, 246, 0.25)' :
+          'rgba(230, 57, 70, 0.3)'
+        }
+      >
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -406,6 +449,19 @@ export default function ProfilePage() {
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                setShowBannerModal(true);
+              }}
+              className="btn-secondary px-3.5 py-2.5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-[#E63946]/50 shrink-0"
+              title="Personalizar tema y textura del carnet de competidor"
+            >
+              <Palette className="w-4 h-4 text-[#E63946]" />
+              <span>Tema de Carnet</span>
+            </button>
+
             <Link
               href={`/profile/${user.id}`}
               className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-600 dark:text-emerald-300 hover:text-[var(--text-primary)] border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
@@ -575,23 +631,29 @@ export default function ProfilePage() {
               <Link
                 key={medal.id}
                 href={`/tournaments/${medal.tournament_slug}`}
-                className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden flex flex-col justify-between ${
+                onMouseEnter={() => sounds.playClick()}
+                className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden flex flex-col justify-between shine-sheen ${
                   medal.medal_type === 'GOLD'
-                    ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-amber-500/15 bg-gradient-to-b from-amber-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-amber-400/60 hover:border-amber-300 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 bg-gradient-to-b from-amber-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'SILVER'
-                    ? 'border-slate-400/40 hover:border-slate-300 hover:shadow-slate-400/15 bg-gradient-to-b from-slate-400/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-slate-300/60 hover:border-slate-200 shadow-lg shadow-slate-400/10 hover:shadow-slate-300/25 bg-gradient-to-b from-slate-400/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'BRONZE'
-                    ? 'border-amber-700/40 hover:border-amber-600 hover:shadow-amber-700/15 bg-gradient-to-b from-amber-700/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-amber-700/60 hover:border-amber-600 shadow-lg shadow-amber-800/10 hover:shadow-amber-700/25 bg-gradient-to-b from-amber-700/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'HONOR'
-                    ? 'border-blue-500/40 hover:border-blue-400 hover:shadow-blue-500/15 bg-gradient-to-b from-blue-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
-                    : 'border-emerald-500/30 hover:border-emerald-400 hover:shadow-emerald-500/15 bg-gradient-to-b from-emerald-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-blue-500/50 hover:border-blue-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 bg-gradient-to-b from-blue-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    : 'border-emerald-500/40 hover:border-emerald-400 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 bg-gradient-to-b from-emerald-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                 }`}
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors" />
 
                 <div className="space-y-3 relative z-10">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform ${
+                      medal.medal_type === 'GOLD' ? 'bg-gradient-to-tr from-amber-500/30 to-amber-200/20 border border-amber-400/50 shadow-amber-500/20' :
+                      medal.medal_type === 'SILVER' ? 'bg-gradient-to-tr from-slate-400/30 to-slate-200/20 border border-slate-300/50 shadow-slate-400/20' :
+                      medal.medal_type === 'BRONZE' ? 'bg-gradient-to-tr from-amber-800/30 to-amber-600/20 border border-amber-600/50 shadow-amber-800/20' :
+                      'bg-[var(--bg-arena)] border border-[var(--border-card)]'
+                    }`}>
                       {medal.emoji}
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
@@ -1231,6 +1293,74 @@ export default function ProfilePage() {
               </div>
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* GAMER BANNER THEME SELECTOR MODAL */}
+      {showBannerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-[#E63946]/20 text-[#E63946] flex items-center justify-center">
+                  <Palette className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-black text-[var(--text-primary)]">Personalizar Carnet Gamer</h3>
+                  <p className="text-xs text-[var(--text-secondary)]">Elige la textura y estética holográfica de tu perfil</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowBannerModal(false)}
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {[
+                { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian oficial de Campus Arena', bgClass: 'banner-cyberpunk border-[#E63946]/40' },
+                { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', bgClass: 'banner-carbon border-slate-500/40' },
+                { id: 'aurora', name: 'Aurora Cósmica', desc: 'Onda etérea verde esmeralda y violeta neón', bgClass: 'banner-aurora border-emerald-500/40' },
+                { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeón áureo', bgClass: 'banner-gold border-amber-500/40' },
+                { id: 'obsidian', name: 'Titanio Obsidiana', desc: 'Acabado minimalista de cristal templado', bgClass: 'banner-obsidian border-[var(--border-card)]' },
+              ].map((theme) => {
+                const isSelected = bannerTheme === theme.id;
+                return (
+                  <button
+                    key={theme.id}
+                    type="button"
+                    onClick={() => handleSelectBannerTheme(theme.id as any)}
+                    className={`p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer relative overflow-hidden group hover:scale-[1.02] ${theme.bgClass} ${
+                      isSelected
+                        ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20'
+                        : 'hover:border-[#E63946]/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-[var(--text-primary)]">{theme.name}</span>
+                      {isSelected && (
+                        <CheckCircle2 className="w-4 h-4 text-[#E63946]" />
+                      )}
+                    </div>
+                    <p className="text-[11px] text-[var(--text-secondary)] leading-snug">{theme.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowBannerModal(false)}
+                className="btn-secondary py-2 px-5 text-xs cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
         </div>
       )}

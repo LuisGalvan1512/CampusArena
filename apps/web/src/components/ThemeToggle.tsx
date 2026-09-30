@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { Sun, Moon } from 'lucide-react';
+import { sounds } from '@/lib/sound';
 
 export function ThemeToggle({ className = '' }: { className?: string }) {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -23,7 +24,10 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   return (
     <button
       type="button"
-      onClick={() => setTheme(isDark ? 'light' : 'dark')}
+      onClick={() => {
+        sounds.playClick();
+        setTheme(isDark ? 'light' : 'dark');
+      }}
       className={`relative w-9 h-9 rounded-xl border flex items-center justify-center transition-all duration-300 group cursor-pointer ${
         isDark
           ? 'bg-[#15161E] border-white/10 hover:border-amber-400/50 text-amber-400 hover:bg-amber-400/10 shadow-sm'

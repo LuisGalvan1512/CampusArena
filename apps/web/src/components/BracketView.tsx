@@ -81,6 +81,86 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   // Stage / OBS Mode state
   const [isStageMode, setIsStageMode] = useState(false);
 
+  // Interactive SVG connector lines state
+  const normalInnerRef = React.useRef<HTMLDivElement>(null);
+  const stageInnerRef = React.useRef<HTMLDivElement>(null);
+  const [connectorLines, setConnectorLines] = useState<Array<{
+    fromId: string;
+    toId: string;
+    d: string;
+    hasWinner: boolean;
+    isWinnerPath: boolean;
+  }>>([]);
+  const [hoveredMatchupId, setHoveredMatchupId] = useState<string | null>(null);
+
+  const calculateBracketLines = React.useCallback(() => {
+    const inner = isStageMode ? stageInnerRef.current : normalInnerRef.current;
+    if (!inner || !initialBracket?.rounds) return;
+
+    const innerRect = inner.getBoundingClientRect();
+    const newLines: Array<{
+      fromId: string;
+      toId: string;
+      d: string;
+      hasWinner: boolean;
+      isWinnerPath: boolean;
+    }> = [];
+
+    const prefix = isStageMode ? 'stage-' : '';
+
+    for (const r of initialBracket.rounds) {
+      for (const m of r.matchups) {
+        if (!m.next_matchup_id) continue;
+        const elFrom = document.getElementById(`${prefix}matchup-card-${m.id}`);
+        const elTo = document.getElementById(`${prefix}matchup-card-${m.next_matchup_id}`);
+
+        if (!elFrom || !elTo) continue;
+
+        const rectFrom = elFrom.getBoundingClientRect();
+        const rectTo = elTo.getBoundingClientRect();
+
+        // Exact coordinates relative to inner content container
+        const x1 = rectFrom.right - innerRect.left;
+        const y1 = rectFrom.top + rectFrom.height / 2 - innerRect.top;
+
+        const x2 = rectTo.left - innerRect.left;
+        const y2 = rectTo.top + rectTo.height / 2 - innerRect.top;
+
+        // Smooth cubic bezier curve connecting matchup A to matchup B
+        const dx = Math.max(x2 - x1, 20);
+        const cp1x = x1 + dx * 0.45;
+        const cp2x = x2 - dx * 0.45;
+        const d = `M ${x1} ${y1} C ${cp1x} ${y1}, ${cp2x} ${y2}, ${x2} ${y2}`;
+
+        const hasWinner = Boolean(m.winner_tag);
+
+        newLines.push({
+          fromId: m.id,
+          toId: m.next_matchup_id,
+          d,
+          hasWinner,
+          isWinnerPath: hasWinner,
+        });
+      }
+    }
+
+    setConnectorLines(newLines);
+  }, [initialBracket, isStageMode]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      calculateBracketLines();
+    }, 150);
+
+    const handleResize = () => calculateBracketLines();
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [calculateBracketLines]);
+
   // ⚡ Supabase Realtime Channel Subscription for instant bracket updates
   useEffect(() => {
     if (!tournamentId) return;
@@ -238,157 +318,246 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     setIsSubmitting(false);
   };
 
-  const renderBracketColumns = (isStage: boolean = false) => (
-    <div className="overflow-x-auto pb-6">
-      <div 
-        className="min-w-full grid gap-6 sm:gap-8 items-center"
-        style={{ gridTemplateColumns: `repeat(${initialBracket.rounds.length}, minmax(280px, 1fr))` }}
-      >
-        {initialBracket.rounds.map((round) => (
-          <div key={round.id} className="space-y-4">
-            
-            {/* Round Title */}
-            <div className={`p-3 rounded-xl border text-center transition-all ${
-              isStage 
-                ? 'bg-[#1D3557]/40 border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
-                : 'bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm'
-            }`}>
-              <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
-                {round.name}
-              </span>
-            </div>
+  const renderBracketColumns = (isStage: boolean = false) => {
+    const prefix = isStage ? 'stage-' : '';
+    const innerRef = isStage ? stageInnerRef : normalInnerRef;
+    const minColWidth = 320;
+    const totalMinWidth = Math.max(initialBracket.rounds.length * minColWidth, 900);
 
-            {/* Matchups in this Round */}
-            <div className="space-y-6 flex flex-col justify-around min-h-[380px]">
-              {round.matchups.map((m) => {
-                const isCompleted = m.status === 'COMPLETED' || m.status === 'WALKOVER';
-                const isReady = m.status === 'READY';
-                const isFinal = !m.next_matchup_id;
-                const hasBoth = Boolean(m.participant_a_tag && m.participant_b_tag);
+    return (
+      <div className="overflow-x-auto pb-6">
+        <div 
+          ref={innerRef}
+          className="relative min-w-max py-2"
+          style={{ minWidth: `${totalMinWidth}px` }}
+        >
+          {/* SVG BRACKET CONNECTOR LINES WITH LASER PULSE */}
+          <svg 
+            className="absolute inset-0 pointer-events-none w-full h-full overflow-visible z-0"
+            aria-hidden="true"
+          >
+            <defs>
+              <filter id={`laser-glow-${prefix || 'normal'}`} x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="3.5" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <linearGradient id={`laser-active-${prefix || 'normal'}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#E63946" />
+                <stop offset="100%" stopColor="#06B6D4" />
+              </linearGradient>
+              <linearGradient id={`laser-winner-${prefix || 'normal'}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#10B981" />
+                <stop offset="100%" stopColor="#06B6D4" />
+              </linearGradient>
+            </defs>
 
-                return (
-                  <div
-                    key={m.id}
-                    onClick={() => handleMatchupClick(m, round.name)}
-                    className={`relative rounded-xl p-3.5 border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
-                      isFinal
-                        ? 'bg-gradient-to-b from-[#1D3557]/20 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
-                        : isCompleted
-                        ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-[#E63946]/50'
-                        : isReady
-                        ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
-                        : 'bg-[var(--bg-card)]/60 border-[var(--border-card)] opacity-70 hover:opacity-100'
-                    }`}
-                  >
-                    {/* Top status indicator */}
-                    <div className="flex items-center justify-between mb-2 text-[10px] font-mono">
-                      <span className="text-[var(--text-muted)]">Match #{m.position}</span>
-                      
-                      {isCompleted ? (
-                        <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold">
-                          <CheckCircle2 className="w-3 h-3" />
-                          Finalizado
-                        </span>
-                      ) : isReady ? (
-                        <span className="text-[#E63946] flex items-center gap-1 font-bold animate-pulse">
-                          <Flame className="w-3 h-3" />
-                          Listo / En Juego
-                        </span>
-                      ) : (
-                        <span className="text-[var(--text-muted)]">Esperando rival</span>
-                      )}
-                    </div>
+            {connectorLines.map((line, idx) => {
+              const isHovered = hoveredMatchupId === line.fromId || hoveredMatchupId === line.toId;
+              const isWinnerPath = line.hasWinner;
 
-                    {/* Participant A */}
-                    <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
-                      m.winner_tag && m.winner_tag === m.participant_a_tag
-                        ? 'bg-emerald-500/15 border border-emerald-500/30'
-                        : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
-                    }`}>
-                      <div className="space-y-0.5 truncate pr-2">
-                        <p className={`text-xs font-bold truncate ${
-                          m.winner_tag === m.participant_a_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
+              return (
+                <g key={`bracket-conn-${line.fromId}-${line.toId}-${idx}`}>
+                  {/* Outer laser halo glow on hover */}
+                  {isHovered && (
+                    <path
+                      d={line.d}
+                      fill="none"
+                      stroke={`url(#laser-active-${prefix || 'normal'})`}
+                      strokeWidth="6"
+                      strokeOpacity="0.45"
+                      filter={`url(#laser-glow-${prefix || 'normal'})`}
+                    />
+                  )}
+                  {/* Main connection curve */}
+                  <path
+                    d={line.d}
+                    fill="none"
+                    stroke={
+                      isHovered
+                        ? `url(#laser-active-${prefix || 'normal'})`
+                        : isWinnerPath
+                        ? `url(#laser-winner-${prefix || 'normal'})`
+                        : 'var(--border-card)'
+                    }
+                    strokeWidth={isHovered ? 2.5 : isWinnerPath ? 2 : 1.5}
+                    strokeOpacity={isHovered ? 1 : isWinnerPath ? 0.8 : 0.35}
+                    className={isHovered ? 'laser-active-line' : undefined}
+                  />
+                  {/* Moving cyber pulse particle along curve */}
+                  {isHovered && (
+                    <circle r="4" fill="#06B6D4" filter={`url(#laser-glow-${prefix || 'normal'})`}>
+                      <animateMotion dur="0.9s" repeatCount="indefinite" path={line.d} />
+                    </circle>
+                  )}
+                </g>
+              );
+            })}
+          </svg>
+
+          {/* Grid of Rounds */}
+          <div 
+            className="min-w-full grid gap-8 sm:gap-14 items-stretch relative z-10"
+            style={{ gridTemplateColumns: `repeat(${initialBracket.rounds.length}, minmax(280px, 1fr))` }}
+          >
+            {initialBracket.rounds.map((round) => (
+              <div key={round.id} className="space-y-4">
+                
+                {/* Round Title */}
+                <div className={`p-3 rounded-xl border text-center transition-all ${
+                  isStage 
+                    ? 'bg-[#1D3557]/40 border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
+                    : 'bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm'
+                }`}>
+                  <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
+                    {round.name}
+                  </span>
+                </div>
+
+                {/* Matchups in this Round */}
+                <div className="space-y-6 flex flex-col justify-around min-h-[420px]">
+                  {round.matchups.map((m) => {
+                    const isCompleted = m.status === 'COMPLETED' || m.status === 'WALKOVER';
+                    const isReady = m.status === 'READY';
+                    const isFinal = !m.next_matchup_id;
+                    const hasBoth = Boolean(m.participant_a_tag && m.participant_b_tag);
+                    const isCardHovered = hoveredMatchupId === m.id;
+
+                    return (
+                      <div
+                        key={m.id}
+                        id={`${prefix}matchup-card-${m.id}`}
+                        onClick={() => handleMatchupClick(m, round.name)}
+                        onMouseEnter={() => {
+                          setHoveredMatchupId(m.id);
+                          sounds.playClick();
+                        }}
+                        onMouseLeave={() => setHoveredMatchupId(null)}
+                        className={`relative rounded-xl p-3.5 border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
+                          isFinal
+                            ? 'bg-gradient-to-b from-[#1D3557]/20 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
+                            : isCardHovered
+                            ? 'bg-[var(--bg-card)] border-cyan-400/80 shadow-lg shadow-cyan-500/15 ring-1 ring-cyan-400/40'
+                            : isCompleted
+                            ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-[#E63946]/50'
+                            : isReady
+                            ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
+                            : 'bg-[var(--bg-card)]/60 border-[var(--border-card)] opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        {/* Top status indicator */}
+                        <div className="flex items-center justify-between mb-2 text-[10px] font-mono">
+                          <span className="text-[var(--text-muted)]">Match #{m.position}</span>
+                          
+                          {isCompleted ? (
+                            <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold">
+                              <CheckCircle2 className="w-3 h-3" />
+                              Finalizado
+                            </span>
+                          ) : isReady ? (
+                            <span className="text-[#E63946] flex items-center gap-1 font-bold animate-pulse">
+                              <Flame className="w-3 h-3" />
+                              Listo / En Juego
+                            </span>
+                          ) : (
+                            <span className="text-[var(--text-muted)]">Esperando rival</span>
+                          )}
+                        </div>
+
+                        {/* Participant A */}
+                        <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
+                          m.winner_tag && m.winner_tag === m.participant_a_tag
+                            ? 'bg-emerald-500/15 border border-emerald-500/30'
+                            : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
-                          {m.participant_a_name || 'TBD (Por definir)'}
-                        </p>
-                        {m.participant_a_tag && (
-                          <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
-                        )}
-                      </div>
+                          <div className="space-y-0.5 truncate pr-2">
+                            <p className={`text-xs font-bold truncate ${
+                              m.winner_tag === m.participant_a_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
+                            }`}>
+                              {m.participant_a_name || 'TBD (Por definir)'}
+                            </p>
+                            {m.participant_a_tag && (
+                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
+                            )}
+                          </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {m.winner_tag && m.winner_tag === m.participant_a_tag && (
-                          <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                        )}
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
-                          {isCompleted ? m.score_a : '-'}
-                        </span>
-                      </div>
-                    </div>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {m.winner_tag && m.winner_tag === m.participant_a_tag && (
+                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            )}
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
+                              {isCompleted ? m.score_a : '-'}
+                            </span>
+                          </div>
+                        </div>
 
-                    {/* VS divider */}
-                    <div className="text-center my-1 text-[9px] font-mono text-[var(--text-muted)] font-bold">VS</div>
+                        {/* VS divider */}
+                        <div className="text-center my-1 text-[9px] font-mono text-[var(--text-muted)] font-bold">VS</div>
 
-                    {/* Participant B */}
-                    <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
-                      m.winner_tag && m.winner_tag === m.participant_b_tag
-                        ? 'bg-emerald-500/15 border border-emerald-500/30'
-                        : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
-                    }`}>
-                      <div className="space-y-0.5 truncate pr-2">
-                        <p className={`text-xs font-bold truncate ${
-                          m.winner_tag === m.participant_b_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
+                        {/* Participant B */}
+                        <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
+                          m.winner_tag && m.winner_tag === m.participant_b_tag
+                            ? 'bg-emerald-500/15 border border-emerald-500/30'
+                            : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
-                          {m.participant_b_name || 'TBD (Por definir)'}
-                        </p>
-                        {m.participant_b_tag && (
-                          <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
+                          <div className="space-y-0.5 truncate pr-2">
+                            <p className={`text-xs font-bold truncate ${
+                              m.winner_tag === m.participant_b_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
+                            }`}>
+                              {m.participant_b_name || 'TBD (Por definir)'}
+                            </p>
+                            {m.participant_b_tag && (
+                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {m.winner_tag && m.winner_tag === m.participant_b_tag && (
+                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                            )}
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
+                              {isCompleted ? m.score_b : '-'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Referee button for admins/organizers */}
+                        {canManage && hasBoth && !isCompleted && (
+                          <div className="mt-2.5 pt-2 border-t border-[var(--border-card)] flex items-center justify-between">
+                            <span className="text-[10px] text-[var(--text-secondary)] font-bold">Arbitraje</span>
+                            <button
+                              type="button"
+                              onClick={(e) => handleOpenReferee(e, m)}
+                              className="btn-primary py-1 px-2.5 text-[10px] flex items-center gap-1 cursor-pointer"
+                            >
+                              <Swords className="w-3 h-3" />
+                              <span>Marcador</span>
+                            </button>
+                          </div>
                         )}
-                      </div>
 
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        {m.winner_tag && m.winner_tag === m.participant_b_tag && (
-                          <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                        {/* Final Crown Badge on Grand Final */}
+                        {isFinal && isCompleted && (
+                          <div className="mt-2.5 p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-center flex items-center justify-center gap-1 text-[11px] font-bold text-amber-500 dark:text-amber-400">
+                            <Trophy className="w-3.5 h-3.5" />
+                            <span>¡Campeón: {m.winner_name}!</span>
+                          </div>
                         )}
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
-                          {isCompleted ? m.score_b : '-'}
-                        </span>
+
                       </div>
-                    </div>
+                    );
+                  })}
+                </div>
 
-                    {/* Referee button for admins/organizers */}
-                    {canManage && hasBoth && !isCompleted && (
-                      <div className="mt-2.5 pt-2 border-t border-[var(--border-card)] flex items-center justify-between">
-                        <span className="text-[10px] text-[var(--text-secondary)] font-bold">Arbitraje</span>
-                        <button
-                          type="button"
-                          onClick={(e) => handleOpenReferee(e, m)}
-                          className="btn-primary py-1 px-2.5 text-[10px] flex items-center gap-1 cursor-pointer"
-                        >
-                          <Swords className="w-3 h-3" />
-                          <span>Marcador</span>
-                        </button>
-                      </div>
-                    )}
-
-                    {/* Final Crown Badge on Grand Final */}
-                    {isFinal && isCompleted && (
-                      <div className="mt-2.5 p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-center flex items-center justify-center gap-1 text-[11px] font-bold text-amber-500 dark:text-amber-400">
-                        <Trophy className="w-3.5 h-3.5" />
-                        <span>¡Campeón: {m.winner_name}!</span>
-                      </div>
-                    )}
-
-                  </div>
-                );
-              })}
-            </div>
-
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in">

@@ -94,6 +94,12 @@ export default function PublicProfilePage() {
   const [isSubmittingSig, setIsSubmittingSig] = useState(false);
   const [sigFeedback, setSigFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<string | null>(null);
+  const [bannerTheme, setBannerTheme] = useState<string>('cyberpunk');
+
+  useEffect(() => {
+    const saved = localStorage.getItem('campus_arena_banner_theme');
+    if (saved) setBannerTheme(saved);
+  }, []);
 
   const fetchSignatures = async () => {
     try {
@@ -279,7 +285,21 @@ export default function PublicProfilePage() {
       )}
 
       {/* 1. HEADER HERO */}
-      <HolographicCard className="p-8 sm:p-10 relative overflow-hidden" glowColor="rgba(230, 57, 70, 0.25)">
+      <HolographicCard 
+        className={`p-8 sm:p-10 relative overflow-hidden transition-all duration-500 ${
+          bannerTheme === 'cyberpunk' ? 'banner-cyberpunk' :
+          bannerTheme === 'carbon' ? 'banner-carbon' :
+          bannerTheme === 'aurora' ? 'banner-aurora' :
+          bannerTheme === 'gold' ? 'banner-gold' : 'banner-obsidian'
+        }`} 
+        glowColor={
+          bannerTheme === 'gold' ? 'rgba(245, 158, 11, 0.35)' :
+          bannerTheme === 'aurora' ? 'rgba(16, 185, 129, 0.3)' :
+          bannerTheme === 'carbon' ? 'rgba(148, 163, 184, 0.25)' :
+          bannerTheme === 'obsidian' ? 'rgba(59, 130, 246, 0.25)' :
+          'rgba(230, 57, 70, 0.3)'
+        }
+      >
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -425,23 +445,29 @@ export default function PublicProfilePage() {
               <Link
                 key={medal.id}
                 href={`/tournaments/${medal.tournament_slug}`}
-                className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden flex flex-col justify-between ${
+                onMouseEnter={() => sounds.playClick()}
+                className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-2xl relative overflow-hidden flex flex-col justify-between shine-sheen ${
                   medal.medal_type === 'GOLD'
-                    ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-amber-500/15 bg-gradient-to-b from-amber-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-amber-400/60 hover:border-amber-300 shadow-lg shadow-amber-500/10 hover:shadow-amber-500/25 bg-gradient-to-b from-amber-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'SILVER'
-                    ? 'border-slate-400/40 hover:border-slate-300 hover:shadow-slate-400/15 bg-gradient-to-b from-slate-400/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-slate-300/60 hover:border-slate-200 shadow-lg shadow-slate-400/10 hover:shadow-slate-300/25 bg-gradient-to-b from-slate-400/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'BRONZE'
-                    ? 'border-amber-700/40 hover:border-amber-600 hover:shadow-amber-700/15 bg-gradient-to-b from-amber-700/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-amber-700/60 hover:border-amber-600 shadow-lg shadow-amber-800/10 hover:shadow-amber-700/25 bg-gradient-to-b from-amber-700/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'HONOR'
-                    ? 'border-blue-500/40 hover:border-blue-400 hover:shadow-blue-500/15 bg-gradient-to-b from-blue-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
-                    : 'border-emerald-500/30 hover:border-emerald-400 hover:shadow-emerald-500/15 bg-gradient-to-b from-emerald-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    ? 'border-blue-500/50 hover:border-blue-400 shadow-lg shadow-blue-500/10 hover:shadow-blue-500/25 bg-gradient-to-b from-blue-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    : 'border-emerald-500/40 hover:border-emerald-400 shadow-lg shadow-emerald-500/10 hover:shadow-emerald-500/25 bg-gradient-to-b from-emerald-500/15 via-[var(--bg-card)] to-[var(--bg-arena)]'
                 }`}
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors" />
 
                 <div className="space-y-3 relative z-10">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform ${
+                      medal.medal_type === 'GOLD' ? 'bg-gradient-to-tr from-amber-500/30 to-amber-200/20 border border-amber-400/50 shadow-amber-500/20' :
+                      medal.medal_type === 'SILVER' ? 'bg-gradient-to-tr from-slate-400/30 to-slate-200/20 border border-slate-300/50 shadow-slate-400/20' :
+                      medal.medal_type === 'BRONZE' ? 'bg-gradient-to-tr from-amber-800/30 to-amber-600/20 border border-amber-600/50 shadow-amber-800/20' :
+                      'bg-[var(--bg-arena)] border border-[var(--border-card)]'
+                    }`}>
                       {medal.emoji}
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
