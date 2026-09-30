@@ -473,7 +473,7 @@ export default function CommunityPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#0B0C10] pt-24 pb-12">
+    <div className="min-h-screen bg-[var(--bg-arena)] pt-24 pb-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 flex flex-col lg:flex-row gap-8">
         
         {/* SIDEBAR (Desktop) */}
@@ -489,8 +489,8 @@ export default function CommunityPage() {
             Crear Post
           </button>
 
-          <div className="arena-card p-4 glass-panel border-white/5">
-            <h3 className="text-xs font-bold text-[#8E92A4] uppercase tracking-wider mb-3 px-2">Categorías</h3>
+          <div className="arena-card p-4 glass-panel border-[var(--border-card)]">
+            <h3 className="text-xs font-bold text-[var(--text-secondary)] uppercase tracking-wider mb-3 px-2">Categorías</h3>
             <div className="space-y-1">
               {CATEGORIES.map(cat => {
                 const Icon = cat.icon;
@@ -501,8 +501,8 @@ export default function CommunityPage() {
                     onClick={() => setActiveCategory(cat.id)}
                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                       isActive 
-                        ? 'bg-white/10 text-white shadow-[inset_0_0_10px_rgba(255,255,255,0.05)]' 
-                        : 'text-[#8E92A4] hover:bg-white/5 hover:text-white'
+                        ? 'bg-[#E63946]/10 text-[#E63946] border border-[#E63946]/30 font-bold' 
+                        : 'text-[var(--text-secondary)] hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)]'
                     }`}
                   >
                     <Icon className={`w-4 h-4 ${isActive ? 'text-[#E63946]' : ''}`} />
@@ -530,7 +530,7 @@ export default function CommunityPage() {
                     value={newTitle}
                     onChange={e => setNewTitle(e.target.value)}
                     placeholder="Título interesante..." 
-                    className="w-full bg-transparent border-b border-white/10 pb-2 text-white font-bold text-lg focus:outline-none focus:border-[#E63946] transition-colors placeholder:text-white/20"
+                    className="w-full bg-transparent border-b border-[var(--border-card)] pb-2 text-[var(--text-primary)] font-bold text-lg focus:outline-none focus:border-[#E63946] transition-colors placeholder:text-[var(--text-muted)]"
                   />
                 </div>
                 
@@ -538,7 +538,7 @@ export default function CommunityPage() {
                   value={newDescription}
                   onChange={e => setNewDescription(e.target.value)}
                   placeholder="¿Qué está pasando en el campus?"
-                  className="w-full bg-transparent border-none text-[#A8DADC] text-sm focus:outline-none resize-none h-20 placeholder:text-white/20"
+                  className="w-full bg-transparent border-none text-[var(--text-secondary)] text-sm focus:outline-none resize-none h-20 placeholder:text-[var(--text-muted)]"
                 />
 
                 {/* Image / Media Input Area */}
@@ -552,20 +552,20 @@ export default function CommunityPage() {
                   />
 
                   {newMediaUrl ? (
-                    <div className="rounded-xl overflow-hidden border border-white/10 bg-black/60 p-2.5 flex items-center justify-between">
+                    <div className="rounded-xl overflow-hidden border border-[var(--border-card)] bg-[var(--bg-arena)] p-2.5 flex items-center justify-between">
                       <div className="flex items-center gap-3 overflow-hidden">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img 
                           src={newMediaUrl} 
                           alt="Previsualización" 
-                          className="w-14 h-14 object-cover rounded-lg border border-white/10 shrink-0" 
+                          className="w-14 h-14 object-cover rounded-lg border border-[var(--border-card)] shrink-0" 
                         />
                         <div className="flex flex-col min-w-0">
-                          <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
                             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                             Imagen adjuntada
                           </span>
-                          <span className="text-[11px] text-[#8E92A4] truncate">
+                          <span className="text-[11px] text-[var(--text-secondary)] truncate">
                             {newMediaUrl.startsWith('data:') ? 'Imagen local cargada' : newMediaUrl}
                           </span>
                         </div>
@@ -573,7 +573,7 @@ export default function CommunityPage() {
                       <button
                         type="button"
                         onClick={() => setNewMediaUrl('')}
-                        className="p-1.5 rounded-lg bg-white/5 hover:bg-red-500/20 text-[#8E92A4] hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer"
+                        className="p-1.5 rounded-lg bg-[var(--bg-card)] hover:bg-red-500/20 text-[var(--text-secondary)] hover:text-red-400 transition-colors ml-2 shrink-0 cursor-pointer"
                         title="Quitar imagen"
                       >
                         <X className="w-4 h-4" />
@@ -585,7 +585,7 @@ export default function CommunityPage() {
                         type="button"
                         disabled={uploadingPostMedia}
                         onClick={() => postFileInputRef.current?.click()}
-                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 hover:border-white/20 transition-all text-xs font-bold cursor-pointer shrink-0"
+                        className="flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-[var(--bg-arena)] hover:bg-[var(--bg-card-hover)] text-[var(--text-primary)] border border-[var(--border-card)] hover:border-[var(--text-secondary)] transition-all text-xs font-bold cursor-pointer shrink-0"
                       >
                         {uploadingPostMedia ? (
                           <>
@@ -594,41 +594,41 @@ export default function CommunityPage() {
                           </>
                         ) : (
                           <>
-                            <Upload className="w-3.5 h-3.5 text-[#A8DADC]" />
+                            <Upload className="w-3.5 h-3.5 text-[#E63946]" />
                             <span>Subir desde tu equipo</span>
                           </>
                         )}
                       </button>
 
-                      <div className="flex-1 flex items-center gap-2 bg-white/5 rounded-xl px-3 py-2 border border-white/5 text-white text-xs">
-                        <ImageIcon className="w-3.5 h-3.5 text-[#8E92A4] shrink-0" />
+                      <div className="flex-1 flex items-center gap-2 bg-[var(--bg-arena)] rounded-xl px-3 py-2 border border-[var(--border-card)] text-[var(--text-primary)] text-xs">
+                        <ImageIcon className="w-3.5 h-3.5 text-[var(--text-muted)] shrink-0" />
                         <input 
                           type="url" 
                           value={newMediaUrl}
                           onChange={e => setNewMediaUrl(e.target.value)}
                           placeholder="O pegar enlace web (GIF de Tenor, Giphy, etc.)..."
-                          className="w-full bg-transparent text-xs text-white focus:outline-none placeholder:text-white/25"
+                          className="w-full bg-transparent text-xs text-[var(--text-primary)] focus:outline-none placeholder:text-[var(--text-muted)]"
                         />
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between pt-2 border-t border-[var(--border-card)]">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-[#8E92A4]">Categoría:</span>
+                    <span className="text-xs font-semibold text-[var(--text-secondary)]">Categoría:</span>
                     <select 
                       value={newCategory}
                       onChange={e => setNewCategory(e.target.value)}
-                      className="bg-white/5 text-white text-xs rounded-lg px-2 py-1 border border-white/10 focus:outline-none"
+                      className="bg-[var(--bg-arena)] text-[var(--text-primary)] text-xs rounded-lg px-2.5 py-1.5 border border-[var(--border-card)] focus:outline-none"
                     >
                       {CATEGORIES.filter(c => c.id !== 'ALL').map(c => (
-                        <option key={c.id} value={c.id} className="bg-[#1C1D27]">{c.name}</option>
+                        <option key={c.id} value={c.id} className="bg-[var(--bg-card)] text-[var(--text-primary)]">{c.name}</option>
                       ))}
                     </select>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setIsPosting(false)} className="px-4 py-2 text-xs font-bold text-[#8E92A4] hover:text-white transition-colors cursor-pointer">Cancelar</button>
+                    <button onClick={() => setIsPosting(false)} className="px-4 py-2 text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer">Cancelar</button>
                     <button onClick={handleCreatePost} className="btn-primary px-5 py-2 text-sm rounded-lg hover:scale-105 transition-transform cursor-pointer">Publicar</button>
                   </div>
                 </div>
@@ -638,13 +638,13 @@ export default function CommunityPage() {
 
           {/* Search Bar */}
           <div className="relative group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[#8E92A4] group-focus-within:text-[#E63946] transition-colors" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--text-muted)] group-focus-within:text-[#E63946] transition-colors" />
             <input 
-              type="text"
+              type="text" 
               placeholder="Buscar discusiones, equipos o memes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-[#15161E] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-[#E63946]/50 focus:ring-1 focus:ring-[#E63946]/50 transition-all shadow-inner text-sm"
+              className="w-full bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl py-4 pl-12 pr-4 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-[#E63946]/50 focus:ring-1 focus:ring-[#E63946]/50 transition-all shadow-sm text-sm"
             />
           </div>
 
@@ -674,7 +674,7 @@ export default function CommunityPage() {
                 const canDelete = canDeletePost(post);
 
                 return (
-                  <div key={post.id} className="arena-card p-5 group transition-colors glass-panel border-white/5 relative">
+                  <div key={post.id} className="arena-card p-5 group transition-colors glass-panel border-[var(--border-card)] relative">
                     
                     {/* Meta Header with Delete Button */}
                     <div className="flex items-center justify-between mb-3">
@@ -694,28 +694,28 @@ export default function CommunityPage() {
                           <div className="flex items-center gap-2 flex-wrap">
                             <Link 
                               href={`/profile/${post.user_id || post.user?.id || ''}`}
-                              className="text-sm font-black text-white hover:text-[#E63946] transition-colors"
+                              className="text-sm font-black text-[var(--text-primary)] hover:text-[#E63946] transition-colors"
                               title="Ver perfil y medallero"
                             >
                               {post.user.profile?.nickname || capitalizeWords(post.user.first_name)}
                             </Link>
                             {post.user.role === 'ADMIN' && (
-                              <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-bold border border-red-500/30">
+                              <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-500 dark:text-red-300 font-bold border border-red-500/30">
                                 👑 Admin
                               </span>
                             )}
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-white/5 text-[#A8DADC] border border-white/10 hidden sm:inline-block">
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-[var(--bg-arena)] text-[var(--text-secondary)] border border-[var(--border-card)] hidden sm:inline-block font-semibold">
                               {post.user.profile?.career || 'Competidor'}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 text-[11px] text-[#8E92A4]">
-                            <span className="font-semibold text-[#A8DADC]/90">
+                          <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-muted)]">
+                            <span className="font-semibold text-[var(--text-secondary)]">
                               {capitalizeWords(`${post.user.first_name} ${post.user.last_name}`)}
                             </span>
                             <span>•</span>
-                            <span className="text-[10px] text-[#5A5E73]">{new Date(post.created_at).toLocaleDateString()}</span>
+                            <span className="text-[10px]">{new Date(post.created_at).toLocaleDateString()}</span>
                             <span>•</span>
-                            <span className="text-[#A8DADC] font-semibold text-[10px]">{post.category}</span>
+                            <span className="text-[#E63946] font-semibold text-[10px]">{post.category}</span>
                           </div>
                         </div>
                       </div>
@@ -725,7 +725,7 @@ export default function CommunityPage() {
                         <button
                           onClick={() => handleDeletePost(post.id)}
                           disabled={actionLoading === post.id}
-                          className="p-1.5 rounded-lg text-[#8E92A4] hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          className="p-1.5 rounded-lg text-[var(--text-muted)] hover:text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
                           title="Eliminar publicación indebida"
                         >
                           {actionLoading === post.id ? (
@@ -738,16 +738,16 @@ export default function CommunityPage() {
                     </div>
 
                     {/* Content */}
-                    <h3 className="text-lg font-bold text-white mb-2 leading-tight">
+                    <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 leading-tight">
                       {post.title}
                     </h3>
-                    <p className="text-[#8E92A4] text-sm leading-relaxed mb-4 whitespace-pre-wrap">
+                    <p className="text-[var(--text-secondary)] text-sm leading-relaxed mb-4 whitespace-pre-wrap">
                       {post.description}
                     </p>
 
                     {/* Image/GIF */}
                     {post.media_url && (
-                      <div className="mb-4 rounded-xl overflow-hidden border border-white/5 bg-black/50 max-h-[400px]">
+                      <div className="mb-4 rounded-xl overflow-hidden border border-[var(--border-card)] bg-[var(--bg-arena)] max-h-[400px]">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={post.media_url} alt="Media" className="w-full h-full object-contain" />
                       </div>
@@ -758,22 +758,21 @@ export default function CommunityPage() {
                       <div className="flex items-center gap-2 mb-3 px-1">
                         <div className="flex -space-x-1">
                           {topReactions.map((emoji, idx) => (
-                            <span key={idx} className="w-5 h-5 rounded-full bg-[#1C1D27] flex items-center justify-center text-xs border border-white/10 relative z-10">
+                            <span key={idx} className="w-5 h-5 rounded-full bg-[var(--bg-card)] flex items-center justify-center text-xs border border-[var(--border-card)] relative z-10 shadow-sm">
                               {emoji}
                             </span>
                           ))}
                         </div>
-                        <span className="text-xs text-[#8E92A4] font-medium">
+                        <span className="text-xs text-[var(--text-secondary)] font-medium">
                           {totalReactions} {totalReactions === 1 ? 'reacción' : 'reacciones'}
                         </span>
                       </div>
                     )}
 
                     {/* Actions Toolbar */}
-                    <div className="flex items-center justify-between border-t border-white/5 pt-3 text-sm text-[#8E92A4]">
+                    <div className="flex items-center justify-between border-t border-[var(--border-card)] pt-3 text-sm text-[var(--text-secondary)]">
                       
                       {/* React Button with Popover */}
-                      {/* React Button with Popover (Fixed Hover Bridge & Debounce) */}
                       <div 
                         className="relative"
                         onMouseEnter={() => handleMouseEnterPostReaction(post.id)}
@@ -781,7 +780,7 @@ export default function CommunityPage() {
                       >
                         <button 
                           onClick={() => handleReact(post.id, 'LIKE')}
-                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer ${
+                          className={`flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--bg-card-hover)] transition-colors cursor-pointer ${
                             currentUserReaction ? 'text-[#E63946] font-bold' : ''
                           }`}
                         >
@@ -789,10 +788,10 @@ export default function CommunityPage() {
                           <span>{currentUserReaction ? currentUserReaction.label : 'Reaccionar'}</span>
                         </button>
 
-                        {/* Floating Reactions Bar with Invisible Hover Bridge */}
+                        {/* Floating Reactions Bar */}
                         {hoveredPostReaction === post.id && (
                           <div 
-                            className="absolute bottom-full left-0 mb-1.5 p-1.5 bg-[#15161E] border border-white/10 rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
+                            className="absolute bottom-full left-0 mb-1.5 p-1.5 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
                             onMouseEnter={() => {
                               if (postHoverTimeoutRef.current) clearTimeout(postHoverTimeoutRef.current);
                             }}
@@ -802,7 +801,7 @@ export default function CommunityPage() {
                               <button
                                 key={reaction.type}
                                 onClick={() => handleReact(post.id, reaction.type)}
-                                className="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-lg hover:scale-125 transition-transform cursor-pointer"
+                                className="w-8 h-8 rounded-full hover:bg-[var(--bg-arena)] flex items-center justify-center text-lg hover:scale-125 transition-transform cursor-pointer"
                                 title={reaction.label}
                               >
                                 {reaction.emoji}
@@ -815,7 +814,7 @@ export default function CommunityPage() {
                       {/* Comment Toggle Button */}
                       <button 
                         onClick={() => setActiveCommentPost(activeCommentPost === post.id ? null : post.id)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
                         <MessageSquare className="w-4 h-4" />
                         <span>{post._count?.comments || 0} Comentarios</span>
@@ -827,7 +826,7 @@ export default function CommunityPage() {
                           navigator.clipboard.writeText(window.location.href);
                           alert('Enlace copiado al portapapeles');
                         }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
                         <Share2 className="w-4 h-4" />
                         <span className="hidden sm:inline">Compartir</span>
@@ -836,19 +835,19 @@ export default function CommunityPage() {
 
                     {/* COMMENTS SECTION */}
                     {activeCommentPost === post.id && (
-                      <div className="mt-4 pt-4 border-t border-white/5 space-y-4 animate-in fade-in">
+                      <div className="mt-4 pt-4 border-t border-[var(--border-card)] space-y-4 animate-in fade-in">
                         
                         {/* New Comment Input with Replying Badge */}
                         <div className="space-y-2">
                           {replyingTo && replyingTo.postId === post.id && (
-                            <div className="flex items-center justify-between text-xs bg-amber-500/10 text-amber-300 border border-amber-500/20 px-3 py-1.5 rounded-lg animate-in fade-in">
+                            <div className="flex items-center justify-between text-xs bg-amber-500/10 text-amber-500 dark:text-amber-300 border border-amber-500/20 px-3 py-1.5 rounded-lg animate-in fade-in">
                               <div className="flex items-center gap-1.5">
-                                <Reply className="w-3.5 h-3.5 text-amber-400" />
+                                <Reply className="w-3.5 h-3.5 text-amber-500" />
                                 <span>Respondiendo a <strong>@{replyingTo.userName}</strong></span>
                               </div>
                               <button 
                                 onClick={() => setReplyingTo(null)}
-                                className="text-[#8E92A4] hover:text-white font-bold ml-2 cursor-pointer text-xs"
+                                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] font-bold ml-2 cursor-pointer text-xs"
                                 title="Cancelar respuesta"
                               >
                                 ✕
@@ -866,7 +865,7 @@ export default function CommunityPage() {
                               onKeyDown={e => {
                                 if (e.key === 'Enter') handleCreateComment(post.id);
                               }}
-                              className="flex-1 bg-white/5 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-[#E63946]/50 border border-white/5"
+                              className="flex-1 bg-[var(--bg-arena)] rounded-xl px-4 py-2 text-sm text-[var(--text-primary)] focus:outline-none focus:ring-1 focus:ring-[#E63946]/50 border border-[var(--border-card)] placeholder:text-[var(--text-muted)]"
                             />
 
                             {/* Local Image upload button for comments */}
@@ -881,7 +880,7 @@ export default function CommunityPage() {
                               type="button"
                               disabled={uploadingCommentMedia === post.id}
                               onClick={() => document.getElementById(`comment-file-input-${post.id}`)?.click()}
-                              className="p-2 rounded-xl border border-white/10 text-[#8E92A4] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                              className="p-2 rounded-xl border border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
                               title="Subir foto desde tu equipo"
                             >
                               {uploadingCommentMedia === post.id ? (
@@ -894,7 +893,7 @@ export default function CommunityPage() {
                             <button 
                               onClick={() => setShowCommentMediaInput(showCommentMediaInput === post.id ? null : post.id)}
                               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
-                                showCommentMediaInput === post.id ? 'bg-[#E63946] border-[#E63946] text-white' : 'border-white/10 text-[#8E92A4] hover:bg-white/5'
+                                showCommentMediaInput === post.id ? 'bg-[#E63946] border-[#E63946] text-white' : 'border-[var(--border-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-card)]'
                               }`}
                               title="Pegar link de Imagen/GIF web"
                             >
@@ -910,18 +909,18 @@ export default function CommunityPage() {
 
                           {/* Media Preview / URL Input for comments */}
                           {newCommentMediaUrl && showCommentMediaInput === post.id && (
-                            <div className="flex items-center justify-between p-2 bg-white/5 rounded-xl border border-white/10 animate-in fade-in">
+                            <div className="flex items-center justify-between p-2 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] animate-in fade-in">
                               <div className="flex items-center gap-2.5 overflow-hidden">
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={newCommentMediaUrl} alt="Attached" className="w-10 h-10 object-cover rounded-lg border border-white/10 shrink-0" />
-                                <span className="text-[11px] text-white font-medium truncate">
+                                <img src={newCommentMediaUrl} alt="Attached" className="w-10 h-10 object-cover rounded-lg border border-[var(--border-card)] shrink-0" />
+                                <span className="text-[11px] text-[var(--text-primary)] font-medium truncate">
                                   {newCommentMediaUrl.startsWith('data:') ? 'Foto local adjunta' : newCommentMediaUrl}
                                 </span>
                               </div>
                               <button 
                                 type="button"
                                 onClick={() => setNewCommentMediaUrl('')}
-                                className="p-1 rounded-lg text-[#8E92A4] hover:text-red-400 hover:bg-white/5 transition-colors cursor-pointer"
+                                className="p-1 rounded-lg text-[var(--text-secondary)] hover:text-red-400 hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
                                 title="Quitar imagen"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -935,7 +934,7 @@ export default function CommunityPage() {
                               value={newCommentMediaUrl}
                               onChange={e => setNewCommentMediaUrl(e.target.value)}
                               placeholder="O pegar link de Imagen o GIF (Tenor/Giphy)..."
-                              className="w-full bg-white/5 rounded-xl px-4 py-2 text-xs text-white focus:outline-none border border-white/5"
+                              className="w-full bg-[var(--bg-arena)] rounded-xl px-4 py-2 text-xs text-[var(--text-primary)] focus:outline-none border border-[var(--border-card)] placeholder:text-[var(--text-muted)]"
                             />
                           )}
                         </div>
@@ -965,48 +964,48 @@ export default function CommunityPage() {
                                     (comment.user?.profile?.nickname || comment.user?.first_name || 'U')[0].toUpperCase()
                                   )}
                                 </Link>
-                                <div className="flex-1 bg-white/5 rounded-xl p-3 border border-white/5 space-y-1">
+                                <div className="flex-1 bg-[var(--bg-arena)] rounded-xl p-3 border border-[var(--border-card)] space-y-1">
                                   <div className="flex items-start justify-between mb-1">
                                     <div>
                                       <Link
                                         href={`/profile/${comment.user?.id || ''}`}
-                                        className="font-bold text-white hover:text-[#E63946] transition-colors text-xs"
+                                        className="font-bold text-[var(--text-primary)] hover:text-[#E63946] transition-colors text-xs"
                                         title="Ver perfil y medallero"
                                       >
-                                        {comment.user.profile?.nickname || capitalizeWords(comment.user?.first_name)}
+                                        {comment.user?.profile?.nickname || capitalizeWords(comment.user?.first_name)}
                                       </Link>
-                                      <span className="text-[10px] text-[#A8DADC]/80 font-medium block">
+                                      <span className="text-[10px] text-[#A8DADC] dark:text-[#A8DADC]/80 font-medium block">
                                         {capitalizeWords(`${comment.user?.first_name} ${comment.user?.last_name}`)}
                                       </span>
                                     </div>
-                                    <span className="text-[10px] text-[#5A5E73]">{new Date(comment.created_at).toLocaleDateString()}</span>
+                                    <span className="text-[10px] text-[var(--text-muted)]">{new Date(comment.created_at).toLocaleDateString()}</span>
                                   </div>
 
                                   {comment.content && (
-                                    <p className="text-[#8E92A4] leading-relaxed">
+                                    <p className="text-[var(--text-secondary)] leading-relaxed">
                                       {renderCommentContent(comment.content)}
                                     </p>
                                   )}
 
                                   {comment.media_url && (
-                                    <div className="mt-2 rounded-lg overflow-hidden border border-white/5 max-h-48 bg-black/40">
+                                    <div className="mt-2 rounded-lg overflow-hidden border border-[var(--border-card)] max-h-48 bg-black/10 dark:bg-black/40">
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img src={comment.media_url} alt="Media comment" className="w-full h-full object-contain" />
                                     </div>
                                   )}
 
                                   {/* Comment Action Footer: Reactions & Reply */}
-                                  <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-white/5 text-[11px] text-[#8E92A4]">
+                                  <div className="flex items-center justify-between pt-1.5 mt-2 border-t border-[var(--border-card)] text-[11px] text-[var(--text-secondary)]">
                                     <div className="flex items-center gap-2">
                                       {/* Reactions Counter for Comment */}
                                       {cTotalReactions > 0 && (
-                                        <div className="flex items-center gap-1 bg-black/40 px-2 py-0.5 rounded-full border border-white/10">
+                                        <div className="flex items-center gap-1 bg-[var(--bg-card)] px-2 py-0.5 rounded-full border border-[var(--border-card)]">
                                           <div className="flex -space-x-1">
                                             {cTopReactions.map((emoji, idx) => (
                                               <span key={idx} className="text-xs">{emoji}</span>
                                             ))}
                                           </div>
-                                          <span className="text-[10px] font-mono text-white/80">{cTotalReactions}</span>
+                                          <span className="text-[10px] font-mono text-[var(--text-primary)] font-bold">{cTotalReactions}</span>
                                         </div>
                                       )}
 
@@ -1018,8 +1017,8 @@ export default function CommunityPage() {
                                       >
                                         <button
                                           onClick={() => handleReactComment(post.id, comment.id, 'LIKE')}
-                                          className={`flex items-center gap-1 px-2 py-0.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer ${
-                                            currentCommentReaction ? 'text-[#E63946] font-bold' : 'hover:text-white'
+                                          className={`flex items-center gap-1 px-2 py-0.5 rounded-lg hover:bg-[var(--bg-card)] transition-colors cursor-pointer ${
+                                            currentCommentReaction ? 'text-[#E63946] font-bold' : 'hover:text-[var(--text-primary)]'
                                           }`}
                                         >
                                           <Smile className="w-3.5 h-3.5" />
@@ -1029,7 +1028,7 @@ export default function CommunityPage() {
                                         {/* Floating Reactions Bar for Comment */}
                                         {hoveredCommentReaction === comment.id && (
                                           <div 
-                                            className="absolute bottom-full left-0 mb-1.5 p-1 bg-[#15161E] border border-white/10 rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
+                                            className="absolute bottom-full left-0 mb-1.5 p-1 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
                                             onMouseEnter={() => {
                                               if (commentHoverTimeoutRef.current) clearTimeout(commentHoverTimeoutRef.current);
                                             }}
@@ -1039,7 +1038,7 @@ export default function CommunityPage() {
                                               <button
                                                 key={reaction.type}
                                                 onClick={() => handleReactComment(post.id, comment.id, reaction.type)}
-                                                className="w-7 h-7 rounded-full hover:bg-white/10 flex items-center justify-center text-base hover:scale-125 transition-transform cursor-pointer"
+                                                className="w-7 h-7 rounded-full hover:bg-[var(--bg-arena)] flex items-center justify-center text-base hover:scale-125 transition-transform cursor-pointer"
                                                 title={reaction.label}
                                               >
                                                 {reaction.emoji}
@@ -1053,7 +1052,7 @@ export default function CommunityPage() {
                                     {/* Reply Button */}
                                     <button
                                       onClick={() => handleReplyComment(post.id, comment.id, comment.user)}
-                                      className="flex items-center gap-1 text-[#8E92A4] hover:text-white transition-colors cursor-pointer px-2 py-0.5 rounded-lg hover:bg-white/5"
+                                      className="flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer px-2 py-0.5 rounded-lg hover:bg-[var(--bg-card)]"
                                       title={`Responder a ${comment.user?.first_name}`}
                                     >
                                       <Reply className="w-3.5 h-3.5" />
@@ -1066,9 +1065,9 @@ export default function CommunityPage() {
                                     <div className="pt-2 pl-0.5">
                                       <button
                                         onClick={() => toggleReplies(comment.id)}
-                                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-[#8E92A4] hover:text-white transition-colors cursor-pointer group"
+                                        className="inline-flex items-center gap-2 text-[11px] font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer group"
                                       >
-                                        <span className="w-6 h-[1.5px] bg-white/20 group-hover:bg-white/50 transition-colors" />
+                                        <span className="w-6 h-[1.5px] bg-[var(--border-card)] group-hover:bg-[var(--text-secondary)] transition-colors" />
                                         <span>
                                           {expandedReplies[comment.id]
                                             ? 'Ocultar respuestas'
@@ -1080,7 +1079,7 @@ export default function CommunityPage() {
 
                                   {/* Nested Replies List (1-Level Instagram Thread) */}
                                   {expandedReplies[comment.id] && comment.replies && comment.replies.length > 0 && (
-                                    <div className="pl-4 ml-1 border-l-2 border-white/10 space-y-2 mt-2.5 animate-in fade-in">
+                                    <div className="pl-4 ml-1 border-l-2 border-[var(--border-card)] space-y-2 mt-2.5 animate-in fade-in">
                                       {comment.replies.map(reply => {
                                         const rReactions = reply.reactionCounts || {};
                                         const rTotalReactions = Object.values(rReactions).reduce((a, b) => a + b, 0);
@@ -1104,47 +1103,47 @@ export default function CommunityPage() {
                                                 (reply.user?.profile?.nickname || reply.user?.first_name || 'U')[0].toUpperCase()
                                               )}
                                             </Link>
-                                            <div className="flex-1 bg-white/[0.04] rounded-xl p-2.5 border border-white/5 space-y-1">
+                                            <div className="flex-1 bg-[var(--bg-card)] rounded-xl p-2.5 border border-[var(--border-card)] space-y-1">
                                               <div className="flex items-start justify-between mb-1">
                                                 <div>
                                                   <Link
                                                     href={`/profile/${reply.user?.id || ''}`}
-                                                    className="font-bold text-white hover:text-[#E63946] transition-colors text-[11px]"
+                                                    className="font-bold text-[var(--text-primary)] hover:text-[#E63946] transition-colors text-[11px]"
                                                     title="Ver perfil y medallero"
                                                   >
-                                                    {reply.user.profile?.nickname || capitalizeWords(reply.user?.first_name)}
+                                                    {reply.user?.profile?.nickname || capitalizeWords(reply.user?.first_name)}
                                                   </Link>
-                                                  <span className="text-[9px] text-[#A8DADC]/80 font-medium block">
+                                                  <span className="text-[9px] text-[#A8DADC] dark:text-[#A8DADC]/80 font-medium block">
                                                     {capitalizeWords(`${reply.user?.first_name} ${reply.user?.last_name}`)}
                                                   </span>
                                                 </div>
-                                                <span className="text-[9px] text-[#5A5E73]">{new Date(reply.created_at).toLocaleDateString()}</span>
+                                                <span className="text-[9px] text-[var(--text-muted)]">{new Date(reply.created_at).toLocaleDateString()}</span>
                                               </div>
 
                                               {reply.content && (
-                                                <p className="text-[#8E92A4] leading-relaxed text-[11px]">
+                                                <p className="text-[var(--text-secondary)] leading-relaxed text-[11px]">
                                                   {renderCommentContent(reply.content)}
                                                 </p>
                                               )}
 
                                               {reply.media_url && (
-                                                <div className="mt-1.5 rounded-lg overflow-hidden border border-white/5 max-h-40 bg-black/40">
+                                                <div className="mt-1.5 rounded-lg overflow-hidden border border-[var(--border-card)] max-h-40 bg-black/10 dark:bg-black/40">
                                                   {/* eslint-disable-next-line @next/next/no-img-element */}
                                                   <img src={reply.media_url} alt="Media comment" className="w-full h-full object-contain" />
                                                 </div>
                                               )}
 
                                               {/* Reply Action Footer: Reactions & Reply */}
-                                              <div className="flex items-center justify-between pt-1 mt-1.5 border-t border-white/5 text-[10px] text-[#8E92A4]">
+                                              <div className="flex items-center justify-between pt-1 mt-1.5 border-t border-[var(--border-card)] text-[10px] text-[var(--text-secondary)]">
                                                 <div className="flex items-center gap-1.5">
                                                   {rTotalReactions > 0 && (
-                                                    <div className="flex items-center gap-1 bg-black/40 px-1.5 py-0.5 rounded-full border border-white/10">
+                                                    <div className="flex items-center gap-1 bg-[var(--bg-arena)] px-1.5 py-0.5 rounded-full border border-[var(--border-card)]">
                                                       <div className="flex -space-x-1">
                                                         {rTopReactions.map((emoji, idx) => (
                                                           <span key={idx} className="text-[10px]">{emoji}</span>
                                                         ))}
                                                       </div>
-                                                      <span className="text-[9px] font-mono text-white/80">{rTotalReactions}</span>
+                                                      <span className="text-[9px] font-mono text-[var(--text-primary)] font-bold">{rTotalReactions}</span>
                                                     </div>
                                                   )}
 
@@ -1156,8 +1155,8 @@ export default function CommunityPage() {
                                                   >
                                                     <button
                                                       onClick={() => handleReactComment(post.id, reply.id, 'LIKE')}
-                                                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer ${
-                                                        currentReplyReaction ? 'text-[#E63946] font-bold' : 'hover:text-white'
+                                                      className={`flex items-center gap-1 px-1.5 py-0.5 rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer ${
+                                                        currentReplyReaction ? 'text-[#E63946] font-bold' : 'hover:text-[var(--text-primary)]'
                                                       }`}
                                                     >
                                                       <Smile className="w-3 h-3" />
@@ -1166,7 +1165,7 @@ export default function CommunityPage() {
 
                                                     {hoveredCommentReaction === reply.id && (
                                                       <div 
-                                                        className="absolute bottom-full left-0 mb-1.5 p-1 bg-[#15161E] border border-white/10 rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
+                                                        className="absolute bottom-full left-0 mb-1.5 p-1 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-full flex gap-1 shadow-2xl z-20 animate-in fade-in zoom-in-95 before:absolute before:-bottom-3 before:left-0 before:right-0 before:h-4 before:content-['']"
                                                         onMouseEnter={() => {
                                                           if (commentHoverTimeoutRef.current) clearTimeout(commentHoverTimeoutRef.current);
                                                         }}
@@ -1176,7 +1175,7 @@ export default function CommunityPage() {
                                                           <button
                                                             key={reaction.type}
                                                             onClick={() => handleReactComment(post.id, reply.id, reaction.type)}
-                                                            className="w-6 h-6 rounded-full hover:bg-white/10 flex items-center justify-center text-sm hover:scale-125 transition-transform cursor-pointer"
+                                                            className="w-6 h-6 rounded-full hover:bg-[var(--bg-arena)] flex items-center justify-center text-sm hover:scale-125 transition-transform cursor-pointer"
                                                             title={reaction.label}
                                                           >
                                                             {reaction.emoji}
@@ -1190,7 +1189,7 @@ export default function CommunityPage() {
                                                 {/* Responder a esta respuesta (mantiene comment.id como root parent y etiqueta al usuario) */}
                                                 <button
                                                   onClick={() => handleReplyComment(post.id, comment.id, reply.user)}
-                                                  className="flex items-center gap-1 text-[#8E92A4] hover:text-white transition-colors cursor-pointer px-1.5 py-0.5 rounded-lg hover:bg-white/5"
+                                                  className="flex items-center gap-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer px-1.5 py-0.5 rounded-lg hover:bg-[var(--bg-arena)]"
                                                   title={`Responder a ${reply.user?.first_name}`}
                                                 >
                                                   <Reply className="w-3 h-3" />

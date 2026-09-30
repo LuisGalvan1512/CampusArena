@@ -78,18 +78,18 @@ export default function TournamentsPage() {
             Arena Competitiva Oficial
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
             Explorador de Torneos
           </h1>
 
-          <p className="text-sm sm:text-base text-[#8E92A4] leading-relaxed">
+          <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
             Inscríbete a los torneos de tu institución, compite en brackets oficiales en vivo y gana premios en efectivo y medallas legendarias.
           </p>
 
           {/* Search Bar */}
           <form onSubmit={handleSearchSubmit} className="pt-2 flex gap-3 max-w-xl">
             <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[#5A5E73]">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
                 <Search className="w-4 h-4" />
               </div>
               <input
@@ -111,7 +111,7 @@ export default function TournamentsPage() {
       </div>
 
       {/* 2. FILTERS BAR — 5 GAME TABS */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-[var(--border-card)]">
         
         {/* Game Tabs */}
         <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
@@ -119,8 +119,8 @@ export default function TournamentsPage() {
             onClick={() => setSelectedGame('ALL')}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               selectedGame === 'ALL'
-                ? 'bg-white text-black shadow-lg'
-                : 'bg-[#15161E] text-[#8E92A4] hover:text-white border border-white/5'
+                ? 'bg-[var(--accent-red)] text-white shadow-lg shadow-red-500/20'
+                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)]'
             }`}
           >
             Todos los Juegos
@@ -133,7 +133,7 @@ export default function TournamentsPage() {
               className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 selectedGame === game.code
                   ? 'text-white shadow-lg'
-                  : 'bg-[#15161E] text-[#8E92A4] hover:text-white border border-white/5'
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)]'
               }`}
               style={selectedGame === game.code ? { 
                 backgroundColor: game.color,
@@ -148,20 +148,20 @@ export default function TournamentsPage() {
 
         {/* Status Dropdown Filter */}
         <div className="flex items-center gap-3 self-end md:self-auto">
-          <span className="text-xs text-[#8E92A4] flex items-center gap-1">
+          <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
             <Filter className="w-3.5 h-3.5" />
             Estado:
           </span>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-[#15161E] border border-white/10 text-white text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
+            className="bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
           >
-            <option value="ALL">Todos los Estados</option>
-            <option value="REGISTRATION_OPEN">Inscripciones Abiertas</option>
-            <option value="PUBLISHED">Próximamente</option>
-            <option value="IN_PROGRESS">En Curso</option>
-            <option value="FINISHED">Finalizados</option>
+            <option value="ALL" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Todos los Estados</option>
+            <option value="REGISTRATION_OPEN" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Inscripciones Abiertas</option>
+            <option value="PUBLISHED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Próximamente</option>
+            <option value="IN_PROGRESS" className="bg-[var(--bg-card)] text-[var(--text-primary)]">En Curso</option>
+            <option value="FINISHED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Finalizados</option>
           </select>
         </div>
 
@@ -171,16 +171,16 @@ export default function TournamentsPage() {
       {isLoading ? (
         <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3">
           <Loader2 className="w-8 h-8 animate-spin text-[#E63946]" />
-          <p className="text-xs text-[#8E92A4]">Cargando torneos de la liga...</p>
+          <p className="text-xs text-[var(--text-secondary)]">Cargando torneos de la liga...</p>
         </div>
       ) : tournaments.length === 0 ? (
         <div className="arena-card p-12 text-center space-y-4">
-          <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto text-[#8E92A4]">
-            <Trophy className="w-8 h-8 text-[#5A5E73]" />
+          <div className="w-16 h-16 rounded-2xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-center mx-auto text-[var(--text-secondary)]">
+            <Trophy className="w-8 h-8 text-[var(--text-secondary)]" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-bold text-white">No se encontraron torneos</h3>
-            <p className="text-xs text-[#8E92A4] max-w-sm mx-auto">
+            <h3 className="text-lg font-bold text-[var(--text-primary)]">No se encontraron torneos</h3>
+            <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
               No hay torneos que coincidan con los filtros seleccionados. Intenta cambiar de juego o reiniciar la búsqueda.
             </p>
           </div>

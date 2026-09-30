@@ -30,8 +30,8 @@
 .light, [data-theme='light'] {
   /* Warm Slate / Titanium Light Theme (Anti-Glave & Elegant) */
   --bg-arena: #F1F3F7;
-  --bg-card: rgba(255, 255, 255, 0.92);
-  --bg-card-hover: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
   --border-card: rgba(15, 23, 42, 0.08);
   --border-active: rgba(220, 38, 38, 0.55);
 
@@ -45,12 +45,58 @@
 
   --text-primary: #0F172A;
   --text-secondary: #475569;
-  --text-muted: #94A3B8;
+  --text-muted: #64748B;
 
   --input-bg: #FFFFFF;
   --input-border: rgba(15, 23, 42, 0.12);
-  --nav-bg: rgba(241, 243, 247, 0.88);
-  --card-shadow: 0 10px 25px -4px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  --nav-bg: rgba(241, 243, 247, 0.92);
+  --card-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+/* Light Mode Global Safeguards to eliminate white-on-white text & black boxes */
+.light h1:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
+.light h2:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
+.light h3:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
+.light h4:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *) {
+  color: var(--text-primary);
+}
+
+.light .bg-\[\#0B0C10\],
+.light .bg-\[\#07080B\],
+.light .bg-\[\#15161E\],
+.light .bg-\[\#1C1D27\] {
+  background-color: var(--bg-card) !important;
+}
+
+.light .bg-\[\#0B0C10\]\/90,
+.light .bg-\[\#0B0C10\]\/80,
+.light .bg-\[\#0B0C10\]\/60 {
+  background-color: var(--bg-card) !important;
+}
+
+.light .border-white\/5,
+.light .border-white\/10,
+.light .border-white\/15,
+.light .border-white\/20 {
+  border-color: var(--border-card) !important;
+}
+
+.light .divide-white\/5 > :not([hidden]) ~ :not([hidden]),
+.light .divide-white\/10 > :not([hidden]) ~ :not([hidden]) {
+  border-color: var(--border-card) !important;
+}
+
+/* Guard against invisible text-white in light mode when not inside a dark or colored element */
+.light .arena-card h1.text-white,
+.light .arena-card h2.text-white,
+.light .arena-card h3.text-white,
+.light .arena-card h4.text-white,
+.light .arena-card h5.text-white,
+.light .arena-card h6.text-white,
+.light .arena-card span.text-white:not([class*="bg-"]):not(.btn-primary *),
+.light .arena-card p.text-white:not([class*="bg-"]):not(.btn-primary *),
+.light .arena-card strong.text-white:not([class*="bg-"]) {
+  color: var(--text-primary);
 }
 
 body {
@@ -75,7 +121,7 @@ body {
 .arena-card:hover {
   background-color: var(--bg-card-hover);
   transform: translateY(-3px);
-  box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.15), 0 0 0 1px var(--border-card);
+  box-shadow: 0 14px 35px -5px rgba(0, 0, 0, 0.12), 0 0 0 1px var(--border-card);
 }
 
 .dark .arena-card:hover {

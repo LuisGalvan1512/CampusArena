@@ -156,12 +156,12 @@ export function LinkGameModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[#15161E] border border-white/10 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-[#8E92A4] hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+          className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
@@ -172,10 +172,10 @@ export function LinkGameModal({
             <Sparkles className="w-3.5 h-3.5" />
             Integración Multi-Juego
           </div>
-          <h3 className="text-2xl font-black text-white">
+          <h3 className="text-2xl font-black text-[var(--text-primary)]">
             Vincular Cuenta de Juego
           </h3>
-          <p className="text-xs text-[#8E92A4]">
+          <p className="text-xs text-[var(--text-secondary)]">
             Conecta tu cuenta para inscribirte a torneos y sincronizar tus estadísticas.
           </p>
         </div>
@@ -191,7 +191,7 @@ export function LinkGameModal({
         {/* Step 1: Game Selector — 5 Games */}
         {!verifiedPlayer && (
           <div className="space-y-4">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
               1. Selecciona el Videojuego
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -208,7 +208,7 @@ export function LinkGameModal({
                     className={`p-3 rounded-xl border text-left transition-all relative ${
                       isSelected
                         ? 'shadow-lg'
-                        : 'bg-[#0B0C10] border-white/10 hover:border-white/20'
+                        : 'bg-[var(--bg-arena)] border-[var(--border-card)] hover:border-[var(--text-primary)]'
                     } ${isLinked ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                     style={isSelected ? {
                       backgroundColor: `${game.color}20`,
@@ -301,7 +301,7 @@ export function LinkGameModal({
         {verifiedPlayer && (
           <div className="space-y-6 animate-fade-in-up">
             <div 
-              className="p-5 rounded-xl bg-[#0B0C10] border space-y-4"
+              className="p-5 rounded-xl bg-[var(--bg-arena)] border space-y-4 shadow-sm"
               style={{ borderColor: `${currentGame.color}50` }}
             >
               <div className="flex items-center justify-between">
@@ -311,7 +311,7 @@ export function LinkGameModal({
                     {isApiGame ? `Jugador Encontrado en ${verifiedPlayer.game_name}` : `Cuenta Registrada — ${verifiedPlayer.game_name}`}
                   </span>
                 </div>
-                <span className="font-mono text-xs font-bold text-[#A8DADC]">
+                <span className="font-mono text-xs font-bold text-sky-500">
                   {verifiedPlayer.player_tag}
                 </span>
               </div>
@@ -323,30 +323,30 @@ export function LinkGameModal({
                   {verifiedPlayer.in_game_name[0]}
                 </div>
                 <div>
-                  <h4 className="text-xl font-black text-white">
+                  <h4 className="text-xl font-black text-[var(--text-primary)]">
                     {verifiedPlayer.in_game_name}
                   </h4>
-                  <p className="text-xs text-[#8E92A4]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     {verifiedPlayer.arena_or_club}
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 pt-2 text-center text-xs">
-                <div className="p-2.5 bg-[#15161E] rounded-lg border border-white/5">
-                  <p className="text-base font-bold text-amber-400 flex items-center justify-center gap-1">
+                <div className="p-2.5 bg-[var(--bg-card)] rounded-lg border border-[var(--border-card)]">
+                  <p className="text-base font-bold text-amber-500 flex items-center justify-center gap-1">
                     <Trophy className="w-3.5 h-3.5" />
                     {verifiedPlayer.trophies.toLocaleString()}
                   </p>
-                  <p className="text-[10px] text-[#5A5E73] uppercase mt-0.5">{currentGame.statLabel}</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] uppercase mt-0.5">{currentGame.statLabel}</p>
                 </div>
 
-                <div className="p-2.5 bg-[#15161E] rounded-lg border border-white/5">
-                  <p className="text-base font-bold text-white flex items-center justify-center gap-1">
+                <div className="p-2.5 bg-[var(--bg-card)] rounded-lg border border-[var(--border-card)]">
+                  <p className="text-base font-bold text-[var(--text-primary)] flex items-center justify-center gap-1">
                     <Flame className="w-3.5 h-3.5" style={{ color: currentGame.color }} />
                     {verifiedPlayer.level > 0 ? `Nivel ${verifiedPlayer.level}` : currentGame.badge}
                   </p>
-                  <p className="text-[10px] text-[#5A5E73] uppercase mt-0.5">
+                  <p className="text-[10px] text-[var(--text-secondary)] uppercase mt-0.5">
                     {verifiedPlayer.level > 0 ? 'Nivel de Cuenta' : 'Modalidad'}
                   </p>
                 </div>
@@ -354,7 +354,7 @@ export function LinkGameModal({
             </div>
 
             <div className="space-y-2">
-              <p className="text-xs text-center text-[#8E92A4]">
+              <p className="text-xs text-center text-[var(--text-secondary)]">
                 ¿Confirmas que esta es tu cuenta oficial de juego?
               </p>
               <div className="grid grid-cols-2 gap-3">

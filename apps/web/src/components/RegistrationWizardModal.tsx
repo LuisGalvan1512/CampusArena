@@ -250,26 +250,26 @@ export function RegistrationWizardModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[#15161E] border border-white/10 shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
+      <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-[#8E92A4] hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+          className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Header with Steps */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-[#8E92A4]">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span className="font-bold text-[#E63946] uppercase tracking-wider">
               Inscripción Oficial
             </span>
             <span>Paso {step} de 4</span>
           </div>
 
-          <h3 className="text-xl font-black text-white">
+          <h3 className="text-xl font-black text-[var(--text-primary)]">
             {tournament.name}
           </h3>
 
@@ -279,7 +279,7 @@ export function RegistrationWizardModal({
               <div
                 key={i}
                 className={`h-1.5 rounded-full transition-all ${
-                  step >= i ? 'bg-[#E63946]' : 'bg-white/10'
+                  step >= i ? 'bg-[#E63946]' : 'bg-[var(--border-card)]'
                 }`}
               />
             ))}
@@ -298,36 +298,36 @@ export function RegistrationWizardModal({
         {step === 1 && (
           <div className="space-y-5 animate-in fade-in">
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">1. Confirmar Cuenta de Videojuego</h4>
-              <p className="text-xs text-[#8E92A4]">
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">1. Confirmar Cuenta de Videojuego</h4>
+              <p className="text-xs text-[var(--text-secondary)]">
                 Para competir en este torneo de {gameName}, utilizaremos tu cuenta o Tag oficial vinculado.
               </p>
             </div>
 
             {matchingGameProfile ? (
-              <div className="p-4 bg-[#0B0C10] rounded-xl border border-emerald-500/30 space-y-3">
+              <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-emerald-500/30 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#E63946]/20 text-[#E63946]">
                       <Gamepad2 className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-white">{matchingGameProfile.in_game_name}</p>
-                      <p className="text-xs text-[#8E92A4]">Tag / ID: <span className="text-[#A8DADC] font-mono font-bold">{matchingGameProfile.player_tag}</span></p>
+                      <p className="text-sm font-bold text-[var(--text-primary)]">{matchingGameProfile.in_game_name}</p>
+                      <p className="text-xs text-[var(--text-secondary)]">Tag / ID: <span className="text-[#E63946] font-mono font-bold">{matchingGameProfile.player_tag}</span></p>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
                     Vinculado
                   </span>
                 </div>
               </div>
             ) : (
-              <div className="p-5 bg-[#0B0C10] rounded-xl border border-white/10 space-y-4">
+              <div className="p-5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-4">
                 <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-white">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
                     Ingresa tu Nickname o Player Tag
                   </label>
-                  <p className="text-xs text-[#8E92A4]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Registraremos temporalmente tu ID para que puedas competir en el torneo de inmediato.
                   </p>
                 </div>
@@ -343,15 +343,15 @@ export function RegistrationWizardModal({
 
             {/* TEAM SQUAD SETUP (Dynamic size: 2v2, 3v3, 4v4, 5v5) */}
             {isTeamTournament && (
-              <div className="p-4 bg-[#0B0C10] rounded-xl border border-indigo-500/30 space-y-4">
+              <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-indigo-500/30 space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4 text-indigo-400" />
-                    <h5 className="text-xs font-bold text-white uppercase tracking-wider">
+                    <h5 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
                       {teamSize === 2 ? 'Registro de Dúo (2v2)' : teamSize === 3 ? 'Registro de Trío (3v3)' : teamSize === 4 ? 'Registro de Escuadra (4v4)' : `Registro de Equipo (${teamSize}v${teamSize})`}
                     </h5>
                   </div>
-                  <span className="text-[10px] font-bold text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                  <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
                     👑 Tú eres el Capitán
                   </span>
                 </div>
@@ -388,18 +388,18 @@ export function RegistrationWizardModal({
                 
                 {/* Team Name and Emblem Selector */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-[#8E92A4]">
+                  <label className="block text-xs font-semibold text-[var(--text-secondary)]">
                     Nombre del Equipo e Icono Representativo *
                   </label>
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-[#15161E] p-1 rounded-xl border border-white/10 shrink-0">
+                    <div className="flex items-center gap-1 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)] shrink-0">
                       {['🐉', '⚡', '🐺', '🛡️', '👑', '🦅', '⚔️'].map((emb) => (
                         <button
                           key={emb}
                           type="button"
                           onClick={() => setTeamEmblem(emb)}
                           className={`w-6 h-6 rounded-md text-xs flex items-center justify-center transition-all cursor-pointer ${
-                            teamEmblem === emb ? 'bg-indigo-500/30 border border-indigo-500 shadow-sm scale-110' : 'hover:bg-white/5 opacity-70 hover:opacity-100'
+                            teamEmblem === emb ? 'bg-indigo-500/30 border border-indigo-500 shadow-sm scale-110' : 'hover:bg-[var(--bg-card)] opacity-70 hover:opacity-100'
                           }`}
                         >
                           {emb}
@@ -532,24 +532,24 @@ export function RegistrationWizardModal({
         {step === 2 && (
           <div className="space-y-5 animate-in fade-in">
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">2. Aceptación del Reglamento Oficial</h4>
-              <p className="text-xs text-[#8E92A4]">
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">2. Aceptación del Reglamento Oficial</h4>
+              <p className="text-xs text-[var(--text-secondary)]">
                 Lee y acepta las normas de Fair Play y formato de torneo.
               </p>
             </div>
 
-            <div className="p-4 bg-[#0B0C10] rounded-xl border border-white/5 max-h-40 overflow-y-auto text-xs text-[#8E92A4] font-mono leading-relaxed space-y-2 whitespace-pre-line">
+            <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] max-h-40 overflow-y-auto text-xs text-[var(--text-secondary)] font-mono leading-relaxed space-y-2 whitespace-pre-line">
               {tournament.rules_text}
             </div>
 
-            <label className="flex items-start gap-3 p-3 bg-[#0B0C10] rounded-xl border border-white/10 cursor-pointer">
+            <label className="flex items-start gap-3 p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] cursor-pointer">
               <input
                 type="checkbox"
                 checked={acceptedRules}
                 onChange={(e) => setAcceptedRules(e.target.checked)}
-                className="w-4 h-4 mt-0.5 rounded bg-[#15161E] border-white/20 text-[#E63946] focus:ring-[#E63946]"
+                className="w-4 h-4 mt-0.5 rounded bg-[var(--bg-card)] border-[var(--border-card)] text-[#E63946] focus:ring-[#E63946]"
               />
-              <span className="text-xs text-[#F1FAEE] leading-relaxed">
+              <span className="text-xs text-[var(--text-primary)] leading-relaxed">
                 He leído y acepto cumplir el <strong>Reglamento Oficial de Competición</strong> y las sanciones por conducta antideportiva.
               </span>
             </label>
@@ -588,9 +588,9 @@ export function RegistrationWizardModal({
         {step === 3 && (
           <div className="space-y-5 animate-in fade-in">
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-white">3. Pago y Comprobante</h4>
-              <p className="text-xs text-[#8E92A4]">
-                Monto a pagar: <strong className="text-white">S/ {tournament.cost} PEN</strong>
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">3. Pago y Comprobante</h4>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Monto a pagar: <strong className="text-[var(--text-primary)]">S/ {tournament.cost} PEN</strong>
               </p>
             </div>
 
@@ -601,8 +601,8 @@ export function RegistrationWizardModal({
                 onClick={() => setPaymentMethod('YAPE')}
                 className={`py-2 rounded-xl text-xs font-bold transition-all border ${
                   paymentMethod === 'YAPE'
-                    ? 'bg-[#74008E] border-[#74008E] text-white'
-                    : 'bg-[#15161E] border-white/10 text-[#8E92A4] hover:border-white/30'
+                    ? 'bg-[#74008E] border-[#74008E] text-white shadow-md'
+                    : 'bg-[var(--bg-arena)] border-[var(--border-card)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'
                 }`}
               >
                 Yape
@@ -612,8 +612,8 @@ export function RegistrationWizardModal({
                 onClick={() => setPaymentMethod('PLIN')}
                 className={`py-2 rounded-xl text-xs font-bold transition-all border ${
                   paymentMethod === 'PLIN'
-                    ? 'bg-[#003883] border-[#003883] text-white'
-                    : 'bg-[#15161E] border-white/10 text-[#8E92A4] hover:border-white/30'
+                    ? 'bg-[#003883] border-[#003883] text-white shadow-md'
+                    : 'bg-[var(--bg-arena)] border-[var(--border-card)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'
                 }`}
               >
                 Plin
@@ -633,14 +633,14 @@ export function RegistrationWizardModal({
                 />
               </div>
               <div className="space-y-1 text-xs text-center sm:text-left flex-1">
-                <p className="font-bold text-[#A8DADC] uppercase tracking-wider">
+                <p className="font-bold text-[#E63946] uppercase tracking-wider">
                   Escanea para pagar con {paymentMethod}
                 </p>
-                <p className="text-xl font-black text-white font-mono tracking-widest mt-1">
+                <p className="text-xl font-black text-[var(--text-primary)] font-mono tracking-widest mt-1">
                   994 058 442
                 </p>
-                <p className="text-xs text-[#8E92A4] mt-2">
-                  Titular: <span className="font-bold text-white">
+                <p className="text-xs text-[var(--text-secondary)] mt-2">
+                  Titular: <span className="font-bold text-[var(--text-primary)]">
                     {paymentMethod === 'YAPE' ? 'Luis Enrique Galvan Morales' : 'Luis Galvan'}
                   </span>
                 </p>
@@ -650,7 +650,7 @@ export function RegistrationWizardModal({
             {/* Upload Form */}
             <form onSubmit={handleSubmitEvidence} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                   Número de Operación (Opcional)
                 </label>
                 <input
@@ -663,13 +663,13 @@ export function RegistrationWizardModal({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                   Comprobante / Captura del Voucher (Yape o Plin)
                 </label>
                 
                 {previewUrl ? (
-                  <div className="relative p-3 bg-[#0B0C10] border border-emerald-500/40 rounded-xl space-y-3">
-                    <div className="relative w-full h-44 rounded-lg overflow-hidden bg-black/60 border border-white/10 flex items-center justify-center">
+                  <div className="relative p-3 bg-[var(--bg-arena)] border border-emerald-500/40 rounded-xl space-y-3">
+                    <div className="relative w-full h-44 rounded-lg overflow-hidden bg-black/60 border border-[var(--border-card)] flex items-center justify-center">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img 
                         src={previewUrl} 
@@ -684,11 +684,11 @@ export function RegistrationWizardModal({
                       )}
                     </div>
                     <div className="flex items-center justify-between text-xs">
-                      <span className="flex items-center gap-1.5 text-emerald-400 font-semibold">
-                        <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                      <span className="flex items-center gap-1.5 text-emerald-500 dark:text-emerald-400 font-semibold">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                         Captura lista para revisión
                       </span>
-                      <label className="text-[#A8DADC] hover:underline cursor-pointer font-medium">
+                      <label className="text-[#E63946] hover:underline cursor-pointer font-medium">
                         Cambiar captura
                         <input
                           type="file"
@@ -700,25 +700,25 @@ export function RegistrationWizardModal({
                     </div>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-6 bg-[#0B0C10] border-2 border-dashed border-white/20 hover:border-[#E63946]/50 rounded-xl text-center space-y-2 cursor-pointer transition-all group">
+                  <label className="flex flex-col items-center justify-center p-6 bg-[var(--bg-arena)] border-2 border-dashed border-[var(--border-card)] hover:border-[#E63946]/50 rounded-xl text-center space-y-2 cursor-pointer transition-all group">
                     <input
                       type="file"
                       accept="image/*"
                       className="hidden"
                       onChange={handleFileChange}
                     />
-                    <div className="w-10 h-10 rounded-full bg-white/5 group-hover:bg-[#E63946]/10 flex items-center justify-center transition-colors">
+                    <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] group-hover:bg-[#E63946]/10 flex items-center justify-center transition-colors">
                       <UploadCloud className="w-5 h-5 text-[#457B9D] group-hover:text-[#E63946] transition-colors" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">
+                      <p className="text-xs font-bold text-[var(--text-primary)]">
                         Haz clic o arrastra tu captura de Yape / Plin
                       </p>
-                      <p className="text-[11px] text-[#8E92A4] mt-0.5">
+                      <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
                         PNG, JPG o WEBP (máximo 5MB)
                       </p>
                     </div>
-                    <span className="px-3 py-1 bg-white/10 group-hover:bg-[#E63946] group-hover:text-white rounded-lg text-[10px] font-bold text-[#A8DADC] transition-colors">
+                    <span className="px-3 py-1 bg-[var(--bg-card)] group-hover:bg-[#E63946] group-hover:text-white rounded-lg text-[10px] font-bold text-[var(--text-secondary)] transition-colors">
                       Seleccionar archivo
                     </span>
                   </label>
@@ -735,7 +735,7 @@ export function RegistrationWizardModal({
                       }
                     }}
                     placeholder="O pega el enlace público de la imagen si prefieres..."
-                    className="input-arena text-[11px] py-1.5 w-full text-[#8E92A4] bg-transparent border-white/5"
+                    className="input-arena text-[11px] py-1.5 w-full text-[var(--text-secondary)] bg-transparent border-[var(--border-card)]"
                   />
                 )}
               </div>
@@ -764,31 +764,31 @@ export function RegistrationWizardModal({
         {/* STEP 4: SUCCESS CONFIRMATION */}
         {step === 4 && (
           <div className="space-y-6 text-center py-4 animate-in zoom-in-95">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
               <CheckCircle2 className="w-10 h-10" />
             </div>
 
             <div className="space-y-2">
-              <h4 className="text-2xl font-black text-white">
+              <h4 className="text-2xl font-black text-[var(--text-primary)]">
                 ¡Solicitud Registrada con Éxito!
               </h4>
-              <p className="text-xs text-[#8E92A4] max-w-sm mx-auto leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed">
                 Tu comprobante y cuenta de juego están en revisión por los organizadores del torneo. Recibirás confirmación cuando el cupo esté formalmente validado.
               </p>
             </div>
 
-            <div className="p-4 bg-[#0B0C10] rounded-xl border border-white/5 text-xs text-left space-y-2">
+            <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs text-left space-y-2">
               <div className="flex justify-between">
-                <span className="text-[#8E92A4]">Torneo:</span>
-                <span className="font-bold text-white">{tournament.name}</span>
+                <span className="text-[var(--text-muted)]">Torneo:</span>
+                <span className="font-bold text-[var(--text-primary)]">{tournament.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#8E92A4]">Jugador:</span>
-                <span className="font-bold text-[#A8DADC]">{matchingGameProfile?.in_game_name} ({matchingGameProfile?.player_tag})</span>
+                <span className="text-[var(--text-muted)]">Jugador:</span>
+                <span className="font-bold text-[#E63946]">{matchingGameProfile?.in_game_name} ({matchingGameProfile?.player_tag})</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#8E92A4]">Estado:</span>
-                <span className="font-bold text-amber-400 uppercase">En Revisión</span>
+                <span className="text-[var(--text-muted)]">Estado:</span>
+                <span className="font-bold text-amber-500 dark:text-amber-400 uppercase">En Revisión</span>
               </div>
             </div>
 

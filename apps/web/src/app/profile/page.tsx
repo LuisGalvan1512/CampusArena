@@ -342,10 +342,10 @@ export default function ProfilePage() {
                   <img
                     src={profile.avatar_url}
                     alt={profile.nickname || 'Avatar'}
-                    className="w-full h-full object-cover rounded-[14px] bg-[#0B0C10]"
+                    className="w-full h-full object-cover rounded-[14px] bg-[var(--bg-arena)]"
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#0B0C10] rounded-[14px] flex items-center justify-center text-3xl font-black text-white">
+                  <div className="w-full h-full bg-[var(--bg-arena)] rounded-[14px] flex items-center justify-center text-3xl font-black text-[var(--text-primary)]">
                     {(profile.nickname || user.first_name || 'U')[0].toUpperCase()}
                   </div>
                 )}
@@ -366,21 +366,21 @@ export default function ProfilePage() {
 
             <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+                <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">
                   {profile.nickname || capitalizeWords(user.first_name)}
                 </h1>
 
                 {/* Institutional Academic Badge */}
                 {academicRole === 'DOCENTE' ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-500 dark:text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
                     👨‍🏫 Docente Tecsup
                   </span>
                 ) : academicRole === 'EGRESADO' ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
                     🎓 Egresado Tecsup
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
                     📚 {profile.cycle || 1}° Ciclo (Tecsup)
                   </span>
                 )}
@@ -389,15 +389,15 @@ export default function ProfilePage() {
                   Competidor
                 </span>
               </div>
-              <p className="text-sm font-semibold text-[#A8DADC]">
+              <p className="text-sm font-semibold text-[var(--text-secondary)]">
                 {capitalizeWords(`${user.first_name} ${user.last_name}`)}
               </p>
-              <p className="text-[11px] font-mono text-[#8E92A4]/80 flex items-center gap-1.5 pt-0.5">
-                <Mail className="w-3 h-3 text-[#5A5E73]" />
+              <p className="text-[11px] font-mono text-[var(--text-muted)] flex items-center gap-1.5 pt-0.5">
+                <Mail className="w-3 h-3 text-[var(--text-muted)]" />
                 <span>{user.email}</span>
               </p>
-              <div className="flex items-center gap-2 pt-1 text-xs text-[#A8DADC]">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center gap-2 pt-1 text-xs text-[var(--text-secondary)]">
+                <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                 <span>Cuenta Verificada en Supabase Cloud</span>
               </div>
             </div>
@@ -406,16 +406,16 @@ export default function ProfilePage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             <Link
               href={`/profile/${user.id}`}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-300 hover:text-white border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
+              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-600 dark:text-emerald-300 hover:text-[var(--text-primary)] border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
               title="Ver cómo ven tu perfil los demás competidores"
             >
-              <Eye className="w-4 h-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <Eye className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
               <span>Vista de Visitante</span>
             </Link>
 
-            <div className="bg-[#0B0C10] px-5 py-3 rounded-xl border border-white/10 text-left sm:text-right">
-              <p className="text-xs text-[#8E92A4]">Representando a</p>
-              <p className="text-sm font-bold text-white flex items-center justify-start sm:justify-end gap-1.5">
+            <div className="bg-[var(--bg-arena)] px-5 py-3 rounded-xl border border-[var(--border-card)] text-left sm:text-right">
+              <p className="text-xs text-[var(--text-muted)]">Representando a</p>
+              <p className="text-sm font-bold text-[var(--text-primary)] flex items-center justify-start sm:justify-end gap-1.5">
                 <span>Tecsup — Sede {profile.campus || 'Lima'}</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
               </p>
@@ -510,14 +510,14 @@ export default function ProfilePage() {
 
       {/* 2. MEDALLERO DE HONOR & LEGADO */}
       <div className="arena-card p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-card)] pb-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 dark:text-amber-400 flex items-center justify-center">
               <Trophy className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-black text-white">Medallero de Honor & Insignias</h2>
-              <p className="text-xs text-[#8E92A4]">
+              <h2 className="text-lg font-black text-[var(--text-primary)]">Medallero de Honor & Insignias</h2>
+              <p className="text-xs text-[var(--text-secondary)]">
                 Reconocimientos oficiales ganados en torneos culminados de Campus Arena
               </p>
             </div>
@@ -525,17 +525,17 @@ export default function ProfilePage() {
 
           <div className="flex items-center gap-3">
             {/* Medals Counter Badges */}
-            <div className="flex items-center gap-2 text-xs bg-[#0B0C10] px-3 py-1.5 rounded-xl border border-white/10 font-mono">
+            <div className="flex items-center gap-2 text-xs bg-[var(--bg-arena)] px-3 py-1.5 rounded-xl border border-[var(--border-card)] font-mono text-[var(--text-primary)]">
               <span title="Medallas de Oro">🥇 {legacySummary.championships}</span>
-              <span className="text-white/20">•</span>
+              <span className="text-[var(--text-muted)]">•</span>
               <span title="Medallas de Plata">🥈 {legacySummary.silver_medals}</span>
-              <span className="text-white/20">•</span>
+              <span className="text-[var(--text-muted)]">•</span>
               <span title="Medallas de Bronce">🥉 {legacySummary.bronze_medals}</span>
             </div>
 
             <Link
               href="/ranking"
-              className="btn-secondary px-3.5 py-1.5 text-xs flex items-center gap-1.5 text-amber-400 shrink-0"
+              className="btn-secondary px-3.5 py-1.5 text-xs flex items-center gap-1.5 text-amber-500 dark:text-amber-400 shrink-0"
             >
               <Trophy className="w-3.5 h-3.5" />
               Ranking
@@ -545,16 +545,16 @@ export default function ProfilePage() {
 
         {/* Dynamic Medals List or Clean Empty State */}
         {medals.length === 0 ? (
-          <div className="p-8 sm:p-10 text-center bg-[#0B0C10] rounded-2xl border border-white/5 space-y-4">
-            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400/70 flex items-center justify-center mx-auto text-3xl shadow-inner">
+          <div className="p-8 sm:p-10 text-center bg-[var(--bg-arena)] rounded-2xl border border-[var(--border-card)] space-y-4">
+            <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500/70 dark:text-amber-400/70 flex items-center justify-center mx-auto text-3xl shadow-inner">
               🏅
             </div>
             <div className="space-y-1.5 max-w-md mx-auto">
-              <h3 className="text-sm sm:text-base font-black text-white">
+              <h3 className="text-sm sm:text-base font-black text-[var(--text-primary)]">
                 Sin medallas oficiales aún
               </h3>
-              <p className="text-xs text-[#8E92A4] leading-relaxed">
-                Las medallas de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se asignan automáticamente a tu perfil una vez que el torneo en el que participas culmina oficialmente (estado <span className="text-emerald-400 font-bold">FINALIZADO</span>) según tu posición en las llaves del bracket.
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                Las medallas de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se asignan automáticamente a tu perfil una vez que el torneo en el que participas culmina oficialmente (estado <span className="text-emerald-500 dark:text-emerald-400 font-bold">FINALIZADO</span>) según tu posición en las llaves del bracket.
               </p>
             </div>
             <div className="pt-2">
@@ -575,51 +575,51 @@ export default function ProfilePage() {
                 href={`/tournaments/${medal.tournament_slug}`}
                 className={`p-5 rounded-2xl border transition-all duration-300 group hover:-translate-y-1 hover:shadow-xl relative overflow-hidden flex flex-col justify-between ${
                   medal.medal_type === 'GOLD'
-                    ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-amber-500/15 bg-gradient-to-b from-amber-500/10 via-[#15161E] to-[#0B0C10]'
+                    ? 'border-amber-500/40 hover:border-amber-400 hover:shadow-amber-500/15 bg-gradient-to-b from-amber-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'SILVER'
-                    ? 'border-slate-400/40 hover:border-slate-300 hover:shadow-slate-400/15 bg-gradient-to-b from-slate-400/10 via-[#15161E] to-[#0B0C10]'
+                    ? 'border-slate-400/40 hover:border-slate-300 hover:shadow-slate-400/15 bg-gradient-to-b from-slate-400/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'BRONZE'
-                    ? 'border-amber-700/40 hover:border-amber-600 hover:shadow-amber-700/15 bg-gradient-to-b from-amber-700/10 via-[#15161E] to-[#0B0C10]'
+                    ? 'border-amber-700/40 hover:border-amber-600 hover:shadow-amber-700/15 bg-gradient-to-b from-amber-700/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
                     : medal.medal_type === 'HONOR'
-                    ? 'border-blue-500/40 hover:border-blue-400 hover:shadow-blue-500/15 bg-gradient-to-b from-blue-500/10 via-[#15161E] to-[#0B0C10]'
-                    : 'border-emerald-500/30 hover:border-emerald-400 hover:shadow-emerald-500/15 bg-gradient-to-b from-emerald-500/10 via-[#15161E] to-[#0B0C10]'
+                    ? 'border-blue-500/40 hover:border-blue-400 hover:shadow-blue-500/15 bg-gradient-to-b from-blue-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
+                    : 'border-emerald-500/30 hover:border-emerald-400 hover:shadow-emerald-500/15 bg-gradient-to-b from-emerald-500/10 via-[var(--bg-card)] to-[var(--bg-arena)]'
                 }`}
               >
                 <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full blur-2xl pointer-events-none group-hover:bg-white/10 transition-colors" />
 
                 <div className="space-y-3 relative z-10">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-[#0B0C10] border border-white/10 flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-2xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform">
                       {medal.emoji}
                     </div>
                     <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border ${
                       medal.medal_type === 'GOLD'
-                        ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                        ? 'bg-amber-500/20 text-amber-500 dark:text-amber-300 border-amber-500/40'
                         : medal.medal_type === 'SILVER'
-                        ? 'bg-slate-300/20 text-slate-200 border-slate-300/40'
+                        ? 'bg-slate-300/20 text-slate-700 dark:text-slate-200 border-slate-300/40'
                         : medal.medal_type === 'BRONZE'
-                        ? 'bg-amber-700/20 text-amber-400 border-amber-700/40'
+                        ? 'bg-amber-700/20 text-amber-600 dark:text-amber-400 border-amber-700/40'
                         : medal.medal_type === 'HONOR'
-                        ? 'bg-blue-500/20 text-blue-300 border-blue-500/40'
-                        : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                        ? 'bg-blue-500/20 text-blue-500 dark:text-blue-300 border-blue-500/40'
+                        : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border-emerald-500/40'
                     }`}>
                       {medal.place}
                     </span>
                   </div>
 
                   <div className="space-y-1">
-                    <p className="text-xs font-black text-white group-hover:text-amber-400 transition-colors line-clamp-1">
+                    <p className="text-xs font-black text-[var(--text-primary)] group-hover:text-amber-500 dark:group-hover:text-amber-400 transition-colors line-clamp-1">
                       {medal.tournament_name}
                     </p>
-                    <p className="text-[11px] font-semibold text-[#8E92A4]">
+                    <p className="text-[11px] font-semibold text-[var(--text-secondary)]">
                       {medal.title}
                     </p>
                   </div>
                 </div>
 
-                <div className="pt-4 border-t border-white/5 mt-4 flex items-center justify-between text-[10px] text-[#5A5E73] relative z-10">
-                  <span className="font-bold text-[#A8DADC]">{medal.game_code}</span>
-                  <span className="inline-flex items-center gap-1 text-[#8E92A4] group-hover:text-white transition-colors">
+                <div className="pt-4 border-t border-[var(--border-card)] mt-4 flex items-center justify-between text-[10px] text-[var(--text-muted)] relative z-10">
+                  <span className="font-bold text-[var(--text-secondary)]">{medal.game_code}</span>
+                  <span className="inline-flex items-center gap-1 text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
                     Ver historial &rarr;
                   </span>
                 </div>
@@ -631,19 +631,19 @@ export default function ProfilePage() {
 
       {/* 3. MIS TORNEOS E INSCRIPCIONES */}
       <div className="arena-card p-6 sm:p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#E63946]/20 text-[#E63946] flex items-center justify-center">
               <Swords className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black text-white">Historial de Torneos y Participaciones</h2>
+                <h2 className="text-lg font-black text-[var(--text-primary)]">Historial de Torneos y Participaciones</h2>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30">
                   {registrations.length} {registrations.length === 1 ? 'Participación' : 'Participaciones'}
                 </span>
               </div>
-              <p className="text-xs text-[#8E92A4]">Registro oficial de competencias, estados y rendimiento en Campus Arena</p>
+              <p className="text-xs text-[var(--text-secondary)]">Registro oficial de competencias, estados y rendimiento en Campus Arena</p>
             </div>
           </div>
 
@@ -657,9 +657,9 @@ export default function ProfilePage() {
         </div>
 
         {registrations.length === 0 ? (
-          <div className="p-8 text-center bg-[#0B0C10] rounded-xl border border-white/5 space-y-3">
-            <p className="text-sm font-bold text-white">Aún no estás inscrito en ningún torneo</p>
-            <p className="text-xs text-[#8E92A4] max-w-sm mx-auto">
+          <div className="p-8 text-center bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-3">
+            <p className="text-sm font-bold text-[var(--text-primary)]">Aún no estás inscrito en ningún torneo</p>
+            <p className="text-xs text-[var(--text-secondary)] max-w-sm mx-auto">
               Explora el catálogo de torneos de Tecsup, inscribe tu cuenta de juego y asegura tu lugar en el bracket oficial.
             </p>
             <Link
@@ -679,21 +679,21 @@ export default function ProfilePage() {
               return (
                 <div
                   key={reg.id}
-                  className="p-5 bg-[#0B0C10] rounded-xl border border-white/10 space-y-4 hover:border-white/20 transition-all flex flex-col justify-between"
+                  className="p-5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-4 hover:border-[#E63946]/30 transition-all flex flex-col justify-between"
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold text-[#A8DADC] uppercase tracking-wider">
+                      <span className="text-[10px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                         {reg.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars'}
                       </span>
                       <div className="flex items-center gap-1.5">
                         {earnedMedal && (
                           <span className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 ${
                             earnedMedal.medal_type === 'GOLD'
-                              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40'
+                              ? 'bg-amber-500/20 text-amber-500 dark:text-amber-300 border-amber-500/40'
                               : earnedMedal.medal_type === 'SILVER'
-                              ? 'bg-slate-300/20 text-slate-200 border-slate-300/40'
-                              : 'bg-amber-700/20 text-amber-400 border-amber-700/40'
+                              ? 'bg-slate-300/20 text-slate-700 dark:text-slate-200 border-slate-300/40'
+                              : 'bg-amber-700/20 text-amber-600 dark:text-amber-400 border-amber-700/40'
                           }`}>
                             {earnedMedal.medal_type === 'GOLD' ? '🥇 1° Lugar' : earnedMedal.medal_type === 'SILVER' ? '🥈 2° Lugar' : '🥉 3° Lugar'}
                           </span>
@@ -702,24 +702,24 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
-                    <h3 className="text-base font-extrabold text-white line-clamp-1">
+                    <h3 className="text-base font-extrabold text-[var(--text-primary)] line-clamp-1">
                       {reg.tournament_name}
                     </h3>
 
-                    <div className="text-xs text-[#8E92A4] space-y-0.5">
+                    <div className="text-xs text-[var(--text-secondary)] space-y-0.5">
                       <p>
-                        Jugador: <span className="text-white font-semibold">{reg.in_game_name}</span> ({reg.player_tag})
+                        Jugador: <span className="text-[var(--text-primary)] font-semibold">{reg.in_game_name}</span> ({reg.player_tag})
                       </p>
                       {reg.team_name && (
                         <p>
-                          Escuadra: <span className="text-amber-400 font-semibold">{reg.team_name}</span>
+                          Escuadra: <span className="text-amber-500 dark:text-amber-400 font-semibold">{reg.team_name}</span>
                         </p>
                       )}
                     </div>
                   </div>
 
-                  <div className="pt-3 border-t border-white/5 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 text-[#8E92A4]">
+                  <div className="pt-3 border-t border-[var(--border-card)] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
                       <Calendar className="w-3.5 h-3.5 text-[#E63946]" />
                       <span>
                         {new Date(reg.tournament_start_at).toLocaleDateString('es-PE', {
@@ -731,7 +731,7 @@ export default function ProfilePage() {
 
                     <Link
                       href={`/tournaments/${reg.tournament_slug}`}
-                      className="text-xs font-bold text-[#A8DADC] hover:text-white flex items-center gap-1"
+                      className="text-xs font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1"
                     >
                       Ver Torneo &rarr;
                     </Link>
@@ -745,24 +745,24 @@ export default function ProfilePage() {
 
       {/* 3. INFORMACIÓN ACADÉMICA & DEL COMPETIDOR */}
       <div className="arena-card p-6 sm:p-8 space-y-6">
-        <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+        <div className="flex items-center gap-3 border-b border-[var(--border-card)] pb-4">
           <div className="w-10 h-10 rounded-xl bg-[#457B9D]/20 text-[#457B9D] flex items-center justify-center">
             <GraduationCap className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-lg font-black text-white">Información Académica y de Competidor</h2>
-            <p className="text-xs text-[#8E92A4]">Datos validados para torneos interuniversitarios Tecsup</p>
+            <h2 className="text-lg font-black text-[var(--text-primary)]">Información Académica y de Competidor</h2>
+            <p className="text-xs text-[var(--text-secondary)]">Datos validados para torneos interuniversitarios Tecsup</p>
           </div>
         </div>
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
           {/* Apodo / Gamertag */}
-          <div className="space-y-2 bg-white/[0.02] p-4 rounded-xl border border-white/5">
+          <div className="space-y-2 bg-[var(--bg-arena)] p-4 rounded-xl border border-[var(--border-card)]">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
+              <label className="block text-xs font-bold uppercase tracking-wider text-amber-500 dark:text-amber-400">
                 🎮 Apodo / Gamertag (Nombre principal en la Arena)
               </label>
-              <span className="text-[10px] text-[#8E92A4]">Visible en Comunidad, Torneos y Rankings</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Visible en Comunidad, Torneos y Rankings</span>
             </div>
             <input
               type="text"
@@ -770,35 +770,35 @@ export default function ProfilePage() {
               onChange={(e) => setProfile({ ...profile, nickname: e.target.value })}
               placeholder="Ej. Viper, LuchoPro, Ghost..."
               maxLength={30}
-              className="input-arena border-amber-500/30 focus:border-amber-400 focus:ring-amber-400/20 text-white font-bold"
+              className="input-arena border-amber-500/30 focus:border-amber-400 focus:ring-amber-400/20 text-[var(--text-primary)] font-bold bg-[var(--bg-card)]"
             />
-            <p className="text-[11px] text-[#8E92A4]">
+            <p className="text-[11px] text-[var(--text-secondary)]">
               Este será el nombre principal grande con el que te identificarán todos en la plataforma. Tu nombre real aparecerá debajo en letra más pequeña.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 Nombres
               </label>
               <input
                 type="text"
                 disabled
                 value={capitalizeWords(user.first_name)}
-                className="input-arena opacity-70 cursor-not-allowed bg-black/40 font-medium text-white"
+                className="input-arena opacity-70 cursor-not-allowed bg-[var(--bg-arena)] font-medium text-[var(--text-primary)] border-[var(--border-card)]"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 Apellidos
               </label>
               <input
                 type="text"
                 disabled
                 value={capitalizeWords(user.last_name)}
-                className="input-arena opacity-70 cursor-not-allowed bg-black/40 font-medium text-white"
+                className="input-arena opacity-70 cursor-not-allowed bg-[var(--bg-arena)] font-medium text-[var(--text-primary)] border-[var(--border-card)]"
               />
             </div>
           </div>
@@ -806,10 +806,10 @@ export default function ProfilePage() {
           {/* Sede Institucional Tecsup (Lima, Arequipa, Trujillo) */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 📍 Sede Institucional Tecsup
               </label>
-              <span className="text-[10px] text-[#8E92A4]">Representarás a esta sede en torneos y rankings</span>
+              <span className="text-[10px] text-[var(--text-muted)]">Representarás a esta sede en torneos y rankings</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               {[
@@ -825,16 +825,16 @@ export default function ProfilePage() {
                     onClick={() => setProfile({ ...profile, campus: c.id })}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-3 cursor-pointer ${
                       isSelected
-                        ? 'bg-[#E63946]/10 text-white border-[#E63946] shadow-sm'
-                        : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                        ? 'bg-[#E63946]/10 text-[var(--text-primary)] border-[#E63946] shadow-sm'
+                        : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] border-[var(--border-card)] hover:border-[var(--text-primary)]'
                     }`}
                   >
                     <span className="text-xl shrink-0">{c.flag}</span>
                     <div className="space-y-0.5">
-                      <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-[#A8DADC]'}`}>
+                      <p className={`text-xs font-bold ${isSelected ? 'text-[#E63946]' : 'text-[var(--text-primary)]'}`}>
                         {c.name}
                       </p>
-                      <p className="text-[10px] font-normal text-[#8E92A4] leading-tight">
+                      <p className="text-[10px] font-normal text-[var(--text-secondary)] leading-tight">
                         {c.desc}
                       </p>
                     </div>
@@ -846,7 +846,7 @@ export default function ProfilePage() {
 
           {/* Institutional Academic Condition in Tecsup */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
               Condición Institucional en Tecsup
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -860,14 +860,14 @@ export default function ProfilePage() {
                 }}
                 className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
                   academicRole === 'ESTUDIANTE'
-                    ? 'bg-[#E63946]/10 text-white border-[#E63946] shadow-sm'
-                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                    ? 'bg-[#E63946]/10 text-[var(--text-primary)] border-[#E63946] shadow-sm'
+                    : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] border-[var(--border-card)] hover:border-[var(--text-primary)]'
                 }`}
               >
-                <GraduationCap className="w-4 h-4 text-emerald-400" />
+                <GraduationCap className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                 <div>
-                  <p className="text-white">Estudiante Regular</p>
-                  <p className="text-[10px] font-normal text-[#8E92A4]">Ciclos 1° al 6°</p>
+                  <p className="text-[var(--text-primary)]">Estudiante Regular</p>
+                  <p className="text-[10px] font-normal text-[var(--text-secondary)]">Ciclos 1° al 6°</p>
                 </div>
               </button>
 
@@ -879,14 +879,14 @@ export default function ProfilePage() {
                 }}
                 className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
                   academicRole === 'DOCENTE'
-                    ? 'bg-indigo-500/10 text-white border-indigo-500 shadow-sm'
-                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                    ? 'bg-indigo-500/10 text-[var(--text-primary)] border-indigo-500 shadow-sm'
+                    : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] border-[var(--border-card)] hover:border-[var(--text-primary)]'
                 }`}
               >
                 <span className="text-base">👨‍🏫</span>
                 <div>
-                  <p className="text-white">Docente / Profesor</p>
-                  <p className="text-[10px] font-normal text-[#8E92A4]">Plana Docente Tecsup</p>
+                  <p className="text-[var(--text-primary)]">Docente / Profesor</p>
+                  <p className="text-[10px] font-normal text-[var(--text-secondary)]">Plana Docente Tecsup</p>
                 </div>
               </button>
 
@@ -898,14 +898,14 @@ export default function ProfilePage() {
                 }}
                 className={`p-3 rounded-xl border text-xs font-bold transition-all text-left flex items-center gap-2.5 cursor-pointer ${
                   academicRole === 'EGRESADO'
-                    ? 'bg-amber-500/10 text-white border-amber-500 shadow-sm'
-                    : 'bg-[#15161E] text-[#8E92A4] border-white/5 hover:border-white/20'
+                    ? 'bg-amber-500/10 text-[var(--text-primary)] border-amber-500 shadow-sm'
+                    : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] border-[var(--border-card)] hover:border-[var(--text-primary)]'
                 }`}
               >
                 <span className="text-base">🎓</span>
                 <div>
-                  <p className="text-white">Egresado / Graduado</p>
-                  <p className="text-[10px] font-normal text-[#8E92A4]">Comunidad de Alumni</p>
+                  <p className="text-[var(--text-primary)]">Egresado / Graduado</p>
+                  <p className="text-[10px] font-normal text-[var(--text-secondary)]">Comunidad de Alumni</p>
                 </div>
               </button>
             </div>
@@ -913,7 +913,7 @@ export default function ProfilePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             <div className={academicRole === 'ESTUDIANTE' ? 'sm:col-span-2 space-y-1.5' : 'sm:col-span-3 space-y-1.5'}>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                 {academicRole === 'DOCENTE' 
                   ? 'Área o Especialidad Docente' 
                   : academicRole === 'EGRESADO' 
@@ -936,16 +936,16 @@ export default function ProfilePage() {
 
             {academicRole === 'ESTUDIANTE' && (
               <div className="space-y-1.5">
-                <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
                   Ciclo Académico Actual
                 </label>
                 <select
                   value={profile.cycle || 1}
                   onChange={(e) => setProfile({ ...profile, cycle: Number(e.target.value) })}
-                  className="input-arena bg-[#15161E]"
+                  className="input-arena bg-[var(--bg-card)] text-[var(--text-primary)] border-[var(--border-card)]"
                 >
                   {[1, 2, 3, 4, 5, 6].map((c) => (
-                    <option key={c} value={c}>
+                    <option key={c} value={c} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
                       {c}° Ciclo
                     </option>
                   ))}
@@ -994,43 +994,43 @@ export default function ProfilePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
           <div className="arena-card p-6 sm:p-8 max-w-lg w-full space-y-5 border-amber-500/30">
             
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-500 dark:text-amber-400 flex items-center justify-center">
                   <Scale className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Solicitud de Apelación Disciplinaria</h3>
-                  <p className="text-xs text-[#8E92A4]">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">Solicitud de Apelación Disciplinaria</h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Envía tu descargo para que el equipo administrativo revise tu sanción
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setAppealModalSanction(null)}
-                className="p-1 rounded-lg text-[#8E92A4] hover:text-white"
+                className="p-1 rounded-lg text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="bg-black/40 p-3.5 rounded-xl border border-white/5 text-xs space-y-1.5">
-              <p className="text-[#8E92A4]">
-                <strong className="text-white">Tipo de sanción:</strong> {appealModalSanction.type}
+            <div className="bg-[var(--bg-arena)] p-3.5 rounded-xl border border-[var(--border-card)] text-xs space-y-1.5">
+              <p className="text-[var(--text-secondary)]">
+                <strong className="text-[var(--text-primary)]">Tipo de sanción:</strong> {appealModalSanction.type}
               </p>
-              <p className="text-[#8E92A4]">
-                <strong className="text-white">Motivo aplicado:</strong> {appealModalSanction.reason}
+              <p className="text-[var(--text-secondary)]">
+                <strong className="text-[var(--text-primary)]">Motivo aplicado:</strong> {appealModalSanction.reason}
               </p>
               {appealModalSanction.ends_at && (
-                <p className="text-[#8E92A4]">
-                  <strong className="text-white">Fecha de expiración:</strong> {new Date(appealModalSanction.ends_at).toLocaleDateString()}
+                <p className="text-[var(--text-secondary)]">
+                  <strong className="text-[var(--text-primary)]">Fecha de expiración:</strong> {new Date(appealModalSanction.ends_at).toLocaleDateString()}
                 </p>
               )}
             </div>
 
             <form onSubmit={handleSubmitAppeal} className="space-y-4 text-xs">
               <div className="space-y-2">
-                <label className="font-bold text-white">Tu descargo y explicación de los hechos:</label>
+                <label className="font-bold text-[var(--text-primary)]">Tu descargo y explicación de los hechos:</label>
                 <textarea
                   value={appealText}
                   onChange={(e) => setAppealText(e.target.value)}
@@ -1038,11 +1038,11 @@ export default function ProfilePage() {
                   rows={4}
                   required
                   minLength={10}
-                  className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder:text-white/20 focus:outline-none focus:border-amber-400 text-xs leading-relaxed"
+                  className="w-full bg-[var(--bg-arena)] border border-[var(--border-card)] rounded-xl p-3 text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none focus:border-amber-400 text-xs leading-relaxed"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--border-card)]">
                 <button
                   type="button"
                   onClick={() => setAppealModalSanction(null)}
@@ -1068,40 +1068,40 @@ export default function ProfilePage() {
       {/* AVATAR SELECTOR MODAL */}
       {showAvatarModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-          <div className="arena-card p-6 sm:p-8 max-w-xl w-full space-y-6 border border-white/10 shadow-2xl">
+          <div className="arena-card p-6 sm:p-8 max-w-xl w-full space-y-6 border border-[var(--border-card)] shadow-2xl">
             
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#E63946]/10 text-[#E63946] flex items-center justify-center">
                   <Camera className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Elegir Foto de Perfil</h3>
-                  <p className="text-xs text-[#8E92A4]">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">Elegir Foto de Perfil</h3>
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Selecciona un avatar oficial del sistema o ingresa un enlace web personalizado
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowAvatarModal(false)}
-                className="text-[#8E92A4] hover:text-white text-lg font-bold cursor-pointer"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-lg font-bold cursor-pointer"
               >
                 ✕
               </button>
             </div>
 
             {/* Modal Tabs */}
-            <div className="grid grid-cols-2 gap-2 bg-[#0B0C10] p-1 rounded-xl border border-white/5">
+            <div className="grid grid-cols-2 gap-2 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)]">
               <button
                 type="button"
                 onClick={() => setAvatarTab('SYSTEM')}
                 className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   avatarTab === 'SYSTEM'
-                    ? 'bg-white/15 text-white shadow-sm'
-                    : 'text-[#8E92A4] hover:text-white'
+                    ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                <Sparkles className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                 Avatares del Sistema
               </button>
               <button
@@ -1110,7 +1110,7 @@ export default function ProfilePage() {
                 className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
                   avatarTab === 'CUSTOM'
                     ? 'bg-[#E63946] text-white shadow-sm shadow-[#E63946]/20'
-                    : 'text-[#8E92A4] hover:text-white'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 <ImageIcon className="w-3.5 h-3.5" />
@@ -1121,7 +1121,7 @@ export default function ProfilePage() {
             {/* TAB CONTENT: SYSTEM AVATARS */}
             {avatarTab === 'SYSTEM' ? (
               <div className="space-y-4">
-                <p className="text-xs text-[#8E92A4]">
+                <p className="text-xs text-[var(--text-secondary)]">
                   Elige entre avatares temáticos de gaming y esports inspirados en Tecsup:
                 </p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[280px] overflow-y-auto p-1">
@@ -1135,13 +1135,13 @@ export default function ProfilePage() {
                         className={`p-2 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border ${
                           isSelected
                             ? 'bg-[#E63946]/20 border-[#E63946] shadow-lg shadow-[#E63946]/30 scale-105'
-                            : 'bg-[#0B0C10] border-white/5 hover:border-white/20 hover:scale-102'
+                            : 'bg-[var(--bg-arena)] border-[var(--border-card)] hover:border-[#E63946]/50 hover:scale-102'
                         }`}
                       >
-                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#15161E] flex items-center justify-center">
+                        <div className="w-14 h-14 rounded-xl overflow-hidden bg-[var(--bg-card)] flex items-center justify-center">
                           <img src={av.url} alt={av.name} className="w-full h-full object-cover" />
                         </div>
-                        <span className="text-[10px] font-semibold text-white/90 text-center truncate max-w-[85px]">
+                        <span className="text-[10px] font-semibold text-[var(--text-primary)] text-center truncate max-w-[85px]">
                           {av.name}
                         </span>
                       </button>
@@ -1153,7 +1153,7 @@ export default function ProfilePage() {
               /* TAB CONTENT: CUSTOM URL */
               <div className="space-y-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-[#8E92A4] block">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] block">
                     URL Directa de la Imagen
                   </label>
                   <input
@@ -1163,15 +1163,15 @@ export default function ProfilePage() {
                     placeholder="https://ejemplo.com/tu-foto.png"
                     className="input-arena w-full text-xs"
                   />
-                  <p className="text-[11px] text-[#8E92A4]">
+                  <p className="text-[11px] text-[var(--text-muted)]">
                     Puedes pegar un enlace directo de Discord, Gravatar, Imgur, GitHub o cualquier imagen web.
                   </p>
                 </div>
 
                 {/* Live Preview */}
                 {customAvatarInput.trim() && (
-                  <div className="flex items-center gap-3 p-3 bg-[#0B0C10] rounded-xl border border-white/10">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-[#15161E] shrink-0 border border-white/10 flex items-center justify-center">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-[var(--bg-card)] shrink-0 border border-[var(--border-card)] flex items-center justify-center">
                       <img
                         src={customAvatarInput.trim()}
                         alt="Vista previa"
@@ -1182,8 +1182,8 @@ export default function ProfilePage() {
                       />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">Vista previa del avatar</p>
-                      <p className="text-[11px] text-[#A8DADC]">Se adaptará automáticamente a tu perfil.</p>
+                      <p className="text-xs font-bold text-[var(--text-primary)]">Vista previa del avatar</p>
+                      <p className="text-[11px] text-[var(--text-secondary)]">Se adaptará automáticamente a tu perfil.</p>
                     </div>
                   </div>
                 )}
@@ -1191,13 +1191,13 @@ export default function ProfilePage() {
             )}
 
             {/* Modal Actions */}
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between pt-3 border-t border-[var(--border-card)]">
               {profile.avatar_url ? (
                 <button
                   type="button"
                   disabled={isSavingAvatar}
                   onClick={() => handleSaveAvatar(null)}
-                  className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  className="px-3 py-2 rounded-xl text-xs font-semibold text-rose-500 dark:text-rose-400 hover:bg-rose-500/10 transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   Quitar Foto Actual

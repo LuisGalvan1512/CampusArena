@@ -93,11 +93,11 @@ export default function RankingPage() {
             Tabla de Posiciones Oficial
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
             Ranking Institucional Tecsup
           </h1>
 
-          <p className="text-sm sm:text-base text-[#8E92A4] leading-relaxed">
+          <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
             Los mejores competidores de la universidad clasificados por sus copas oficiales sincronizadas con Supercell y torneos ganados en la Arena.
           </p>
 
@@ -110,7 +110,7 @@ export default function RankingPage() {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   gameCode === game.code
                     ? 'text-white shadow-lg'
-                    : 'bg-[#15161E] text-[#8E92A4] hover:text-white border border-white/10'
+                    : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border border-[var(--border-card)]'
                 }`}
                 style={gameCode === game.code ? {
                   backgroundColor: game.color,

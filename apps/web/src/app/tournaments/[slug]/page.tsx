@@ -244,27 +244,27 @@ export default function TournamentDetailPage() {
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <Link 
           href="/tournaments"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[#8E92A4] hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           Volver al Catálogo de Torneos
         </Link>
 
         {/* Live Stream Bar */}
-        <div className="flex items-center gap-2.5 bg-[#15161E] px-4 py-1.5 rounded-full border border-white/10 text-xs">
+        <div className="flex items-center gap-2.5 bg-[var(--bg-card)] px-4 py-1.5 rounded-full border border-[var(--border-card)] text-xs shadow-sm">
           <div className="w-2 h-2 rounded-full bg-[#E63946] animate-ping" />
-          <span className="text-[#8E92A4]">Transmisión:</span>
+          <span className="text-[var(--text-secondary)]">Transmisión:</span>
           <Link
             href="/live"
-            className="font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1.5 transition-colors"
+            className="font-bold text-emerald-500 dark:text-emerald-400 hover:underline flex items-center gap-1.5 transition-colors"
           >
             <span>{tournament.stream_platform || 'KICK'} en Vivo</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
           {tournament.team_size && tournament.team_size > 1 && (
             <>
-              <span className="text-[#5A5E73]">•</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+              <span className="text-[var(--text-secondary)]">•</span>
+              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30">
                 Escuadras {tournament.team_size}v{tournament.team_size}
               </span>
             </>
@@ -274,7 +274,7 @@ export default function TournamentDetailPage() {
 
       {/* ORGANIZER / ADMIN MANAGEMENT TOOLBAR */}
       {canManage && (
-        <div className="arena-card p-4 sm:p-5 bg-gradient-to-r from-[#1D3557]/40 via-[#15161E] to-[#E63946]/20 border border-amber-500/40 rounded-2xl shadow-xl space-y-3">
+        <div className="arena-card p-4 sm:p-5 bg-gradient-to-r from-indigo-500/10 via-[var(--bg-card)] to-[#E63946]/10 border border-amber-500/40 rounded-2xl shadow-xl space-y-3">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-black">
@@ -799,27 +799,27 @@ export default function TournamentDetailPage() {
           onClick={() => setSelectedTeamRoster(null)}
         >
           <div 
-            className="relative max-w-lg w-full arena-card bg-[#15161E] border border-white/10 rounded-2xl shadow-2xl p-6 space-y-5 max-h-[85vh] overflow-y-auto"
+            className="relative max-w-lg w-full arena-card bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl shadow-2xl p-6 space-y-5 max-h-[85vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-2xl flex items-center justify-center border border-indigo-500/30">
                   {selectedTeamRoster.roster_members?.team_emblem || '🐉'}
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-white">
+                  <h3 className="text-base font-black text-[var(--text-primary)]">
                     {selectedTeamRoster.team_name || 'Escuadra Oficial'}
                   </h3>
-                  <p className="text-xs text-[#8E92A4]">
+                  <p className="text-xs text-[var(--text-secondary)]">
                     Integrantes oficiales de la escuadra
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedTeamRoster(null)}
-                className="text-[#8E92A4] hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -828,9 +828,9 @@ export default function TournamentDetailPage() {
             {/* Members List */}
             <div className="space-y-3">
               {/* Capitán */}
-              <div className="p-3.5 bg-[#0B0C10] rounded-xl border border-indigo-500/40 flex items-center justify-between">
+              <div className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-indigo-500/40 flex items-center justify-between">
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
                     {selectedTeamRoster.avatar_url ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img src={selectedTeamRoster.avatar_url} alt="" className="w-full h-full object-cover" />
@@ -840,15 +840,15 @@ export default function TournamentDetailPage() {
                   </div>
                   <div className="min-w-0 space-y-0.5">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-white truncate">
+                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                         {selectedTeamRoster.competitor_name}
                       </p>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30">
                         Capitán
                       </span>
                     </div>
-                    <p className="text-[11px] text-[#8E92A4] font-mono truncate">{selectedTeamRoster.email}</p>
-                    <p className="text-[10px] text-emerald-400 font-mono">
+                    <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{selectedTeamRoster.email}</p>
+                    <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono">
                       Tag: {selectedTeamRoster.player_tag} ({selectedTeamRoster.in_game_name})
                     </p>
                   </div>
@@ -873,21 +873,21 @@ export default function TournamentDetailPage() {
                   : [];
 
                 return members.map((m: any, idx: number) => (
-                  <div key={idx} className="p-3.5 bg-[#0B0C10] rounded-xl border border-white/5 flex items-center justify-between">
+                  <div key={idx} className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-white/5 text-[#8E92A4] font-bold flex items-center justify-center border border-white/10 shrink-0">
+                      <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] text-[var(--text-secondary)] font-bold flex items-center justify-center border border-[var(--border-card)] shrink-0">
                         {m.name?.charAt(0) || 'J'}
                       </div>
                       <div className="min-w-0 space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-white truncate">{m.name || `Compañero ${idx + 1}`}</p>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-white/5 text-[#8E92A4]">
+                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">{m.name || `Compañero ${idx + 1}`}</p>
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-card)]">
                             {m.role || `Jugador ${idx + 2}`}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#8E92A4] font-mono truncate">{m.email || 'correo@tecsup.edu.pe'}</p>
+                        <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{m.email || 'correo@tecsup.edu.pe'}</p>
                         {m.player_tag && (
-                          <p className="text-[10px] text-emerald-400 font-mono">Tag: {m.player_tag}</p>
+                          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono">Tag: {m.player_tag}</p>
                         )}
                       </div>
                     </div>

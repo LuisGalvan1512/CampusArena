@@ -151,7 +151,7 @@ export function NotificationCenterDrawer() {
       {/* Bell trigger button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="relative p-2 rounded-full bg-[#15161E] border border-white/10 hover:border-[#E63946]/50 text-[#8E92A4] hover:text-white transition-all cursor-pointer"
+        className="relative p-2 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#E63946]/50 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer"
         aria-label="Abrir centro de notificaciones"
       >
         <Bell className="w-4 h-4" />
@@ -172,38 +172,38 @@ export function NotificationCenterDrawer() {
           />
 
           {/* Drawer Container (Full Height 100vh) */}
-          <div className="relative w-full max-w-md h-full min-h-[100dvh] bg-[#15161E] border-l border-white/10 shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
+          <div className="relative w-full max-w-md h-full min-h-[100dvh] bg-[var(--bg-card)] border-l border-[var(--border-card)] shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-300">
             
             {/* 1. Drawer Header */}
-            <div className="p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#0B0C10]">
+            <div className="p-5 border-b border-[var(--border-card)] flex items-center justify-between shrink-0 bg-[var(--bg-arena)]">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-xl bg-[#E63946]/20 text-[#E63946] flex items-center justify-center">
                   <Bell className="w-4 h-4" />
                 </div>
                 <div>
-                  <h2 className="text-sm font-black text-white">Centro de Notificaciones</h2>
-                  <p className="text-[11px] text-[#8E92A4]">Avisos de partidas, pagos y brackets en vivo</p>
+                  <h2 className="text-sm font-black text-[var(--text-primary)]">Centro de Notificaciones</h2>
+                  <p className="text-[11px] text-[var(--text-secondary)]">Avisos de partidas, pagos y brackets en vivo</p>
                 </div>
               </div>
 
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-[#8E92A4] hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-2 rounded-lg hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* 2. Notification List (Scrollable Area) */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-[#15161E]">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-0 bg-[var(--bg-card)]">
               {unreadCount > 0 && (
                 <div className="flex items-center justify-between px-1 pb-1">
-                  <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider">
+                  <span className="text-[11px] font-bold text-amber-500 dark:text-amber-400 uppercase tracking-wider">
                     {unreadCount} sin leer
                   </span>
                   <button
                     onClick={markAllAsRead}
-                    className="text-[11px] text-[#8E92A4] hover:text-white hover:underline cursor-pointer"
+                    className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:underline cursor-pointer"
                   >
                     Marcar todo como leído
                   </button>
@@ -211,10 +211,10 @@ export function NotificationCenterDrawer() {
               )}
 
               {notifications.length === 0 ? (
-                <div className="p-12 text-center text-[#8E92A4] text-xs space-y-2">
-                  <Bell className="w-8 h-8 text-[#5A5E73] mx-auto" />
-                  <p className="font-semibold text-white">Bandeja al día</p>
-                  <p className="text-[11px]">No tienes notificaciones pendientes. Aquí recibirás avisos de tus inscripciones y partidas.</p>
+                <div className="p-12 text-center text-[var(--text-muted)] text-xs space-y-2">
+                  <Bell className="w-8 h-8 text-[var(--text-muted)] mx-auto opacity-50" />
+                  <p className="font-semibold text-[var(--text-primary)]">Bandeja al día</p>
+                  <p className="text-[11px] text-[var(--text-secondary)]">No tienes notificaciones pendientes. Aquí recibirás avisos de tus inscripciones y partidas.</p>
                 </div>
               ) : (
                 notifications.map((n) => (
@@ -223,23 +223,23 @@ export function NotificationCenterDrawer() {
                     onClick={() => markAsRead(n.id)}
                     className={`p-4 rounded-xl border transition-all space-y-2 cursor-pointer ${
                       n.is_read
-                        ? 'bg-[#0B0C10]/60 border-white/5 text-[#8E92A4]'
-                        : 'bg-[#0B0C10] border-white/15 shadow-lg shadow-black/30 text-white hover:border-[#E63946]/40'
+                        ? 'bg-[var(--bg-arena)]/60 border-[var(--border-card)] text-[var(--text-muted)]'
+                        : 'bg-[var(--bg-arena)] border-[var(--border-card)] shadow-sm text-[var(--text-primary)] hover:border-[#E63946]/40'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2 font-bold text-xs">
                         {getIcon(n.type)}
-                        <span className={n.is_read ? 'text-[#8E92A4]' : 'text-white'}>
+                        <span className={n.is_read ? 'text-[var(--text-muted)]' : 'text-[var(--text-primary)]'}>
                           {n.title}
                         </span>
                       </div>
-                      <span className="text-[10px] text-[#5A5E73] font-mono shrink-0">
+                      <span className="text-[10px] text-[var(--text-muted)] font-mono shrink-0">
                         {formatRelativeTime(n.created_at)}
                       </span>
                     </div>
 
-                    <p className="text-xs leading-relaxed text-[#8E92A4] pl-6">
+                    <p className="text-xs leading-relaxed text-[var(--text-secondary)] pl-6">
                       {n.message}
                     </p>
 
@@ -248,7 +248,7 @@ export function NotificationCenterDrawer() {
                         <Link
                           href={n.link}
                           onClick={() => setIsOpen(false)}
-                          className="text-xs font-bold text-[#A8DADC] hover:underline inline-flex items-center gap-1"
+                          className="text-xs font-bold text-[#E63946] hover:underline inline-flex items-center gap-1"
                         >
                           {n.link_label || 'Ver detalles'} &rarr;
                         </Link>
@@ -260,7 +260,7 @@ export function NotificationCenterDrawer() {
             </div>
 
             {/* 3. Drawer Footer */}
-            <div className="p-3.5 border-t border-white/10 bg-[#0B0C10] text-center text-[11px] text-[#5A5E73] shrink-0">
+            <div className="p-3.5 border-t border-[var(--border-card)] bg-[var(--bg-arena)] text-center text-[11px] text-[var(--text-muted)] shrink-0">
               Campus Arena • Tecsup Esports Notification Engine
             </div>
 

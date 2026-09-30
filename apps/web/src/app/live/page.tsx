@@ -301,20 +301,20 @@ export default function LiveStreamPage() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#0B0C10] pt-24 pb-12 transition-all duration-300 ${isTheaterMode ? 'px-2' : ''}`}>
+    <div className={`min-h-screen bg-[var(--bg-arena)] pt-24 pb-12 transition-all duration-300 ${isTheaterMode ? 'px-2' : ''}`}>
       <div className={`${isTheaterMode ? 'max-w-[99vw]' : 'max-w-7xl'} mx-auto px-2 sm:px-4 lg:px-8 space-y-4`}>
         
-        {/* CLEAN HEADER (NO FAKE 'EN VIVO' BADGE, NO FAKE 1280 COUNTER, NO TOURNAMENT TAGS) */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#15161E] p-4 sm:p-5 rounded-2xl border border-white/5 shadow-2xl">
+        {/* CLEAN HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 arena-card bg-[var(--bg-card)] p-4 sm:p-5 rounded-2xl border border-[var(--border-card)] shadow-2xl">
           <div className="flex items-center gap-3 sm:gap-4">
             <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-[#E63946]/10 border border-[#E63946]/20 flex items-center justify-center shrink-0">
               <Tv className="w-6 h-6 sm:w-7 sm:h-7 text-[#E63946]" />
             </div>
             <div>
-              <h1 className="text-lg sm:text-2xl font-black text-white">
+              <h1 className="text-lg sm:text-2xl font-black text-[var(--text-primary)]">
                 Transmisión Oficial de Campus Arena
               </h1>
-              <p className="text-xs text-[#8E92A4] mt-0.5">
+              <p className="text-xs text-[var(--text-secondary)] mt-0.5">
                 {selectedTournament ? `Torneo activo: ${selectedTournament.name}` : 'Canal oficial de directos de Campus Arena'}
               </p>
             </div>
@@ -325,7 +325,7 @@ export default function LiveStreamPage() {
             <button
               onClick={() => setRefreshKey((k) => k + 1)}
               title="Recargar señal de transmisión"
-              className="p-2 rounded-xl bg-[#0B0C10] hover:bg-white/10 text-[#8E92A4] hover:text-white border border-white/10 transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)] transition-colors cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
             </button>
@@ -336,7 +336,7 @@ export default function LiveStreamPage() {
               className={`p-2 rounded-xl border transition-colors cursor-pointer ${
                 isTheaterMode 
                   ? 'bg-[#E63946] text-white border-[#E63946]' 
-                  : 'bg-[#0B0C10] hover:bg-white/10 text-[#8E92A4] hover:text-white border-white/10'
+                  : 'bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-[var(--border-card)]'
               }`}
             >
               {isTheaterMode ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -345,9 +345,9 @@ export default function LiveStreamPage() {
             <button
               onClick={handleCopyShareLink}
               title="Copiar enlace de la transmisión"
-              className="p-2 rounded-xl bg-[#0B0C10] hover:bg-white/10 text-[#8E92A4] hover:text-white border border-white/10 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium"
+              className="p-2 rounded-xl bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)] transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-medium"
             >
-              {copiedLink ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4" />}
+              {copiedLink ? <Check className="w-4 h-4 text-emerald-500" /> : <Share2 className="w-4 h-4" />}
               <span className="hidden sm:inline">{copiedLink ? 'Copiado' : 'Compartir'}</span>
             </button>
 
@@ -355,20 +355,20 @@ export default function LiveStreamPage() {
             <button
               onClick={() => setShowOverrideModal(true)}
               title="Configurar señal rápida / torneo espontáneo"
-              className="p-2 rounded-xl bg-[#0B0C10] hover:bg-[#1D3557] text-[#A8DADC] border border-white/10 transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+              className="p-2 rounded-xl bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)] transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
             >
-              <Settings2 className="w-4 h-4" />
+              <Settings2 className="w-4 h-4 text-[#457B9D]" />
               <span className="hidden sm:inline">Señal Rápida</span>
             </button>
             
             {/* PLATFORM TABS (KICK, YOUTUBE, TIKTOK - NO TWITCH) */}
-            <div className="flex bg-[#0B0C10] p-1 rounded-xl border border-white/10">
+            <div className="flex bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)]">
               <button 
                 onClick={() => setActivePlatform('KICK')}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   activePlatform === 'KICK' 
                     ? 'bg-[#53FC18] text-black shadow-lg shadow-[#53FC18]/20 font-black' 
-                    : 'text-[#8E92A4] hover:text-white'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 KICK
@@ -378,7 +378,7 @@ export default function LiveStreamPage() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   activePlatform === 'YOUTUBE' 
                     ? 'bg-[#FF0000] text-white shadow-lg shadow-[#FF0000]/30 font-black' 
-                    : 'text-[#8E92A4] hover:text-white'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 YouTube
@@ -388,7 +388,7 @@ export default function LiveStreamPage() {
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                   activePlatform === 'TIKTOK' 
                     ? 'bg-[#00F2FE] text-black shadow-lg shadow-[#00F2FE]/20 font-black' 
-                    : 'text-[#8E92A4] hover:text-white'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                 }`}
               >
                 TikTok
@@ -400,27 +400,27 @@ export default function LiveStreamPage() {
         {/* MODAL: RAPID SPONTANEOUS STREAM OVERRIDE */}
         {showOverrideModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-            <div className="bg-[#15161E] border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
+            <div className="arena-card bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+              <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-3">
+                <h3 className="text-base font-bold text-[var(--text-primary)] flex items-center gap-2">
                   <Video className="w-5 h-5 text-[#E63946]" />
                   Señal Rápida / Torneo Espontáneo
                 </h3>
                 <button
                   onClick={() => setShowOverrideModal(false)}
-                  className="text-[#8E92A4] hover:text-white text-lg font-bold cursor-pointer"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-lg font-bold cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
-              <p className="text-xs text-[#8E92A4] leading-relaxed">
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                 Pega el canal, enlace o ID aquí para transmitir inmediatamente en pantalla completa sin tener que editar descripciones ni formularios.
               </p>
 
               <div className="space-y-3">
                 <div>
-                  <label className="text-[11px] font-bold uppercase text-[#A8DADC] block mb-1">
+                  <label className="text-[11px] font-bold uppercase text-[var(--text-primary)] block mb-1">
                     Canal o Enlace de Transmisión
                   </label>
                   <input
@@ -439,7 +439,7 @@ export default function LiveStreamPage() {
                       setCustomStreamUrl('lusen15');
                       setActivePlatform('KICK');
                     }}
-                    className="p-2 rounded-xl bg-[#0B0C10] border border-white/10 hover:border-[#53FC18] text-xs font-bold text-white text-center cursor-pointer transition-colors"
+                    className="p-2 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)] hover:border-[#53FC18] text-xs font-bold text-[var(--text-primary)] text-center cursor-pointer transition-colors"
                   >
                     <span>Kick: lusen15</span>
                   </button>
@@ -449,7 +449,7 @@ export default function LiveStreamPage() {
                       setCustomStreamUrl('https://www.youtube.com/@LuisGalvan1512');
                       setActivePlatform('YOUTUBE');
                     }}
-                    className="p-2 rounded-xl bg-[#0B0C10] border border-white/10 hover:border-[#FF0000] text-xs font-bold text-white text-center cursor-pointer transition-colors"
+                    className="p-2 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)] hover:border-[#FF0000] text-xs font-bold text-[var(--text-primary)] text-center cursor-pointer transition-colors"
                   >
                     <span>YouTube</span>
                   </button>
@@ -459,14 +459,14 @@ export default function LiveStreamPage() {
                       setCustomStreamUrl('luisgalvan1215');
                       setActivePlatform('TIKTOK');
                     }}
-                    className="p-2 rounded-xl bg-[#0B0C10] border border-white/10 hover:border-[#00F2FE] text-xs font-bold text-white text-center cursor-pointer transition-colors"
+                    className="p-2 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)] hover:border-[#00F2FE] text-xs font-bold text-[var(--text-primary)] text-center cursor-pointer transition-colors"
                   >
                     <span>TikTok</span>
                   </button>
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-3 border-t border-white/10">
+              <div className="flex justify-end gap-2 pt-3 border-t border-[var(--border-card)]">
                 <button
                   type="button"
                   onClick={() => {
@@ -557,14 +557,14 @@ export default function LiveStreamPage() {
           </div>
 
           {/* CHAT / INTERACTIVE SIDEBAR */}
-          <div className="bg-[#15161E] rounded-2xl border border-white/10 flex flex-col overflow-hidden shadow-xl">
+          <div className="arena-card bg-[var(--bg-card)] rounded-2xl border border-[var(--border-card)] flex flex-col overflow-hidden shadow-xl">
             
             {/* CHAT HEADER & MODE SELECTOR */}
-            <div className="p-3 border-b border-white/10 bg-[#0B0C10]/80 space-y-2">
+            <div className="p-3 border-b border-[var(--border-card)] bg-[var(--bg-arena)]/80 space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-[#A8DADC]" />
-                  <h3 className="font-bold text-white text-xs">
+                  <h3 className="font-bold text-[var(--text-primary)] text-xs">
                     {chatMode === 'PLATFORM' ? `Chat (${activePlatform})` : 'Chat Campus Tecsup'}
                   </h3>
                 </div>
@@ -572,7 +572,7 @@ export default function LiveStreamPage() {
                   <button
                     onClick={openPopoutChat}
                     title="Abrir chat en ventana emergente (Popout)"
-                    className="p-1 rounded-lg text-[#8E92A4] hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                    className="p-1 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </button>
@@ -580,13 +580,13 @@ export default function LiveStreamPage() {
               </div>
 
               {/* Chat Mode Switcher Tabs */}
-              <div className="grid grid-cols-2 gap-1 bg-[#0B0C10] p-0.5 rounded-xl border border-white/5">
+              <div className="grid grid-cols-2 gap-1 bg-[var(--bg-card)] p-0.5 rounded-xl border border-[var(--border-card)]">
                 <button
                   onClick={() => setChatMode('PLATFORM')}
                   className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${
                     chatMode === 'PLATFORM'
-                      ? 'bg-white/15 text-white shadow-sm'
-                      : 'text-[#8E92A4] hover:text-white'
+                      ? 'bg-[var(--bg-arena)] text-[var(--text-primary)] shadow-sm'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   Plataforma
@@ -596,17 +596,17 @@ export default function LiveStreamPage() {
                   className={`py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
                     chatMode === 'CAMPUS'
                       ? 'bg-[#E63946] text-white shadow-sm shadow-[#E63946]/30'
-                      : 'text-[#8E92A4] hover:text-white'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="w-3 h-3 text-amber-400" />
                   Chat Tecsup
                 </button>
               </div>
             </div>
             
             {/* CHAT CONTENT */}
-            <div className="flex-1 relative bg-[#0B0C10] overflow-hidden flex flex-col">
+            <div className="flex-1 relative bg-[var(--bg-arena)] overflow-hidden flex flex-col">
               
               {chatMode === 'PLATFORM' ? (
                 /* OFFICIAL PLATFORM CHAT */
@@ -628,13 +628,13 @@ export default function LiveStreamPage() {
                       className="absolute inset-0 border-0 w-full h-full"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center text-[#8E92A4] space-y-3 overflow-y-auto">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center text-[var(--text-secondary)] space-y-3 overflow-y-auto">
                       <div className="w-12 h-12 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20">
                         <MessageSquare className="w-6 h-6 text-[#FF0000]" />
                       </div>
-                      <h4 className="text-white text-xs font-bold">Chat de YouTube en Vivo</h4>
-                      <p className="text-[11px] leading-relaxed text-[#8E92A4]">
-                        Canal oficial: <strong className="text-white">@LuisGalvan1512</strong>. Puedes abrir el chat de YouTube en una ventana flotante o ingresar el ID del video si estás transmitiendo.
+                      <h4 className="text-[var(--text-primary)] text-xs font-bold">Chat de YouTube en Vivo</h4>
+                      <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
+                        Canal oficial: <strong className="text-[var(--text-primary)]">@LuisGalvan1512</strong>. Puedes abrir el chat de YouTube en una ventana flotante o ingresar el ID del video si estás transmitiendo.
                       </p>
 
                       {showYtInput ? (
@@ -667,7 +667,7 @@ export default function LiveStreamPage() {
                           </button>
                           <button 
                             onClick={() => setShowYtInput(true)}
-                            className="w-full py-1.5 px-3 rounded-xl bg-[#15161E] hover:bg-white/5 border border-white/10 text-white text-[11px] font-medium cursor-pointer"
+                            className="w-full py-1.5 px-3 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-arena)] border border-[var(--border-card)] text-[var(--text-primary)] text-[11px] font-medium cursor-pointer"
                           >
                             Ingresar ID del Directo
                           </button>
@@ -677,11 +677,11 @@ export default function LiveStreamPage() {
                   )
                 ) : (
                   /* TIKTOK CHAT */
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center text-[#8E92A4] space-y-3">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-5 text-center text-[var(--text-secondary)] space-y-3">
                     <div className="w-12 h-12 rounded-full bg-[#00F2FE]/10 flex items-center justify-center border border-[#00F2FE]/30">
                       <MessageSquare className="w-6 h-6 text-[#00F2FE]" />
                     </div>
-                    <h4 className="text-white text-xs font-bold">Chat de TikTok Live</h4>
+                    <h4 className="text-[var(--text-primary)] text-xs font-bold">Chat de TikTok Live</h4>
                     <p className="text-[11px] leading-relaxed">
                       TikTok no permite chats en iframes externos por seguridad de sesión. Puedes abrir la ventana emergente oficial o usar el Chat Tecsup.
                     </p>
@@ -694,7 +694,7 @@ export default function LiveStreamPage() {
                       </button>
                       <button 
                         onClick={() => setChatMode('CAMPUS')}
-                        className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-[#A8DADC] text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="w-full py-2 px-3 rounded-xl bg-[var(--bg-card)] hover:bg-[var(--bg-arena)] text-[#A8DADC] text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer border border-[var(--border-card)]"
                       >
                         <Sparkles className="w-3.5 h-3.5 text-amber-400" /> Usar Chat Campus Tecsup
                       </button>
@@ -707,19 +707,19 @@ export default function LiveStreamPage() {
                   {/* Messages container */}
                   <div className="flex-1 p-3 overflow-y-auto space-y-2.5">
                     {campusMessages.map((msg) => (
-                      <div key={msg.id} className="text-xs bg-[#15161E]/90 p-2.5 rounded-xl border border-white/5 space-y-1">
+                      <div key={msg.id} className="text-xs bg-[var(--bg-card)] p-2.5 rounded-xl border border-[var(--border-card)] space-y-1">
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-white flex items-center gap-1 truncate max-w-[150px]">
+                          <span className="font-bold text-[var(--text-primary)] flex items-center gap-1 truncate max-w-[150px]">
                             {msg.sender_name}
                             {msg.is_verified && (
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" title="Verificado Tecsup" />
                             )}
                           </span>
-                          <span className="text-[9px] text-[#8E92A4]">
+                          <span className="text-[9px] text-[var(--text-muted)]">
                             {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
-                        <p className="text-white/90 leading-snug break-words">
+                        <p className="text-[var(--text-secondary)] leading-snug break-words">
                           {msg.text}
                         </p>
                       </div>
@@ -728,13 +728,13 @@ export default function LiveStreamPage() {
                   </div>
 
                   {/* Quick reactions bar */}
-                  <div className="px-3 py-1 bg-[#15161E]/60 border-t border-white/5 flex items-center justify-between text-xs">
+                  <div className="px-3 py-1 bg-[var(--bg-card)] border-t border-[var(--border-card)] flex items-center justify-between text-xs">
                     {['🔥', '👏', '🏆', 'GG', 'Tecsup!'].map((emoji) => (
                       <button
                         key={emoji}
                         type="button"
                         onClick={() => sendQuickReaction(emoji)}
-                        className="px-2 py-0.5 rounded-md hover:bg-white/10 text-white/80 hover:text-white transition-all cursor-pointer font-bold text-[11px]"
+                        className="px-2 py-0.5 rounded-md hover:bg-[var(--bg-arena)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer font-bold text-[11px]"
                       >
                         {emoji}
                       </button>
@@ -742,13 +742,13 @@ export default function LiveStreamPage() {
                   </div>
 
                   {/* Input form */}
-                  <form onSubmit={handleSendCampusMessage} className="p-2.5 bg-[#0B0C10] border-t border-white/10 flex items-center gap-2">
+                  <form onSubmit={handleSendCampusMessage} className="p-2.5 bg-[var(--bg-card)] border-t border-[var(--border-card)] flex items-center gap-2">
                     <input
                       type="text"
                       value={newMessageText}
                       onChange={(e) => setNewMessageText(e.target.value)}
                       placeholder={currentUser ? "Escribe un mensaje en vivo..." : "Comentar en vivo..."}
-                      className="flex-1 bg-[#15161E] text-white text-xs px-3 py-2 rounded-xl border border-white/10 focus:outline-none focus:border-[#E63946]"
+                      className="flex-1 bg-[var(--bg-arena)] text-[var(--text-primary)] text-xs px-3 py-2 rounded-xl border border-[var(--border-card)] focus:outline-none focus:border-[#E63946]"
                     />
                     <button
                       type="submit"
@@ -766,20 +766,20 @@ export default function LiveStreamPage() {
 
         </div>
 
-        {/* SEGUIMIENTO DE BRACKETS (CONFIGURABLE POR EL ADMIN INDEPENDIENTEMENTE DE SI HAY STREAM O NO) */}
+        {/* SEGUIMIENTO DE BRACKETS */}
         {!isTheaterMode && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
             
             {/* Card Principal: Torneo en Seguimiento y Accesos Directos */}
-            <div className="arena-card p-5 space-y-4 md:col-span-2 border border-white/10">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/5 pb-3">
+            <div className="arena-card p-5 space-y-4 md:col-span-2 border border-[var(--border-card)]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[var(--border-card)] pb-3">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#E63946]/10 border border-[#E63946]/20 flex items-center justify-center shrink-0">
                     <Swords className="w-5 h-5 text-[#E63946]" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="text-sm sm:text-base font-bold text-white">
+                      <h3 className="text-sm sm:text-base font-bold text-[var(--text-primary)]">
                         Seguimiento de Brackets
                       </h3>
                       {canManageBrackets && (
@@ -788,7 +788,7 @@ export default function LiveStreamPage() {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-[#8E92A4]">
+                    <p className="text-xs text-[var(--text-secondary)]">
                       {selectedTournament 
                         ? `Mostrando llaves de: ${selectedTournament.name}`
                         : 'Selecciona un torneo para consultar sus eliminatorias y marcadores'}
@@ -796,9 +796,9 @@ export default function LiveStreamPage() {
                   </div>
                 </div>
 
-                {/* Tournament Selector Dropdown (Accessible to Admin or any viewer looking for a bracket) */}
+                {/* Tournament Selector Dropdown */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <label className="text-[11px] font-semibold text-[#8E92A4] hidden sm:inline">
+                  <label className="text-[11px] font-semibold text-[var(--text-secondary)] hidden sm:inline">
                     {canManageBrackets ? 'Configurar Torneo:' : 'Ver Torneo:'}
                   </label>
                   <select
@@ -807,10 +807,10 @@ export default function LiveStreamPage() {
                       const found = tournaments.find((t) => t.id === e.target.value);
                       if (found) handleSelectTournament(found);
                     }}
-                    className="bg-[#0B0C10] text-white border border-white/15 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#E63946] cursor-pointer max-w-[220px] truncate"
+                    className="bg-[var(--bg-arena)] text-[var(--text-primary)] border border-[var(--border-card)] rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:border-[#E63946] cursor-pointer max-w-[220px] truncate"
                   >
                     {tournaments.map((t) => (
-                      <option key={t.id} value={t.id} className="bg-[#15161E] text-white">
+                      <option key={t.id} value={t.id} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
                         {t.name}
                       </option>
                     ))}
@@ -837,33 +837,33 @@ export default function LiveStreamPage() {
 
                   <Link
                     href={`/tournaments/${selectedTournament.slug}`}
-                    className="p-3.5 rounded-xl bg-[#0B0C10] hover:bg-white/5 border border-white/10 text-white font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
+                    className="p-3.5 rounded-xl bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] font-bold text-xs flex items-center justify-between transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2.5">
                       <ListOrdered className="w-4 h-4 text-[#A8DADC]" />
                       <div>
                         <p className="leading-tight">Ver Torneo y Participantes</p>
-                        <p className="text-[10px] text-[#8E92A4] font-normal mt-0.5">Reglamento y tabla general</p>
+                        <p className="text-[10px] text-[var(--text-secondary)] font-normal mt-0.5">Reglamento y tabla general</p>
                       </div>
                     </div>
-                    <ChevronRight className="w-4 h-4 text-[#8E92A4] shrink-0" />
+                    <ChevronRight className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
                   </Link>
                 </div>
               ) : (
-                <div className="text-center py-6 text-xs text-[#8E92A4]">
+                <div className="text-center py-6 text-xs text-[var(--text-secondary)]">
                   No hay torneos registrados para seguimiento de llaves en este momento.
                 </div>
               )}
             </div>
 
             {/* Card Lateral: Lista Rápida de Torneos Registrados */}
-            <div className="arena-card p-5 flex flex-col justify-between space-y-3 border border-white/10">
+            <div className="arena-card p-5 flex flex-col justify-between space-y-3 border border-[var(--border-card)]">
               <div className="space-y-1">
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-                  <Trophy className="w-3.5 h-3.5 text-amber-400" />
+                <h4 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider flex items-center gap-1.5">
+                  <Trophy className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400" />
                   Torneos Disponibles
                 </h4>
-                <p className="text-[11px] text-[#8E92A4]">
+                <p className="text-[11px] text-[var(--text-secondary)]">
                   Haz clic en cualquiera para cambiar el bracket activo:
                 </p>
               </div>
@@ -877,8 +877,8 @@ export default function LiveStreamPage() {
                       onClick={() => handleSelectTournament(t)}
                       className={`w-full p-2 rounded-xl text-left text-xs font-semibold flex items-center justify-between transition-all cursor-pointer border ${
                         isCur
-                          ? 'bg-[#E63946]/10 text-white border-[#E63946]/40'
-                          : 'bg-[#0B0C10] text-[#8E92A4] hover:text-white border-white/5 hover:border-white/20'
+                          ? 'bg-[#E63946]/10 text-[#E63946] border-[#E63946]/40 font-bold'
+                          : 'bg-[var(--bg-arena)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] border-[var(--border-card)]'
                       }`}
                     >
                       <span className="truncate max-w-[180px]">{t.name}</span>
@@ -891,7 +891,7 @@ export default function LiveStreamPage() {
               {selectedTournament?.slug && (
                 <Link
                   href="/tournaments"
-                  className="text-[11px] font-bold text-[#A8DADC] hover:text-white flex items-center justify-center gap-1 pt-1 transition-colors text-center"
+                  className="text-[11px] font-bold text-[#A8DADC] hover:text-[var(--text-primary)] flex items-center justify-center gap-1 pt-1 transition-colors text-center"
                 >
                   Explorar todos los torneos <ChevronRight className="w-3 h-3" />
                 </Link>

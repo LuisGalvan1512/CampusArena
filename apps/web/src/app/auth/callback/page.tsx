@@ -161,8 +161,8 @@ export default function AuthCallbackPage() {
             <div className="w-14 h-14 mx-auto rounded-2xl bg-[#E63946]/10 border border-[#E63946]/30 flex items-center justify-center text-[#E63946]">
               <AlertCircle className="w-8 h-8" />
             </div>
-            <h2 className="text-xl font-bold text-white">Error de Acceso</h2>
-            <p className="text-sm text-[#8E92A4]">{errorMessage}</p>
+            <h2 className="text-xl font-bold text-[var(--text-primary)]">Error de Acceso</h2>
+            <p className="text-sm text-[var(--text-secondary)]">{errorMessage}</p>
 
             <button
               onClick={() => router.push('/auth/login')}
@@ -175,14 +175,14 @@ export default function AuthCallbackPage() {
         ) : (
           <div className="space-y-4">
             <div className="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-[#E63946] to-[#457B9D] p-1 shadow-xl">
-              <div className="w-full h-full bg-[#0B0C10] rounded-[14px] flex items-center justify-center">
+              <div className="w-full h-full bg-[var(--bg-card)] rounded-[14px] flex items-center justify-center">
                 <ShieldCheck className="w-8 h-8 text-[#E63946]" />
               </div>
             </div>
-            <h2 className="text-xl font-black text-white">
+            <h2 className="text-xl font-black text-[var(--text-primary)]">
               Validando Credenciales Tecsup...
             </h2>
-            <p className="text-sm text-[#8E92A4]">
+            <p className="text-sm text-[var(--text-secondary)]">
               Accediendo y sincronizando tu perfil de la Arena...
             </p>
             <div className="flex justify-center pt-2">

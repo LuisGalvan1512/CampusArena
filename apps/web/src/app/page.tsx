@@ -69,13 +69,13 @@ export default function HomePage() {
           className="relative z-10 max-w-5xl mx-auto text-center space-y-8"
         >
           {/* Badge */}
-          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel text-xs font-bold text-[#A8DADC] tracking-widest uppercase">
+          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/70 text-xs font-bold text-sky-600 dark:text-[#A8DADC] tracking-widest uppercase">
             <Flame className="w-4 h-4 text-[#E63946]" />
             Temporada 2026 — 6 Disciplinas Oficiales
           </motion.div>
 
           {/* Epic Title */}
-          <motion.h1 variants={fadeUp} className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1]">
+          <motion.h1 variants={fadeUp} className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-[var(--text-primary)]">
             Compite. Evoluciona.{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E63946] via-[#FF6B35] to-[#D62839] block sm:inline mt-2 sm:mt-0">
               Deja tu huella.
@@ -83,11 +83,11 @@ export default function HomePage() {
           </motion.h1>
 
           {/* Subtitle */}
-          <motion.p variants={fadeUp} className="text-lg sm:text-2xl text-[#8E92A4] max-w-3xl mx-auto leading-relaxed font-medium">
+          <motion.p variants={fadeUp} className="text-lg sm:text-2xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed font-medium">
             La plataforma oficial de esports universitarios. Demuestra tu nivel en{' '}
-            <span className="text-white">Clash Royale</span>,{' '}
-            <span className="text-white">Dota 2</span>,{' '}
-            <span className="text-white">Left 4 Dead 2</span> y más.
+            <span className="text-[var(--text-primary)] font-bold">Clash Royale</span>,{' '}
+            <span className="text-[var(--text-primary)] font-bold">Dota 2</span>,{' '}
+            <span className="text-[var(--text-primary)] font-bold">Left 4 Dead 2</span> y más.
           </motion.p>
 
           {/* Action CTAs */}
@@ -112,7 +112,7 @@ export default function HomePage() {
                 </Link>
                 <Link
                   href="/auth/login"
-                  className="btn-secondary px-10 py-4 text-lg w-full sm:w-auto text-center rounded-xl glass-panel hover:bg-white/10 transition-all"
+                  className="btn-secondary px-10 py-4 text-lg w-full sm:w-auto text-center rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all"
                 >
                   Iniciar Sesión
                 </Link>
@@ -121,22 +121,22 @@ export default function HomePage() {
           </motion.div>
 
           {/* Quick Stats Grid */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16 max-w-4xl mx-auto border-t border-white/10 mt-10">
-            <div className="p-4 text-center glass-panel">
-              <p className="text-3xl font-black text-white">6</p>
-              <p className="text-xs text-[#8E92A4] mt-1 font-semibold uppercase tracking-wider">Juegos Oficiales</p>
+          <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16 max-w-4xl mx-auto border-t border-[var(--border-card)] mt-10">
+            <div className="p-4 text-center arena-card">
+              <p className="text-3xl font-black text-[var(--text-primary)]">6</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Juegos Oficiales</p>
             </div>
-            <div className="p-4 text-center glass-panel">
+            <div className="p-4 text-center arena-card">
               <p className="text-3xl font-black text-[#E63946]">Tecsup</p>
-              <p className="text-xs text-[#8E92A4] mt-1 font-semibold uppercase tracking-wider">Sede Principal</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Sede Principal</p>
             </div>
-            <div className="p-4 text-center glass-panel">
+            <div className="p-4 text-center arena-card">
               <p className="text-3xl font-black text-[#457B9D]">100%</p>
-              <p className="text-xs text-[#8E92A4] mt-1 font-semibold uppercase tracking-wider">Registro Autónomo</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Registro Autónomo</p>
             </div>
-            <div className="p-4 text-center glass-panel">
-              <p className="text-3xl font-black text-[#A8DADC]">24/7</p>
-              <p className="text-xs text-[#8E92A4] mt-1 font-semibold uppercase tracking-wider">Disponibilidad</p>
+            <div className="p-4 text-center arena-card">
+              <p className="text-3xl font-black text-teal-600 dark:text-[#A8DADC]">24/7</p>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Disponibilidad</p>
             </div>
           </motion.div>
 
@@ -152,37 +152,37 @@ export default function HomePage() {
           variants={fadeUp}
           className="arena-card p-1 relative overflow-hidden bg-gradient-to-br from-[#E63946]/20 to-[#1D3557]/40 shadow-2xl"
         >
-          <div className="bg-[#0B0C10]/90 backdrop-blur-xl rounded-xl p-8 sm:p-12 border border-white/5 relative z-10">
+          <div className="bg-[var(--bg-card)]/95 backdrop-blur-xl rounded-xl p-8 sm:p-12 border border-[var(--border-card)] relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-widest">
                   <Building2 className="w-4 h-4" />
                   Sede Oficial
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black text-white leading-tight">
+                <h2 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] leading-tight">
                   La Gran Final se vive en <span className="text-[#E63946]">TECSUP</span>
                 </h2>
-                <p className="text-[#8E92A4] text-lg leading-relaxed">
+                <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
                   Disfruta de lo mejor de ambos mundos. Nuestra plataforma soporta competencias con <strong>Fase Preliminar Online</strong> para jugar cómodamente desde casa, y eventos <strong>100% Presenciales</strong> en los laboratorios de la sede central.
                 </p>
                 <div className="flex flex-col gap-4 pt-4">
-                  <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 transition-colors hover:bg-white/10">
+                  <div className="flex items-center gap-4 bg-[var(--bg-arena)] p-4 rounded-xl border border-[var(--border-card)] transition-colors hover:bg-[var(--bg-card)]">
                     <Wifi className="w-6 h-6 text-[#A8DADC]" />
                     <div>
-                      <h4 className="font-bold text-white text-sm">Fases de Grupo Online</h4>
-                      <p className="text-xs text-[#8E92A4]">Clasificatorias jugadas a distancia con brackets automáticos.</p>
+                      <h4 className="font-bold text-[var(--text-primary)] text-sm">Fases de Grupo Online</h4>
+                      <p className="text-xs text-[var(--text-secondary)]">Clasificatorias jugadas a distancia con brackets automáticos.</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/10 transition-colors hover:bg-white/10">
+                  <div className="flex items-center gap-4 bg-[var(--bg-arena)] p-4 rounded-xl border border-[var(--border-card)] transition-colors hover:bg-[var(--bg-card)]">
                     <MapPin className="w-6 h-6 text-[#E63946]" />
                     <div>
-                      <h4 className="font-bold text-white text-sm">Gran Final Presencial</h4>
-                      <p className="text-xs text-[#8E92A4]">Los mejores equipos se enfrentan cara a cara en las instalaciones.</p>
+                      <h4 className="font-bold text-[var(--text-primary)] text-sm">Gran Final Presencial</h4>
+                      <p className="text-xs text-[var(--text-secondary)]">Los mejores equipos se enfrentan cara a cara en las instalaciones.</p>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="relative h-full min-h-[300px] rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+              <div className="relative h-full min-h-[300px] rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl">
                 {/* Simulated Map/Campus Image Graphic */}
                 <div className="absolute inset-0 bg-gradient-to-br from-[#1D3557] to-[#0B0C10]" />
                 <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
@@ -200,13 +200,13 @@ export default function HomePage() {
       {/* 3. JUEGOS OFICIALES */}
       <section id="juegos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-10">
         <div className="text-center space-y-4 mb-16">
-          <h2 className="text-sm font-bold text-[#A8DADC] uppercase tracking-widest">
+          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
             Disciplinas Oficiales
           </h2>
-          <h3 className="text-4xl sm:text-5xl font-black text-white">
+          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
             Elige tu campo de batalla
           </h3>
-          <p className="text-[#8E92A4] max-w-2xl mx-auto text-base">
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-base">
             6 juegos soportados oficialmente. Registro rápido y sin validaciones restrictivas. 
             Simplemente ingresa tu nickname y estás dentro.
           </p>
@@ -254,16 +254,16 @@ export default function HomePage() {
 
               {/* Body */}
               <div className="mt-8 space-y-2 relative z-10">
-                <h4 className="text-2xl font-black text-white">{game.name}</h4>
-                <p className="text-sm text-[#8E92A4] leading-relaxed line-clamp-3">
+                <h4 className="text-2xl font-black text-[var(--text-primary)]">{game.name}</h4>
+                <p className="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3">
                   {game.description}
                 </p>
               </div>
 
               {/* Footer */}
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-2 text-xs relative z-10">
+              <div className="mt-6 pt-4 border-t border-[var(--border-card)] flex items-center gap-2 text-xs relative z-10">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span className="text-[#5A5E73]">Identificador: <span className="font-mono font-bold text-white ml-1">{game.tagPlaceholder}</span></span>
+                <span className="text-[var(--text-secondary)]">Identificador: <span className="font-mono font-bold text-[var(--text-primary)] ml-1">{game.tagPlaceholder}</span></span>
               </div>
             </motion.div>
           ))}
@@ -287,10 +287,10 @@ export default function HomePage() {
                 <Medal className="w-4 h-4" />
                 Historial Inmutable
               </div>
-              <h3 className="text-4xl sm:text-5xl font-black text-white leading-[1.1]">
+              <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] leading-[1.1]">
                 Tu legado competitivo registrado <span className="text-[#E63946]">para siempre</span>
               </h3>
-              <p className="text-[#8E92A4] text-lg leading-relaxed">
+              <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
                 Cada partida alimenta tu tarjeta de competidor. Tus victorias y campeonatos forman un perfil deportivo verificable que define tu reputación.
               </p>
 
@@ -301,7 +301,7 @@ export default function HomePage() {
                   'Registro multi-juego desde un solo lugar.',
                   'Integración de pagos Yape/Plin directa.'
                 ].map((text, i) => (
-                  <div key={i} className="flex items-center gap-4 text-base text-[#F1FAEE] bg-white/5 p-3 rounded-lg border border-white/5">
+                  <div key={i} className="flex items-center gap-4 text-base text-[var(--text-primary)] bg-[var(--bg-arena)] p-3 rounded-lg border border-[var(--border-card)]">
                     <CheckCircle2 className="w-5 h-5 text-[#E63946] shrink-0" />
                     <span className="font-medium">{text}</span>
                   </div>
@@ -313,19 +313,19 @@ export default function HomePage() {
             <motion.div 
               whileHover={{ scale: 1.02, rotateY: 5, rotateX: 5 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="bg-[#0B0C10] p-8 rounded-2xl border border-white/10 space-y-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative"
+              className="arena-card bg-[var(--bg-card)] p-8 rounded-2xl border border-[var(--border-card)] space-y-6 shadow-2xl relative"
               style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
             >
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#E63946]/10 blur-2xl rounded-full" />
               
-              <div className="flex items-center justify-between pb-6 border-b border-white/10 relative z-10">
+              <div className="flex items-center justify-between pb-6 border-b border-[var(--border-card)] relative z-10">
                 <div className="flex items-center gap-4">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center text-white font-black text-xl shadow-lg border-2 border-white/10">
                     LG
                   </div>
                   <div>
-                    <h5 className="font-black text-xl text-white">Luis Galvan</h5>
-                    <p className="text-sm text-[#8E92A4] mt-0.5">Diseño y Desarrollo de Software</p>
+                    <h5 className="font-black text-xl text-[var(--text-primary)]">Luis Galvan</h5>
+                    <p className="text-sm text-[var(--text-secondary)] mt-0.5">Diseño y Desarrollo de Software</p>
                   </div>
                 </div>
                 <span className="px-3 py-1.5 rounded-lg bg-[#E63946]/20 text-[#E63946] text-sm font-black uppercase tracking-wider">
@@ -334,34 +334,34 @@ export default function HomePage() {
               </div>
 
               <div className="grid grid-cols-3 gap-4 text-center relative z-10">
-                <div className="p-4 glass-panel border-white/5">
-                  <p className="text-2xl font-black text-white">12</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8E92A4] mt-1">Torneos</p>
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
+                  <p className="text-2xl font-black text-[var(--text-primary)]">12</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Torneos</p>
                 </div>
-                <div className="p-4 glass-panel border-white/5">
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
                   <p className="text-2xl font-black text-[#E63946]">2</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8E92A4] mt-1">Copas</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Copas</p>
                 </div>
-                <div className="p-4 glass-panel border-white/5">
-                  <p className="text-2xl font-black text-[#A8DADC]">80.9%</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[#8E92A4] mt-1">Win Rate</p>
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
+                  <p className="text-2xl font-black text-teal-600 dark:text-[#A8DADC]">80.9%</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Win Rate</p>
                 </div>
               </div>
 
               <div className="space-y-3 relative z-10">
-                <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between text-sm transition-colors hover:bg-white/10">
-                  <span className="flex items-center gap-2 font-bold text-[#8E92A4]">
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
+                  <span className="flex items-center gap-2 font-bold text-[var(--text-secondary)]">
                     <Swords className="w-4 h-4 text-[#E63946]" />
                     Dota 2
                   </span>
-                  <span className="font-mono font-bold text-white">Arteezy</span>
+                  <span className="font-mono font-bold text-[var(--text-primary)]">Arteezy</span>
                 </div>
-                <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex items-center justify-between text-sm transition-colors hover:bg-white/10">
-                  <span className="flex items-center gap-2 font-bold text-[#8E92A4]">
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
+                  <span className="flex items-center gap-2 font-bold text-[var(--text-secondary)]">
                     <Crosshair className="w-4 h-4 text-[#4CAF50]" />
                     Left 4 Dead 2
                   </span>
-                  <span className="font-mono font-bold text-white">Luis_L4D</span>
+                  <span className="font-mono font-bold text-[var(--text-primary)]">Luis_L4D</span>
                 </div>
               </div>
             </motion.div>
@@ -384,14 +384,14 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="relative z-10 space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel text-xs font-bold text-amber-400 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest">
             <Sparkles className="w-4 h-4" />
             Inscripciones Abiertas
           </div>
-          <h3 className="text-5xl sm:text-6xl font-black text-white leading-tight">
+          <h3 className="text-5xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
             ¿Listo para ingresar a la arena?
           </h3>
-          <p className="text-[#8E92A4] max-w-xl mx-auto text-lg font-medium">
+          <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
             Crea tu cuenta de competidor en menos de 1 minuto y prepárate para los próximos torneos en Tecsup.
           </p>
           <div className="pt-6">

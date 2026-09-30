@@ -171,22 +171,22 @@ export function EditTournamentModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col arena-card bg-[#15161E] border border-white/10 shadow-2xl rounded-2xl overflow-hidden">
+      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col arena-card bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl rounded-2xl overflow-hidden">
         
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0B0C10]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--border-card)] bg-[var(--bg-card)]">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[#E63946]/20 text-[#E63946] flex items-center justify-center font-bold">
               <Settings className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-base font-black text-white">Panel de Modificación de Torneo</h2>
-              <p className="text-xs text-[#8E92A4]">Edita parámetros oficiales, fechas, reglas y estado de la competición</p>
+              <h2 className="text-base font-black text-[var(--text-primary)]">Panel de Modificación de Torneo</h2>
+              <p className="text-xs text-[var(--text-secondary)]">Edita parámetros oficiales, fechas, reglas y estado de la competición</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="text-[#8E92A4] hover:text-white p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+            className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
@@ -196,14 +196,14 @@ export function EditTournamentModal({
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-6">
           
           {errorMsg && (
-            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 dark:text-red-400 text-xs flex items-center gap-2">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{successMsg}</span>
             </div>
@@ -218,7 +218,7 @@ export function EditTournamentModal({
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white">Nombre Oficial del Torneo</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Nombre Oficial del Torneo</label>
                 <input
                   type="text"
                   name="name"
@@ -230,7 +230,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Videojuego Oficial</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Videojuego Oficial</label>
                 <select
                   name="game_code"
                   value={formData.game_code}
@@ -238,7 +238,7 @@ export function EditTournamentModal({
                   className="input-arena w-full text-xs"
                 >
                   {Object.values(GAME_CATALOG).map((g) => (
-                    <option key={g.code} value={g.code}>
+                    <option key={g.code} value={g.code} className="bg-[var(--bg-card)] text-[var(--text-primary)]">
                       {g.name}
                     </option>
                   ))}
@@ -246,25 +246,25 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Estado de la Competición</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Estado de la Competición</label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="input-arena w-full text-xs font-bold text-emerald-400"
+                  className="input-arena w-full text-xs font-bold text-emerald-600 dark:text-emerald-400"
                 >
-                  <option value="DRAFT">Borrador (DRAFT)</option>
-                  <option value="PUBLISHED">Publicado (PUBLISHED)</option>
-                  <option value="REGISTRATION_OPEN">Inscripciones Abiertas (REGISTRATION_OPEN)</option>
-                  <option value="REGISTRATION_CLOSED">Inscripciones Cerradas (REGISTRATION_CLOSED)</option>
-                  <option value="IN_PROGRESS">En Progreso / Brackets Activos (IN_PROGRESS)</option>
-                  <option value="FINISHED">Concluido / Premiado (FINISHED)</option>
-                  <option value="CANCELLED">Cancelado (CANCELLED)</option>
+                  <option value="DRAFT" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Borrador (DRAFT)</option>
+                  <option value="PUBLISHED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Publicado (PUBLISHED)</option>
+                  <option value="REGISTRATION_OPEN" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Inscripciones Abiertas (REGISTRATION_OPEN)</option>
+                  <option value="REGISTRATION_CLOSED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Inscripciones Cerradas (REGISTRATION_CLOSED)</option>
+                  <option value="IN_PROGRESS" className="bg-[var(--bg-card)] text-[var(--text-primary)]">En Progreso / Brackets Activos (IN_PROGRESS)</option>
+                  <option value="FINISHED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Concluido / Premiado (FINISHED)</option>
+                  <option value="CANCELLED" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Cancelado (CANCELLED)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Organización Responsable</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Organización Responsable</label>
                 <input
                   type="text"
                   name="organization_name"
@@ -275,35 +275,35 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Modalidad del Evento</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Modalidad del Evento</label>
                 <select
                   name="event_modality"
                   value={formData.event_modality}
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
                 >
-                  <option value="PRESENTIAL">📍 100% Presencial (Campus Tecsup)</option>
-                  <option value="ONLINE">🌐 100% Virtual / Remoto</option>
-                  <option value="HYBRID">⚡ Híbrido (Previas Online • Final Presencial)</option>
+                  <option value="PRESENTIAL" className="bg-[var(--bg-card)] text-[var(--text-primary)]">📍 100% Presencial (Campus Tecsup)</option>
+                  <option value="ONLINE" className="bg-[var(--bg-card)] text-[var(--text-primary)]">🌐 100% Virtual / Remoto</option>
+                  <option value="HYBRID" className="bg-[var(--bg-card)] text-[var(--text-primary)]">⚡ Híbrido (Previas Online • Final Presencial)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Sede / Campus Tecsup</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Sede / Campus Tecsup</label>
                 <select
                   name="campus_name"
                   value={formData.campus_name}
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
                 >
-                  <option value="Lima">Sede Lima (Santa Anita)</option>
-                  <option value="Arequipa">Sede Arequipa</option>
-                  <option value="Trujillo">Sede Trujillo</option>
+                  <option value="Lima" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Sede Lima (Santa Anita)</option>
+                  <option value="Arequipa" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Sede Arequipa</option>
+                  <option value="Trujillo" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Sede Trujillo</option>
                 </select>
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white">Descripción Corta</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Descripción Corta</label>
                 <input
                   type="text"
                   name="description_short"
@@ -314,7 +314,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white">Descripción Completa</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Descripción Completa</label>
                 <textarea
                   name="description_full"
                   rows={3}
@@ -325,7 +325,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white flex items-center gap-1.5">
+                <label className="text-xs font-bold text-[var(--text-primary)] flex items-center gap-1.5">
                   <ImageIcon className="w-3.5 h-3.5 text-[#457B9D]" />
                   URL del Banner
                 </label>
@@ -341,7 +341,7 @@ export function EditTournamentModal({
           </div>
 
           {/* Section 2: Dates & Schedule */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-4 border-t border-[var(--border-card)]">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
               2. Fechas & Horarios Oficiales
@@ -349,7 +349,7 @@ export function EditTournamentModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Apertura Inscripciones</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Apertura Inscripciones</label>
                 <input
                   type="datetime-local"
                   name="registration_open_at"
@@ -361,7 +361,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Cierre Inscripciones</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Cierre Inscripciones</label>
                 <input
                   type="datetime-local"
                   name="registration_close_at"
@@ -373,7 +373,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Inicio de Torneo</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Inicio de Torneo</label>
                 <input
                   type="datetime-local"
                   name="tournament_start_at"
@@ -387,7 +387,7 @@ export function EditTournamentModal({
           </div>
 
           {/* Section 3: Slots, Formats & Prizes */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-4 border-t border-[var(--border-card)]">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
               <Trophy className="w-3.5 h-3.5" />
               3. Cupos, Formato & Premios
@@ -395,7 +395,7 @@ export function EditTournamentModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Cupos Máximos</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Cupos Máximos</label>
                 <input
                   type="number"
                   name="max_slots"
@@ -408,7 +408,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Cupos Mínimos</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Cupos Mínimos</label>
                 <input
                   type="number"
                   name="min_slots"
@@ -421,7 +421,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Costo de Inscripción (PEN)</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Costo de Inscripción (PEN)</label>
                 <input
                   type="number"
                   step="0.5"
@@ -434,26 +434,26 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-white">Pozo Acumulado Oficial</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Pozo Acumulado Oficial</label>
                 <input
                   type="text"
                   name="prize_pool"
                   value={formData.prize_pool}
                   onChange={handleChange}
                   placeholder="Ej. Pozo (S/.9 por equipo) o S/ 500"
-                  className="input-arena w-full text-xs text-amber-400 font-bold"
+                  className="input-arena w-full text-xs text-amber-500 dark:text-amber-400 font-bold"
                 />
               </div>
 
               {/* Manual Prize Breakdown per Place */}
-              <div className="sm:col-span-3 space-y-2.5 p-3.5 rounded-xl bg-white/[0.02] border border-white/5">
-                <label className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+              <div className="sm:col-span-3 space-y-2.5 p-3.5 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)]">
+                <label className="text-xs font-bold text-amber-500 dark:text-amber-400 flex items-center gap-1.5">
                   <Trophy className="w-3.5 h-3.5" />
                   Distribución Manual de Premios por Puesto
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
                   <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-white flex items-center gap-1">🥇 1er Lugar</span>
+                    <span className="text-[11px] font-bold text-[var(--text-primary)] flex items-center gap-1">🥇 1er Lugar</span>
                     <input
                       type="text"
                       name="prize_1"
@@ -464,7 +464,7 @@ export function EditTournamentModal({
                     />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-slate-300 flex items-center gap-1">🥈 2do Lugar</span>
+                    <span className="text-[11px] font-bold text-[var(--text-secondary)] flex items-center gap-1">🥈 2do Lugar</span>
                     <input
                       type="text"
                       name="prize_2"
@@ -475,7 +475,7 @@ export function EditTournamentModal({
                     />
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[11px] font-bold text-amber-600 flex items-center gap-1">🥉 3er Lugar</span>
+                    <span className="text-[11px] font-bold text-amber-600 dark:text-amber-500 flex items-center gap-1">🥉 3er Lugar</span>
                     <input
                       type="text"
                       name="prize_3"
@@ -489,7 +489,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Email de Contacto</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Email de Contacto</label>
                 <input
                   type="email"
                   name="contact_email"
@@ -500,7 +500,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-3 space-y-1.5">
-                <label className="text-xs font-bold text-white">Reglamento Oficial de Competición</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Reglamento Oficial de Competición</label>
                 <textarea
                   name="rules_text"
                   rows={4}
@@ -513,7 +513,7 @@ export function EditTournamentModal({
           </div>
 
           {/* Section 4: Teams & Streaming */}
-          <div className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-4 pt-4 border-t border-[var(--border-card)]">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
               4. Modalidad de Equipos & Transmisión Oficial
@@ -521,38 +521,38 @@ export function EditTournamentModal({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Tamaño de Equipo</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Tamaño de Equipo</label>
                 <select
                   name="team_size"
                   value={formData.team_size}
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
                 >
-                  <option value={1}>1 vs 1 (Individual / Solos)</option>
-                  <option value={2}>2 vs 2 (Dúos)</option>
-                  <option value={3}>3 vs 3 (Tríos / Brawl Stars)</option>
-                  <option value={4}>4 vs 4 (Escuadras Fortnite / L4D2)</option>
-                  <option value={5}>5 vs 5 (Equipos Dota 2 / CS2)</option>
+                  <option value={1} className="bg-[var(--bg-card)] text-[var(--text-primary)]">1 vs 1 (Individual / Solos)</option>
+                  <option value={2} className="bg-[var(--bg-card)] text-[var(--text-primary)]">2 vs 2 (Dúos)</option>
+                  <option value={3} className="bg-[var(--bg-card)] text-[var(--text-primary)]">3 vs 3 (Tríos / Brawl Stars)</option>
+                  <option value={4} className="bg-[var(--bg-card)] text-[var(--text-primary)]">4 vs 4 (Escuadras Fortnite / L4D2)</option>
+                  <option value={5} className="bg-[var(--bg-card)] text-[var(--text-primary)]">5 vs 5 (Equipos Dota 2 / CS2)</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Plataforma de Stream</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Plataforma de Stream</label>
                 <select
                   name="stream_platform"
                   value={formData.stream_platform}
                   onChange={handleChange}
                   className="input-arena w-full text-xs"
                 >
-                  <option value="KICK">Kick</option>
-                  <option value="TWITCH">Twitch</option>
-                  <option value="YOUTUBE">YouTube</option>
-                  <option value="TIKTOK">TikTok Live</option>
+                  <option value="KICK" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Kick</option>
+                  <option value="TWITCH" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Twitch</option>
+                  <option value="YOUTUBE" className="bg-[var(--bg-card)] text-[var(--text-primary)]">YouTube</option>
+                  <option value="TIKTOK" className="bg-[var(--bg-card)] text-[var(--text-primary)]">TikTok Live</option>
                 </select>
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-white">Canal o URL del Stream</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Canal o URL del Stream</label>
                 <input
                   type="text"
                   name="stream_url"
@@ -566,7 +566,7 @@ export function EditTournamentModal({
           </div>
 
           {/* Modal Footer */}
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--border-card)]">
             <button
               type="button"
               onClick={onClose}

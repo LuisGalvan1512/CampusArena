@@ -121,7 +121,7 @@ export default function LoginPage() {
         {/* Header Hero */}
         <div className="text-center space-y-3">
           <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-2xl shadow-[#E63946]/30 mb-2">
-            <div className="w-full h-full bg-[#0B0C10] rounded-[14px] flex items-center justify-center">
+            <div className="w-full h-full bg-[var(--bg-card)] rounded-[14px] flex items-center justify-center">
               <Swords className="w-8 h-8 text-[#E63946]" />
             </div>
           </div>
@@ -131,10 +131,10 @@ export default function LoginPage() {
               <ShieldCheck className="w-3.5 h-3.5" />
               Acceso Institucional Supabase Auth
             </span>
-            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight pt-2">
+            <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight pt-2">
               Campus Arena Tecsup
             </h1>
-            <p className="text-sm text-[#8E92A4] max-w-md mx-auto">
+            <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
               Plataforma oficial de torneos universitarios. Acceso protegido con tu cuenta institucional de Google Workspace.
             </p>
           </div>
@@ -152,14 +152,14 @@ export default function LoginPage() {
           )}
 
           {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 gap-1 p-1 bg-[#0B0C10] rounded-xl border border-white/10 text-xs font-bold">
+          <div className="grid grid-cols-2 gap-1 p-1 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs font-bold">
             <button
               type="button"
               onClick={() => setActiveTab('google')}
               className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
                 activeTab === 'google'
-                  ? 'bg-white text-zinc-900 shadow-md'
-                  : 'text-[#8E92A4] hover:text-white'
+                  ? 'bg-[var(--bg-card)] text-[var(--text-primary)] shadow-md border border-[var(--border-card)]'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               Google Workspace
@@ -170,7 +170,7 @@ export default function LoginPage() {
               className={`py-2 px-3 rounded-lg transition-all cursor-pointer ${
                 activeTab === 'email'
                   ? 'bg-[#E63946] text-white shadow-md'
-                  : 'text-[#8E92A4] hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               Correo / Contraseña
@@ -180,12 +180,12 @@ export default function LoginPage() {
           <div className="space-y-6">
             
             {/* Restriction Notice */}
-            <div className="p-3.5 rounded-xl bg-[#15161E] border border-white/10 flex items-center justify-between text-xs">
+            <div className="p-3.5 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-between text-xs">
               <div className="flex items-center gap-2.5">
                 <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[#8E92A4]">Dominio Permitido:</span>
+                <span className="text-[var(--text-secondary)]">Dominio Permitido:</span>
               </div>
-              <span className="font-mono font-bold text-white bg-black/40 px-2.5 py-1 rounded border border-white/10">
+              <span className="font-mono font-bold text-[var(--text-primary)] bg-[var(--bg-card)] px-2.5 py-1 rounded border border-[var(--border-card)]">
                 @tecsup.edu.pe
               </span>
             </div>
@@ -224,7 +224,7 @@ export default function LoginPage() {
                     </>
                   )}
                 </button>
-                <p className="text-[11px] text-center text-[#8E92A4]">
+                <p className="text-[11px] text-center text-[var(--text-secondary)]">
                   Se abrirá la ventana oficial de Google. Elige tu cuenta institucional de Tecsup.
                 </p>
               </div>
@@ -234,7 +234,7 @@ export default function LoginPage() {
                 {isRegistering && (
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">Nombre</label>
+                      <label className="block text-[11px] font-bold uppercase text-[var(--text-secondary)] mb-1">Nombre</label>
                       <input
                         type="text"
                         required
@@ -245,7 +245,7 @@ export default function LoginPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">Apellido</label>
+                      <label className="block text-[11px] font-bold uppercase text-[var(--text-secondary)] mb-1">Apellido</label>
                       <input
                         type="text"
                         required
@@ -259,7 +259,7 @@ export default function LoginPage() {
                 )}
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-[var(--text-secondary)] mb-1">
                     Correo Institucional (@tecsup.edu.pe)
                   </label>
                   <div className="relative">
@@ -271,12 +271,12 @@ export default function LoginPage() {
                       placeholder="tu.nombre@tecsup.edu.pe"
                       className="input-arena text-xs w-full pl-9"
                     />
-                    <Mail className="w-4 h-4 text-[#8E92A4] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Mail className="w-4 h-4 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold uppercase text-[#8E92A4] mb-1">
+                  <label className="block text-[11px] font-bold uppercase text-[var(--text-secondary)] mb-1">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -288,7 +288,7 @@ export default function LoginPage() {
                       placeholder="••••••••"
                       className="input-arena text-xs w-full pl-9"
                     />
-                    <Lock className="w-4 h-4 text-[#8E92A4] absolute left-3 top-1/2 -translate-y-1/2" />
+                    <Lock className="w-4 h-4 text-[var(--text-secondary)] absolute left-3 top-1/2 -translate-y-1/2" />
                   </div>
                 </div>
 
@@ -310,7 +310,7 @@ export default function LoginPage() {
                   <button
                     type="button"
                     onClick={() => setIsRegistering(!isRegistering)}
-                    className="text-xs text-[#8E92A4] hover:text-[#A8DADC] cursor-pointer"
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
                   >
                     {isRegistering
                       ? '¿Ya tienes cuenta? Inicia sesión aquí'
@@ -322,8 +322,8 @@ export default function LoginPage() {
 
           </div>
 
-          <div className="pt-4 border-t border-white/5 text-center">
-            <p className="text-xs text-[#5A5E73]">
+          <div className="pt-4 border-t border-[var(--border-card)] text-center">
+            <p className="text-xs text-[var(--text-secondary)]">
               Al acceder confirmas que eres alumno o docente activo de Tecsup y aceptas las políticas de juego limpio de Campus Arena.
             </p>
           </div>
