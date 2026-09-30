@@ -47,6 +47,8 @@ const GAME_ICON_MAP: Record<string, React.ReactNode> = {
   CircleDot: <CircleDot className="w-3.5 h-3.5" />,
 };
 
+import { SpotlightCard } from '@/components/SpotlightCard';
+
 export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
   const game = GAME_CATALOG[tournament.game_code as GameCode];
   const gameColor = game?.color || '#E63946';
@@ -62,14 +64,14 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
     switch (status) {
       case 'REGISTRATION_OPEN':
         return (
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
             Inscripciones Abiertas
           </span>
         );
       case 'IN_PROGRESS':
         return (
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30 flex items-center gap-1">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30 flex items-center gap-1 shadow-sm">
             <Flame className="w-3 h-3 text-[#E63946]" />
             En Juego
           </span>
@@ -82,13 +84,13 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
         );
       case 'FINISHED':
         return (
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/10 text-[#8E92A4] border border-white/10">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-slate-500/10 text-[var(--text-muted)] border border-slate-500/20">
             Concluido
           </span>
         );
       default:
         return (
-          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/10 text-[#8E92A4]">
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-white/10 text-[var(--text-secondary)]">
             {status}
           </span>
         );
@@ -103,21 +105,21 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
   });
 
   return (
-    <div className="arena-card overflow-hidden flex flex-col group h-full transition-all hover:border-opacity-30" style={{ '--hover-color': gameColor } as React.CSSProperties}>
+    <SpotlightCard className="arena-card overflow-hidden flex flex-col group h-full">
       
       {/* Banner Image / Gradient */}
-      <div className="relative h-44 w-full overflow-hidden bg-[#0B0C10]">
+      <div className="relative h-44 w-full overflow-hidden bg-black/80">
         <img
           src={tournament.banner_url}
           alt={tournament.name}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-60 group-hover:opacity-80"
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-90"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#15161E] via-[#15161E]/40 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-transparent" />
 
         {/* Top Floating Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
           <div 
-            className="px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md text-white"
+            className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md text-white border border-white/20"
             style={{ backgroundColor: `${gameColor}E6` }}
           >
             {gameIcon}
@@ -129,8 +131,8 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
 
         {/* Prize Overlay */}
         <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs z-10">
-          <div className="flex items-center gap-1.5 font-bold text-amber-400">
-            <Trophy className="w-4 h-4 shrink-0" />
+          <div className="flex items-center gap-1.5 font-bold text-amber-400 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10">
+            <Trophy className="w-3.5 h-3.5 shrink-0" />
             <span className="truncate">{tournament.prize_pool}</span>
           </div>
         </div>
@@ -141,16 +143,16 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
         
         <div className="space-y-2">
           {/* Organization / Campus */}
-          <div className="flex items-center gap-2 text-xs text-[#8E92A4]">
+          <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
             <MapPin className="w-3.5 h-3.5 text-[#457B9D]" />
             <span>{tournament.organization_name} • {tournament.campus_name}</span>
           </div>
 
-          <h3 className="text-lg font-extrabold text-white group-hover:text-[#E63946] transition-colors line-clamp-1">
+          <h3 className="text-lg font-extrabold text-[var(--text-primary)] group-hover:text-[#E63946] transition-colors line-clamp-1">
             {tournament.name}
           </h3>
 
-          <p className="text-xs text-[#8E92A4] line-clamp-2 leading-relaxed">
+          <p className="text-xs text-[var(--text-secondary)] line-clamp-2 leading-relaxed">
             {tournament.description_short}
           </p>
         </div>
@@ -200,6 +202,6 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
 
       </div>
 
-    </div>
+    </SpotlightCard>
   );
 }

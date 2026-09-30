@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 import { NotificationCenterDrawer } from '@/components/NotificationCenterDrawer';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { 
   Trophy, 
   Gamepad2, 
@@ -43,27 +44,27 @@ export function Navbar() {
   ];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0B0C10]/80 backdrop-blur-md border-b border-white/10">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[var(--nav-bg)] backdrop-blur-xl border-b border-[var(--border-card)] transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform">
               <Swords className="w-5 h-5 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-wider text-white flex items-center gap-1">
+              <span className="text-lg font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1">
                 CAMPUS <span className="text-[#E63946]">ARENA</span>
               </span>
-              <span className="text-[10px] tracking-widest text-[#8E92A4] uppercase font-semibold">
+              <span className="text-[10px] tracking-widest text-[var(--text-secondary)] uppercase font-semibold">
                 Esports Universitarios
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-8">
+          <div className="hidden md:flex items-center gap-7">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -71,7 +72,7 @@ export function Navbar() {
                   key={link.name}
                   href={link.href}
                   className={`text-sm font-medium transition-colors hover:text-[#E63946] ${
-                    isActive ? 'text-[#E63946] font-bold' : 'text-[#8E92A4]'
+                    isActive ? 'text-[#E63946] font-bold' : 'text-[var(--text-secondary)]'
                   }`}
                 >
                   {link.name}
@@ -81,7 +82,10 @@ export function Navbar() {
           </div>
 
           {/* Auth & Notification Action Buttons (Desktop) */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-2.5">
+            {/* Theme Toggle (Light / Dark) */}
+            <ThemeToggle />
+
             {isAuthenticated && user ? (
               <>
                 {/* Real-time Notification Bell */}
@@ -90,9 +94,9 @@ export function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center gap-2.5 py-1.5 px-3 rounded-full bg-[#15161E] border border-white/10 hover:border-[#E63946]/50 transition-all text-sm cursor-pointer"
+                    className="flex items-center gap-2.5 py-1.5 px-3 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[#E63946]/50 transition-all text-sm cursor-pointer shadow-sm"
                   >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0 shadow-sm">
                       {user.avatar_url ? (
                         <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover" />
                       ) : (
@@ -100,12 +104,12 @@ export function Navbar() {
                       )}
                     </div>
                     <div className="text-left leading-tight hidden lg:block">
-                      <p className="font-semibold text-white text-xs">{user.first_name}</p>
-                      <p className="text-[10px] font-bold text-amber-400">
+                      <p className="font-semibold text-[var(--text-primary)] text-xs">{user.first_name}</p>
+                      <p className="text-[10px] font-bold text-amber-500">
                         {user.role === 'ADMIN' ? '👑 ADMIN' : user.role === 'ORGANIZER' ? '🛡️ ORGANIZADOR' : 'ESTUDIANTE'}
                       </p>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-[#8E92A4]" />
+                    <ChevronDown className="w-4 h-4 text-[var(--text-secondary)]" />
                   </button>
 
                   {/* Dropdown Menu */}
@@ -191,10 +195,11 @@ export function Navbar() {
 
           {/* Mobile Hamburger Button */}
           <div className="flex items-center gap-2 md:hidden">
+            <ThemeToggle />
             {isAuthenticated && <NotificationCenterDrawer />}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="text-[#8E92A4] hover:text-white p-2"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-2 cursor-pointer"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -205,13 +210,13 @@ export function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#15161E] border-b border-white/10 px-4 pt-2 pb-6 space-y-3">
+        <div className="md:hidden bg-[var(--bg-card)] border-b border-[var(--border-card)] backdrop-blur-xl px-4 pt-2 pb-6 space-y-3">
           {navLinks.map((link) => (
             <Link
               key={link.name}
               href={link.href}
               onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-sm font-medium text-[#8E92A4] hover:text-white"
+              className="block py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
             >
               {link.name}
             </Link>

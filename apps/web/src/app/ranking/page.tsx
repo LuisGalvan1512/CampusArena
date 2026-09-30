@@ -137,97 +137,97 @@ export default function RankingPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end pt-6">
               
               {/* 2ND PLACE (SILVER) */}
-              <div className="order-2 md:order-1 arena-card p-6 bg-[#15161E] border border-slate-400/30 text-center space-y-4 relative group hover:scale-[1.02] transition-transform">
-                <div className="w-12 h-12 rounded-full bg-slate-300/20 text-slate-200 flex items-center justify-center mx-auto border border-slate-300/30 font-black text-lg">
+              <div className="order-2 md:order-1 arena-card p-6 bg-[var(--bg-card)] border border-slate-400/30 text-center space-y-4 relative group hover:scale-[1.02] transition-transform shadow-md">
+                <div className="w-12 h-12 rounded-full bg-slate-300/20 text-slate-700 dark:text-slate-200 flex items-center justify-center mx-auto border border-slate-300/30 font-black text-lg">
                   2°
                 </div>
                 <div className="space-y-1">
                   <Link
                     href={`/profile/${topPodium[1].user_id || topPodium[1].id}`}
-                    className="text-lg font-black text-white hover:text-[#E63946] transition-colors block"
+                    className="text-lg font-black text-[var(--text-primary)] hover:text-[#E63946] transition-colors block"
                     title="Ver perfil y medallero"
                   >
                     {topPodium[1].nickname || topPodium[1].in_game_name || capitalizeWords(topPodium[1].player_name)}
                   </Link>
                   <p className="text-xs text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[1].player_name)}</p>
-                  <p className="text-[11px] text-[#8E92A4] font-mono">{topPodium[1].player_tag}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] font-mono">{topPodium[1].player_tag}</p>
                 </div>
-                <div className="p-3 bg-[#0B0C10] rounded-xl border border-white/5 space-y-1">
-                  <span className="text-[10px] text-[#8E92A4] block">COPAS OFICIALES</span>
-                  <span className="text-xl font-black text-slate-200 flex items-center justify-center gap-1">
-                    <Trophy className="w-4 h-4 text-slate-300" />
+                <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
+                  <span className="text-[10px] text-[var(--text-muted)] block">COPAS OFICIALES</span>
+                  <span className="text-xl font-black text-slate-700 dark:text-slate-200 flex items-center justify-center gap-1">
+                    <Trophy className="w-4 h-4 text-slate-500 dark:text-slate-300" />
                     {topPodium[1].trophies.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-[#8E92A4] pt-1">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] pt-1">
                   <span>{topPodium[1].career}</span>
-                  <span className="text-emerald-400 font-bold">{topPodium[1].winrate}% Winrate</span>
+                  <span className="text-emerald-500 font-bold">{topPodium[1].winrate}% Winrate</span>
                 </div>
               </div>
 
               {/* 1ST PLACE (GOLD - CENTER HIGHLIGHT) */}
-              <div className="order-1 md:order-2 arena-card p-8 bg-gradient-to-b from-[#1D3557]/60 via-[#15161E] to-[#15161E] border-2 border-amber-400/50 text-center space-y-5 relative group hover:scale-[1.03] transition-transform shadow-2xl shadow-amber-500/10">
+              <div className="order-1 md:order-2 arena-card p-8 bg-gradient-to-b from-[#1D3557]/20 via-[var(--bg-card)] to-[var(--bg-card)] border-2 border-amber-400/60 text-center space-y-5 relative group hover:scale-[1.03] transition-transform shadow-2xl shadow-amber-500/10">
                 <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-3.5 py-1 rounded-full bg-amber-500 text-black text-xs font-black uppercase tracking-wider flex items-center gap-1 shadow-lg">
                   <Crown className="w-4 h-4 fill-black" />
                   Top 1 Tecsup
                 </div>
 
-                <div className="w-16 h-16 rounded-full bg-amber-400/20 text-amber-400 flex items-center justify-center mx-auto border-2 border-amber-400 font-black text-2xl shadow-xl shadow-amber-500/30 mt-2">
+                <div className="w-16 h-16 rounded-full bg-amber-400/20 text-amber-500 dark:text-amber-400 flex items-center justify-center mx-auto border-2 border-amber-400 font-black text-2xl shadow-xl shadow-amber-500/30 mt-2">
                   1°
                 </div>
 
                 <div className="space-y-1">
                   <Link
                     href={`/profile/${topPodium[0].user_id || topPodium[0].id}`}
-                    className="text-2xl font-black text-white hover:text-amber-400 transition-colors block tracking-tight"
+                    className="text-2xl font-black text-[var(--text-primary)] hover:text-amber-500 transition-colors block tracking-tight"
                     title="Ver perfil y medallero"
                   >
                     {topPodium[0].nickname || topPodium[0].in_game_name || capitalizeWords(topPodium[0].player_name)}
                   </Link>
                   <p className="text-sm text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[0].player_name)}</p>
-                  <p className="text-xs text-[#8E92A4] font-mono">{topPodium[0].player_tag}</p>
+                  <p className="text-xs text-[var(--text-muted)] font-mono">{topPodium[0].player_tag}</p>
                 </div>
 
-                <div className="p-4 bg-[#0B0C10] rounded-xl border border-amber-500/20 space-y-1">
-                  <span className="text-[10px] text-amber-400 font-bold uppercase tracking-wider block">COPAS MÁXIMAS</span>
-                  <span className="text-3xl font-black text-amber-400 flex items-center justify-center gap-1.5">
-                    <Trophy className="w-6 h-6 text-amber-400 fill-amber-400" />
+                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-amber-500/20 space-y-1">
+                  <span className="text-[10px] text-amber-500 font-bold uppercase tracking-wider block">COPAS MÁXIMAS</span>
+                  <span className="text-3xl font-black text-amber-500 dark:text-amber-400 flex items-center justify-center gap-1.5">
+                    <Trophy className="w-6 h-6 text-amber-500 fill-amber-500" />
                     {topPodium[0].trophies.toLocaleString()}
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between text-xs text-[#8E92A4] pt-1">
+                <div className="flex items-center justify-between text-xs text-[var(--text-secondary)] pt-1">
                   <span>{topPodium[0].career}</span>
-                  <span className="text-emerald-400 font-black">{topPodium[0].winrate}% Winrate</span>
+                  <span className="text-emerald-500 font-black">{topPodium[0].winrate}% Winrate</span>
                 </div>
               </div>
 
               {/* 3RD PLACE (BRONZE) */}
-              <div className="order-3 arena-card p-6 bg-[#15161E] border border-amber-700/30 text-center space-y-4 relative group hover:scale-[1.02] transition-transform">
+              <div className="order-3 arena-card p-6 bg-[var(--bg-card)] border border-amber-700/30 text-center space-y-4 relative group hover:scale-[1.02] transition-transform shadow-md">
                 <div className="w-12 h-12 rounded-full bg-amber-700/20 text-amber-600 flex items-center justify-center mx-auto border border-amber-700/30 font-black text-lg">
                   3°
                 </div>
                 <div className="space-y-1">
                   <Link
                     href={`/profile/${topPodium[2].user_id || topPodium[2].id}`}
-                    className="text-lg font-black text-white hover:text-[#E63946] transition-colors block"
+                    className="text-lg font-black text-[var(--text-primary)] hover:text-[#E63946] transition-colors block"
                     title="Ver perfil y medallero"
                   >
                     {topPodium[2].nickname || topPodium[2].in_game_name || capitalizeWords(topPodium[2].player_name)}
                   </Link>
                   <p className="text-xs text-[#A8DADC] font-semibold">{capitalizeWords(topPodium[2].player_name)}</p>
-                  <p className="text-[11px] text-[#8E92A4] font-mono">{topPodium[2].player_tag}</p>
+                  <p className="text-[11px] text-[var(--text-muted)] font-mono">{topPodium[2].player_tag}</p>
                 </div>
-                <div className="p-3 bg-[#0B0C10] rounded-xl border border-white/5 space-y-1">
-                  <span className="text-[10px] text-[#8E92A4] block">COPAS OFICIALES</span>
+                <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
+                  <span className="text-[10px] text-[var(--text-muted)] block">COPAS OFICIALES</span>
                   <span className="text-xl font-black text-amber-600 flex items-center justify-center gap-1">
                     <Trophy className="w-4 h-4 text-amber-600" />
                     {topPodium[2].trophies.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[11px] text-[#8E92A4] pt-1">
+                <div className="flex items-center justify-between text-[11px] text-[var(--text-secondary)] pt-1">
                   <span>{topPodium[2].career}</span>
-                  <span className="text-emerald-400 font-bold">{topPodium[2].winrate}% Winrate</span>
+                  <span className="text-emerald-500 font-bold">{topPodium[2].winrate}% Winrate</span>
                 </div>
               </div>
 
@@ -235,12 +235,12 @@ export default function RankingPage() {
           )}
 
           {/* 3. LEADERBOARD TABLE & SEARCH */}
-          <div className="arena-card p-6 sm:p-8 space-y-6">
+          <div className="arena-card p-6 sm:p-8 space-y-6 border border-[var(--border-card)]">
             
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-card)] pb-4">
               <div>
-                <h2 className="text-xl font-black text-white">Tabla General de Competidores</h2>
-                <p className="text-xs text-[#8E92A4]">Clasificación completa de estudiantes de Tecsup</p>
+                <h2 className="text-xl font-black text-[var(--text-primary)]">Tabla General de Competidores</h2>
+                <p className="text-xs text-[var(--text-secondary)]">Clasificación completa de estudiantes de Tecsup</p>
               </div>
 
               {/* Search filter */}
@@ -262,7 +262,7 @@ export default function RankingPage() {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
-                  <tr className="border-b border-white/10 text-[10px] uppercase tracking-wider text-[#8E92A4]">
+                  <tr className="border-b border-[var(--border-card)] text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                     <th className="py-3 px-3"># Rank</th>
                     <th className="py-3 px-3">Competidor</th>
                     <th className="py-3 px-3">Carrera / Ciclo</th>
@@ -271,13 +271,13 @@ export default function RankingPage() {
                     <th className="py-3 px-3 text-right">Winrate</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-[var(--border-card)]">
                   {filteredLeaderboard.map((player) => (
                     <tr 
                       key={player.id} 
-                      className="hover:bg-white/5 transition-colors group"
+                      className="hover:bg-[var(--bg-card-hover)] transition-colors group"
                     >
-                      <td className="py-3.5 px-3 font-mono font-bold text-white">
+                      <td className="py-3.5 px-3 font-mono font-bold text-[var(--text-primary)]">
                         {player.rank === 1 ? '🥇 1' : player.rank === 2 ? '🥈 2' : player.rank === 3 ? '🥉 3' : `#${player.rank}`}
                       </td>
                       
@@ -285,38 +285,38 @@ export default function RankingPage() {
                         <div className="space-y-0.5">
                           <Link
                             href={`/profile/${player.user_id || player.id}`}
-                            className="font-black text-white hover:text-[#E63946] transition-colors block text-sm"
+                            className="font-black text-[var(--text-primary)] hover:text-[#E63946] transition-colors block text-sm"
                             title="Ver perfil y medallero"
                           >
                             {player.nickname || player.in_game_name || capitalizeWords(player.player_name)}
                           </Link>
-                          <p className="text-[11px] text-[#8E92A4]">
+                          <p className="text-[11px] text-[var(--text-muted)]">
                             <span className="text-[#A8DADC] font-semibold">{capitalizeWords(player.player_name)}</span> • <span className="font-mono text-[#5A5E73]">{player.player_tag}</span>
                           </p>
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-3 text-[#8E92A4]">
-                        <p className="truncate max-w-[200px] text-white">{player.career}</p>
-                        <p className="text-[11px] text-[#5A5E73]">{player.cycle}° Ciclo</p>
+                      <td className="py-3.5 px-3 text-[var(--text-secondary)]">
+                        <p className="truncate max-w-[200px] text-[var(--text-primary)] font-medium">{player.career}</p>
+                        <p className="text-[11px] text-[var(--text-muted)]">{player.cycle}° Ciclo</p>
                       </td>
 
-                      <td className="py-3.5 px-3 text-right font-mono font-black text-amber-400 text-sm">
+                      <td className="py-3.5 px-3 text-right font-mono font-black text-amber-500 dark:text-amber-400 text-sm">
                         {player.trophies.toLocaleString()}
                       </td>
 
-                      <td className="py-3.5 px-3 text-right font-bold text-white">
+                      <td className="py-3.5 px-3 text-right font-bold text-[var(--text-primary)]">
                         {player.tournaments_won > 0 ? (
-                          <span className="inline-flex items-center gap-1 text-amber-400">
+                          <span className="inline-flex items-center gap-1 text-amber-500 dark:text-amber-400">
                             <Trophy className="w-3 h-3" />
                             {player.tournaments_won}
                           </span>
                         ) : (
-                          <span className="text-[#5A5E73]">-</span>
+                          <span className="text-[var(--text-muted)]">-</span>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-3 text-right font-mono font-bold text-emerald-400">
+                      <td className="py-3.5 px-3 text-right font-mono font-bold text-emerald-500">
                         {player.winrate}%
                       </td>
                     </tr>

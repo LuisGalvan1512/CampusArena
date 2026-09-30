@@ -19,6 +19,8 @@ import {
   Minimize2,
   Tv
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { fireCelebration } from '@/lib/confetti';
 
 interface MatchupItem {
   id: string;
@@ -125,12 +127,18 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
         seeding_method: seedingMethod,
       });
       if (res.success) {
+        fireCelebration();
+        toast.success('¡Llaves y emparejamientos generados exitosamente!');
         onUpdate();
       } else {
-        setGenError(res.error?.message || 'Error al generar llaves.');
+        const msg = res.error?.message || 'Error al generar llaves.';
+        setGenError(msg);
+        toast.error(msg);
       }
     } catch (err: any) {
-      setGenError(err.message || 'Error de conexión.');
+      const msg = err.message || 'Error de conexión.';
+      setGenError(msg);
+      toast.error(msg);
     } finally {
       setIsGenerating(false);
     }
@@ -138,14 +146,14 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
   if (!initialBracket || !initialBracket.rounds || initialBracket.rounds.length === 0) {
     return (
-      <div className="arena-card p-10 sm:p-14 text-center space-y-5 border border-white/10 shadow-2xl">
+      <div className="arena-card p-10 sm:p-14 text-center space-y-5 border border-[var(--border-card)] shadow-2xl">
         <div className="w-16 h-16 rounded-2xl bg-[#E63946]/15 border border-[#E63946]/30 text-[#E63946] flex items-center justify-center mx-auto shadow-lg shadow-[#E63946]/10">
           <Swords className="w-8 h-8" />
         </div>
         
         <div className="space-y-2 max-w-md mx-auto">
-          <h3 className="text-lg font-black text-white">Llaves de Competición en Espera</h3>
-          <p className="text-xs text-[#8E92A4] leading-relaxed">
+          <h3 className="text-lg font-black text-[var(--text-primary)]">Llaves de Competición en Espera</h3>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             El sorteo oficial y la estructura de emparejamientos se generarán con los competidores confirmados una vez cerradas las inscripciones.
           </p>
         </div>
@@ -157,7 +165,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
         )}
 
         {canManage && (
-          <div className="pt-4 border-t border-white/5 max-w-md mx-auto space-y-3">
+          <div className="pt-4 border-t border-[var(--border-card)] max-w-md mx-auto space-y-3">
             <span className="text-[11px] font-bold text-[#A8DADC] uppercase tracking-wider block">
               🛡️ Herramientas de Organizador / Administrador
             </span>
@@ -204,13 +212,17 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     });
 
     if (res.success) {
+      fireCelebration();
+      toast.success(res.data?.message || '¡Resultado oficial guardado!');
       setFeedback(res.data?.message || '¡Resultado guardado!');
       setTimeout(() => {
         setSelectedMatchup(null);
         onUpdate();
-      }, 1200);
+      }, 1000);
     } else {
-      setFeedback(res.error?.message || 'Error al guardar el resultado.');
+      const errMsg = res.error?.message || 'Error al guardar el resultado.';
+      toast.error(errMsg);
+      setFeedback(errMsg);
     }
 
     setIsSubmitting(false);
@@ -226,12 +238,12 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
           <div key={round.id} className="space-y-4">
             
             {/* Round Title */}
-            <div className={`p-3 rounded-xl border text-center ${
+            <div className={`p-3 rounded-xl border text-center transition-all ${
               isStage 
                 ? 'bg-[#1D3557]/40 border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
-                : 'bg-[#15161E] border-white/10'
+                : 'bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm'
             }`}>
-              <span className="text-xs font-black uppercase tracking-wider text-[#A8DADC]">
+              <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
                 {round.name}
               </span>
             </div>
@@ -248,22 +260,22 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                   <div
                     key={m.id}
                     onClick={() => handleMatchupClick(m)}
-                    className={`relative rounded-xl p-3.5 border transition-all select-none ${
+                    className={`relative rounded-xl p-3.5 border transition-all select-none shadow-sm ${
                       isFinal
-                        ? 'bg-gradient-to-b from-[#1D3557]/40 to-[#0B0C10] border-amber-400/50 shadow-xl shadow-amber-500/10'
+                        ? 'bg-gradient-to-b from-[#1D3557]/20 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10'
                         : isCompleted
-                        ? 'bg-[#0B0C10] border-white/10 opacity-90'
+                        ? 'bg-[var(--bg-card)] border-[var(--border-card)] opacity-95'
                         : isReady
-                        ? 'bg-[#15161E] border-[#E63946]/40 hover:border-[#E63946] cursor-pointer shadow-lg shadow-[#E63946]/10 group'
-                        : 'bg-[#0B0C10]/60 border-white/5 opacity-60'
+                        ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] cursor-pointer shadow-lg shadow-[#E63946]/10 group ring-1 ring-[#E63946]/20'
+                        : 'bg-[var(--bg-card)]/60 border-[var(--border-card)] opacity-60'
                     }`}
                   >
                     {/* Top status indicator */}
                     <div className="flex items-center justify-between mb-2 text-[10px] font-mono">
-                      <span className="text-[#8E92A4]">Match #{m.position}</span>
+                      <span className="text-[var(--text-muted)]">Match #{m.position}</span>
                       
                       {isCompleted ? (
-                        <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                        <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold">
                           <CheckCircle2 className="w-3 h-3" />
                           Finalizado
                         </span>
@@ -273,7 +285,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                           Listo / En Juego
                         </span>
                       ) : (
-                        <span className="text-[#5A5E73]">Esperando rival</span>
+                        <span className="text-[var(--text-muted)]">Esperando rival</span>
                       )}
                     </div>
 
@@ -281,16 +293,16 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
                       m.winner_tag && m.winner_tag === m.participant_a_tag
                         ? 'bg-emerald-500/15 border border-emerald-500/30'
-                        : 'bg-[#0B0C10]'
+                        : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                     }`}>
                       <div className="space-y-0.5 truncate pr-2">
                         <p className={`text-xs font-bold truncate ${
-                          m.winner_tag === m.participant_a_tag ? 'text-emerald-300' : 'text-white'
+                          m.winner_tag === m.participant_a_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
                         }`}>
                           {m.participant_a_name || 'TBD (Por definir)'}
                         </p>
                         {m.participant_a_tag && (
-                          <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_a_tag}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
                         )}
                       </div>
 
@@ -298,29 +310,29 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         {m.winner_tag && m.winner_tag === m.participant_a_tag && (
                           <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         )}
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white/5 text-white">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
                           {isCompleted ? m.score_a : '-'}
                         </span>
                       </div>
                     </div>
 
                     {/* VS divider */}
-                    <div className="text-center my-1 text-[9px] font-mono text-[#5A5E73]">VS</div>
+                    <div className="text-center my-1 text-[9px] font-mono text-[var(--text-muted)] font-bold">VS</div>
 
                     {/* Participant B */}
                     <div className={`p-2 rounded-lg flex items-center justify-between transition-colors ${
                       m.winner_tag && m.winner_tag === m.participant_b_tag
                         ? 'bg-emerald-500/15 border border-emerald-500/30'
-                        : 'bg-[#0B0C10]'
+                        : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                     }`}>
                       <div className="space-y-0.5 truncate pr-2">
                         <p className={`text-xs font-bold truncate ${
-                          m.winner_tag === m.participant_b_tag ? 'text-emerald-300' : 'text-white'
+                          m.winner_tag === m.participant_b_tag ? 'text-emerald-600 dark:text-emerald-300' : 'text-[var(--text-primary)]'
                         }`}>
                           {m.participant_b_name || 'TBD (Por definir)'}
                         </p>
                         {m.participant_b_tag && (
-                          <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_b_tag}</p>
+                          <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
                         )}
                       </div>
 
@@ -328,7 +340,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         {m.winner_tag && m.winner_tag === m.participant_b_tag && (
                           <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
                         )}
-                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white/5 text-white">
+                        <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--border-card)] text-[var(--text-primary)]">
                           {isCompleted ? m.score_b : '-'}
                         </span>
                       </div>
@@ -336,7 +348,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
                     {/* Final Crown Badge on Grand Final */}
                     {isFinal && isCompleted && (
-                      <div className="mt-2.5 p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-center flex items-center justify-center gap-1 text-[11px] font-bold text-amber-400">
+                      <div className="mt-2.5 p-1.5 rounded-lg bg-amber-500/20 border border-amber-500/30 text-center flex items-center justify-center gap-1 text-[11px] font-bold text-amber-500 dark:text-amber-400">
                         <Trophy className="w-3.5 h-3.5" />
                         <span>¡Campeón: {m.winner_name}!</span>
                       </div>
@@ -357,14 +369,14 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     <div className="space-y-6 animate-in fade-in">
       
       {/* Header Info */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#0B0C10] p-4 sm:p-5 rounded-2xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 arena-card p-4 sm:p-5 rounded-2xl border border-[var(--border-card)]">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-[#E63946]/20 text-[#E63946] flex items-center justify-center">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-white">Llaves Oficiales de Eliminación Directa</h3>
-            <p className="text-xs text-[#8E92A4]">Formato BO3 • Haz clic en un enfrentamiento para ver detalles o registrar marcadores</p>
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Llaves Oficiales de Eliminación Directa</h3>
+            <p className="text-xs text-[var(--text-secondary)]">Formato BO3 • Haz clic en un enfrentamiento para ver detalles o registrar marcadores</p>
           </div>
         </div>
 
@@ -377,7 +389,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             Modo Escenario / OBS
           </button>
 
-          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-2 shadow-sm shadow-emerald-500/10">
+          <span className="px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-500 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-2 shadow-sm shadow-emerald-500/10">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -431,26 +443,26 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
       {/* REFEREE SCORE REPORTING MODAL */}
       {selectedMatchup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md arena-card p-6 sm:p-8 bg-[#15161E] border border-white/10 shadow-2xl space-y-6">
+          <div className="relative w-full max-w-md arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6">
             
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-2 text-xs font-bold text-[#E63946]">
                 <Swords className="w-4 h-4" />
                 <span>Panel de Arbitraje Oficial</span>
               </div>
               <button
                 onClick={() => setSelectedMatchup(null)}
-                className="text-[#8E92A4] hover:text-white p-1"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-2 text-center">
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-[var(--text-primary)]">
                 Match #{selectedMatchup.position} — Registro de Marcador
               </h3>
-              <p className="text-xs text-[#8E92A4]">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Ingresa el resultado de la serie Bo3. El ganador avanzará automáticamente a la siguiente ronda.
               </p>
             </div>
@@ -458,10 +470,10 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             <form onSubmit={handleSubmitResult} className="space-y-5">
               
               {/* Score Input Matrix */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-[#0B0C10] border border-white/5">
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)]">
                 
                 <div className="space-y-2 text-center">
-                  <p className="text-xs font-bold text-white truncate">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                     {selectedMatchup.participant_a_name}
                   </p>
                   <input

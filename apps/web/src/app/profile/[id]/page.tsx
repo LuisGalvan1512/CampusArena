@@ -23,6 +23,8 @@ import {
   Eye,
   Mail
 } from 'lucide-react';
+import { toast } from 'sonner';
+import { fireCelebration } from '@/lib/confetti';
 import { Medal, LegacySummary, capitalizeWords } from '../page';
 
 export interface ProfileSignature {
@@ -160,6 +162,8 @@ export default function PublicProfilePage() {
       });
 
       if (res.success) {
+        fireCelebration();
+        toast.success('¡Firma agregada exitosamente al muro!');
         if (res.data && res.data.author) {
           setSignatures((prev) => [res.data, ...prev]);
         } else {
@@ -170,10 +174,14 @@ export default function PublicProfilePage() {
         setSigFeedback({ type: 'success', message: '¡Firma agregada exitosamente!' });
         setTimeout(() => setSigFeedback(null), 4000);
       } else {
-        setSigFeedback({ type: 'error', message: res.error?.message || 'No se pudo publicar la firma.' });
+        const errMsg = res.error?.message || 'No se pudo publicar la firma.';
+        toast.error(errMsg);
+        setSigFeedback({ type: 'error', message: errMsg });
       }
     } catch (err: any) {
-      setSigFeedback({ type: 'error', message: err.message || 'Error de conexión.' });
+      const errMsg = err.message || 'Error de conexión.';
+      toast.error(errMsg);
+      setSigFeedback({ type: 'error', message: errMsg });
     } finally {
       setIsSubmittingSig(false);
     }
@@ -184,10 +192,14 @@ export default function PublicProfilePage() {
     try {
       const res = await api.delete(`/profile/signatures/${sigId}`);
       if (res.success) {
+        toast.success('Firma eliminada del muro');
         setSignatures((prev) => prev.filter((s) => s.id !== sigId));
+      } else {
+        toast.error(res.error?.message || 'No se pudo eliminar la firma.');
       }
     } catch (err) {
       console.error('Error deleting signature:', err);
+      toast.error('Error al intentar eliminar la firma.');
     }
   };
 
