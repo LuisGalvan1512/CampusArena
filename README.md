@@ -61,17 +61,16 @@
 | Módulo | Estado | Progreso |
 |---|---|---|
 | 🔐 Autenticación (Google Workspace / JWT) | ✅ Funcional | 100% |
-| 👤 Perfil de Usuario + Vinculación de Juegos | ✅ Funcional | 95% |
-| 🏆 CRUD de Torneos (Admin) | ✅ Funcional | 100% |
-| 📋 Inscripción a Torneos + Pagos | ✅ Funcional | 90% |
-| 🗡️ Generación de Brackets (Eliminación Directa) | ✅ Funcional | 90% |
-| 📊 Ranking Institucional por Juego | ✅ Funcional | 80% |
-| 💬 Comunidad / Foro | ✅ Funcional | 85% |
+| 👤 Perfiles Públicos, Vista de Visitante y Muro de Firmas | ✅ Funcional | 100% |
+| 🏆 CRUD de Torneos (Admin / Org) | ✅ Funcional | 100% |
+| 📋 Inscripción a Torneos (Individual y Equipos con Roster) | ✅ Funcional | 100% |
+| 🗡️ Generación de Brackets (Sorteo Aleatorio Oficial) | ✅ Funcional | 95% |
+| 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 90% |
+| 💬 Comunidad / Foro | ✅ Funcional | 90% |
 | 📧 Correos Transaccionales (Brevo SMTP) | ✅ Funcional | 90% |
-| 👑 Panel de Administración | ✅ Funcional | 75% |
+| 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 95% |
 | 🎓 Onboarding de Nuevos Estudiantes | ✅ Funcional | 100% |
-| 📜 Certificados y Diplomas | 🟡 Parcial | 40% |
-| 📡 Notificaciones en Tiempo Real | 🟡 UI Ready | 30% |
+| 📡 Centro de Notificaciones In-App | ✅ Funcional | 85% |
 | 🌐 Deploy a Producción | 🔴 Pendiente | 0% |
 
 ---
@@ -125,14 +124,14 @@ CampusArena/
 │   │       │   ├── guards/           # JwtAuthGuard
 │   │       │   ├── strategies/       # JWT Strategy (Passport)
 │   │       │   └── decorators/       # @CurrentUser()
-│   │       ├── profile/              # Perfil + vinculación de juegos
-│   │       │   └── services/         # SupercellAdapterService (API Royale/BS)
+│   │       ├── profile/              # Perfiles públicos, medallas y muro de firmas
 │   │       ├── tournament/           # CRUD de torneos
-│   │       ├── registration/         # Inscripciones + pagos
-│   │       ├── competition/          # Brackets + matchups + resultados
-│   │       ├── ranking/              # Leaderboard por juego
+│   │       ├── registration/         # Inscripciones individuales y por equipos
+│   │       ├── competition/          # Brackets (sorteo aleatorio) + matchups + resultados
+│   │       ├── ranking/              # Leaderboard por juego y palmarés
 │   │       ├── community/            # Posts, comentarios, reacciones
-│   │       ├── admin/                # Gestión de usuarios y roles
+│   │       ├── admin/                # Moderación, sanciones y apelaciones
+│   │       ├── notifications/        # Notificaciones in-app
 │   │       ├── mail/                 # Servicio de correos (Brevo SMTP)
 │   │       ├── common/
 │   │       │   ├── interceptors/     # ResponseInterceptor (formato unificado)
@@ -148,30 +147,30 @@ CampusArena/
 │           │   ├── auth/
 │           │   │   ├── login/         # Login institucional Google
 │           │   │   └── register/      # Registro manual (legacy)
-│           │   ├── tournaments/       # Listado y detalle de torneos
-│           │   ├── profile/           # Perfil del jugador
+│           │   ├── tournaments/       # Listado, detalle e inscripción
+│           │   ├── profile/           # Perfil propio (con Vista de Visitante)
+│           │   │   └── [id]/          # Perfil público de competidor + Muro de firmas
 │           │   ├── ranking/           # Leaderboard institucional
 │           │   ├── community/         # Foro de la comunidad
 │           │   ├── admin/
-│           │   │   └── organizers/    # Panel de administración
+│           │   │   └── organizers/    # Panel de administración y moderación
 │           │   ├── live/              # Vista de brackets en vivo
-│           │   └── dashboard/         # Dashboard del competidor
+│           │   └── dashboard/         # Dashboard del organizador / competidor
 │           ├── components/
 │           │   ├── Navbar.tsx         # Barra de navegación global
 │           │   ├── Footer.tsx         # Footer institucional
-│           │   ├── BracketView.tsx    # Visualizador de brackets
+│           │   ├── BracketView.tsx    # Visualizador de brackets interactivo
 │           │   ├── TournamentCard.tsx # Tarjeta de torneo
-│           │   ├── LinkGameModal.tsx  # Modal vincular cuenta de juego
-│           │   ├── RegistrationWizardModal.tsx  # Wizard de inscripción
+│           │   ├── RegistrationWizardModal.tsx  # Wizard de inscripción (1v1 y equipos)
 │           │   ├── EditTournamentModal.tsx      # Editar torneo (admin)
 │           │   ├── DeleteTournamentModal.tsx    # Eliminar torneo (admin)
-│           │   ├── CertificateModal.tsx         # Modal de certificados
 │           │   └── NotificationCenterDrawer.tsx # Panel de notificaciones
 │           ├── context/
 │           │   └── AuthContext.tsx     # Zustand auth store global
 │           └── lib/
 │               ├── api.ts             # HTTP client con auto-refresh
-│               └── games.ts           # Catálogo de juegos soportados
+│               ├── games.ts           # Catálogo de juegos soportados
+│               └── storage.ts         # Utilidades de almacenamiento local
 │
 ├── specifications/                    # Documentos de especificación técnica
 │   ├── Auth.spec.md
@@ -333,48 +332,51 @@ Rol:      ADMIN (acceso total al panel de administración)
 | `POST` | `/auth/logout` | Cerrar sesión | 🍪 Cookie |
 | `GET`  | `/auth/me` | Obtener usuario actual | 🔒 JWT |
 
-### Perfil (`/profile`)
+### Perfil y Muro Social (`/profile`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
-| `GET`  | `/profile/me` | Mi perfil + cuentas de juego | 🔒 JWT |
-| `PATCH` | `/profile/me` | Actualizar perfil | 🔒 JWT |
-| `POST` | `/profile/game-accounts` | Vincular cuenta de juego | 🔒 JWT |
-| `POST` | `/profile/game-accounts/verify` | Verificar tag vía API | 🔒 JWT |
-| `DELETE` | `/profile/game-accounts/:id` | Desvincular juego | 🔒 JWT |
+| `GET`  | `/profile/me` | Mi perfil + historial de torneos activos | 🔒 JWT |
+| `PATCH` | `/profile/me` | Actualizar perfil académico y avatar | 🔒 JWT |
+| `GET`  | `/profile/:id` | Perfil público de cualquier competidor | ❌ |
+| `GET`  | `/profile/:id/signatures` | Muro de firmas y dedicatorias de un competidor | ❌ |
+| `POST` | `/profile/:id/signatures` | Dejar firma/sticker/meme en muro de competidor | 🔒 JWT |
+| `DELETE` | `/profile/signatures/:id` | Eliminar firma del muro (autor / dueño / admin) | 🔒 JWT |
+| `GET`  | `/profile/me/sanctions` | Mis sanciones activas y apelaciones | 🔒 JWT |
+| `POST` | `/profile/me/appeals` | Enviar apelación de sanción | 🔒 JWT |
 
 ### Torneos (`/tournaments`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
 | `GET` | `/tournaments` | Listar torneos (filtros opcionales) | ❌ |
 | `GET` | `/tournaments/:slug` | Detalle de torneo por slug | ❌ |
-| `POST` | `/tournaments` | Crear torneo | 🔒 ADMIN/ORG |
-| `PATCH` | `/tournaments/:id` | Editar torneo | 🔒 ADMIN/ORG |
+| `POST` | `/tournaments` | Crear torneo (1v1 o equipos) | 🔒 ADMIN/ORG |
+| `PATCH` | `/tournaments/:id` | Editar torneo completo | 🔒 ADMIN/ORG |
 | `DELETE` | `/tournaments/:id` | Eliminar torneo | 🔒 ADMIN/ORG |
 | `POST` | `/tournaments/:id/publish` | Publicar borrador | 🔒 ADMIN/ORG |
 
-### Inscripciones y Pagos (`/registrations`, `/payments`)
+### Inscripciones y Equipos (`/registrations`, `/payments`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
-| `POST` | `/tournaments/:id/registrations` | Inscribirse a torneo | 🔒 JWT |
-| `GET` | `/registrations/me` | Mis inscripciones | 🔒 JWT |
-| `GET` | `/tournaments/:id/participants` | Participantes confirmados | ❌ |
+| `POST` | `/tournaments/:id/registrations` | Inscribirse a torneo (individual o capitán + roster) | 🔒 JWT |
+| `GET` | `/registrations/me` | Mis inscripciones activas | 🔒 JWT |
+| `GET` | `/tournaments/:id/participants` | Lista de participantes y escuadras | ❌ |
 | `POST` | `/registrations/:id/evidence` | Subir comprobante de pago | 🔒 JWT |
-| `POST` | `/payments/:id/approve` | Aprobar pago | 🔒 ADMIN/ORG |
+| `POST` | `/payments/:id/approve` | Aprobar pago de inscripción | 🔒 ADMIN/ORG |
 | `POST` | `/payments/:id/reject` | Rechazar pago | 🔒 ADMIN/ORG |
 
 ### Competición / Brackets (`/tournaments/:id/bracket`, `/matchups`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
 | `GET` | `/tournaments/:id/bracket` | Obtener bracket del torneo | ❌ |
-| `POST` | `/tournaments/:id/generate-bracket` | Generar bracket automático | 🔒 JWT |
-| `POST` | `/matchups/:id/result` | Registrar resultado de partida | 🔒 JWT |
+| `POST` | `/tournaments/:id/generate-bracket` | Generar bracket por sorteo aleatorio oficial | 🔒 ADMIN/ORG |
+| `POST` | `/matchups/:id/result` | Registrar resultado de partida (score y sets) | 🔒 ADMIN/ORG |
 
-### Ranking (`/ranking`)
+### Ranking y Palmarés (`/ranking`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
 | `GET` | `/ranking/leaderboard?game=CLASH_ROYALE` | Leaderboard institucional | ❌ |
 
-### Comunidad (`/community`)
+### Comunidad y Foro (`/community`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
 | `GET` | `/community/posts` | Listar publicaciones | ❌ |
@@ -382,11 +384,20 @@ Rol:      ADMIN (acceso total al panel de administración)
 | `POST` | `/community/posts/:id/comments` | Comentar publicación | 🔒 JWT |
 | `POST` | `/community/posts/:id/react` | Reaccionar a publicación | 🔒 JWT |
 
-### Administración (`/admin`)
+### Notificaciones In-App (`/notifications`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
-| `GET` | `/admin/users` | Listar todos los usuarios | 🔒 ADMIN |
-| `PATCH` | `/admin/users/:id/role` | Cambiar rol de usuario | 🔒 ADMIN |
+| `GET` | `/notifications` | Listar mis notificaciones | 🔒 JWT |
+| `PATCH` | `/notifications/:id/read` | Marcar notificación como leída | 🔒 JWT |
+
+### Administración y Moderación (`/admin`)
+| Método | Endpoint | Descripción | Auth |
+|---|---|---|---|
+| `GET` | `/admin/users` | Listado y directorio de usuarios con roles y sanciones | 🔒 ADMIN |
+| `PATCH` | `/admin/users/:id/role` | Asignar rol (STUDENT / ORGANIZER / ADMIN) | 🔒 ADMIN |
+| `POST` | `/admin/users/:id/sanction` | Aplicar sanción (Silencio, Ban temporal o permanente) | 🔒 ADMIN |
+| `DELETE` | `/admin/users/:id/sanction` | Levantar sanción disciplinaria | 🔒 ADMIN |
+| `POST` | `/admin/appeals/:id/review` | Aprobar o denegar apelación de estudiante | 🔒 ADMIN |
 
 ---
 
@@ -447,40 +458,49 @@ RankingSeason ── RankingEntry
 - Correo de bienvenida vía Brevo SMTP para nuevos registros.
 - Roles: `STUDENT`, `ORGANIZER`, `ADMIN`.
 
+### 👤 Perfiles Públicos, Vista de Visitante y Muro de Firmas
+- **Perfil Público (`/profile/[id]`)**: Visualización del avatar, nombre completo, correo institucional sutil, carrera, ciclo y estado oficial.
+- **Vista de Visitante**: Botón en el perfil propio (`/profile`) para previsualizar la cuenta tal como la ven los demás competidores, con banner superior de modo visitante y retorno rápido a edición.
+- **Muro de Firmas & Mensajes de la Comunidad**: Espacio social en cada perfil para recibir dedicatorias, firmas de honor, stickers rápidos (*"🏆 ¡A romperla!", "👑 Leyenda de Tecsup", "🔥 GG WP"*) y soporte para adjuntar imágenes/memes. Control de moderación para eliminar mensajes.
+- **Torneos Activos Reales**: Listado en vivo de torneos en los que el competidor está participando actualmente (eliminados tags y copas simuladas).
+- **Medallero de Honor**: Palmarés oficial de podios y participaciones en torneos finalizados (🥇 Oro, 🥈 Plata, 🥉 Bronce).
+
 ### 🏆 Gestión de Torneos
 - CRUD completo de torneos con estados: `DRAFT → PUBLISHED → REGISTRATION_OPEN → IN_PROGRESS → FINISHED`.
 - Campos: nombre, descripción, juego, cupos, costo, premio, formato, fechas, reglas, banner.
+- Modalidades 1vs1 y por equipos (3vs3, 5vs5).
 - Publicación de borradores, edición y eliminación con cascade.
-- Filtros por juego, estado, búsqueda por texto.
+- Filtros por juego, estado y búsqueda rápida.
 
-### 📋 Inscripciones y Pagos
-- Wizard de inscripción en 4 pasos: Selección → Cuenta de juego → Reglas → Pago.
+### 📋 Inscripciones, Equipos y Pagos
+- **Inscripción en Equipos Optimizada**: El Capitán se precarga automáticamente con la cuenta del usuario en sesión, eligiendo emblema del equipo (🐉, ⚡, 🐺, 🛡️, 👑, 🦅, ⚔️) y registrando únicamente a los compañeros restantes.
+- **Roster Lightbox Modal**: Ventana modal sobreexpuesta flotante en la lista de participantes para inspeccionar a todos los miembros de un equipo sin salir de la página ni abrir nuevas pestañas.
+- **Participantes 1vs1**: Tarjeta con avatar, nombre, correo institucional y enlace directo al perfil público.
 - Métodos de pago: **Yape**, **Plin**, **Transferencia**.
-- Flujo de comprobante: subir evidencia → revisión del admin → aprobación/rechazo.
+- Flujo de comprobante: subir evidencia → revisión del organizador/admin → aprobación/rechazo.
 - Estados: `PENDING_PAYMENT → PAYMENT_UNDER_REVIEW → CONFIRMED / REJECTED`.
-- Control de cupos con waitlist automática.
 
 ### 🗡️ Sistema de Brackets
-- Generación automática de brackets de eliminación directa (potencia de 2).
-- Seeding aleatorio o manual de participantes.
-- Registro de resultados por matchup con score A/B.
-- Avance automático del ganador a la siguiente ronda.
-- Visualización de bracket completa en el frontend con `BracketView.tsx`.
+- Generación de brackets por **Sorteo Aleatorio Oficial** (eliminado seeding por copas simuladas).
+- Registro de resultados por matchup con score A/B y sets.
+- Avance automático del ganador a la siguiente ronda (eliminación directa).
+- Visualización de bracket interactivo completa en el frontend con `BracketView.tsx`.
 
-### 📊 Ranking Institucional
-- Leaderboard por juego con estadísticas en tiempo real.
-- Datos: posición, nombre, trofeos, nivel, carrera, ciclo, winrate.
-- Filtros por juego (Clash Royale, Brawl Stars).
+### 👑 Panel de Administración, Moderación y Sanciones
+- Directorio de usuarios registrados con enlace directo a sus perfiles públicos.
+- Cambio dinámico de roles (`STUDENT` ↔ `ORGANIZER` ↔ `ADMIN`).
+- **Sistema Disciplinario**: Aplicación de sanciones de silencio (Mute), suspensión temporal o baneo permanente con motivo y vencimiento.
+- **Sistema de Apelaciones**: Los estudiantes pueden apelar sanciones desde su perfil y el administrador puede evaluarlas, aprobarlas o rechazarlas.
+- Gestión de torneos: crear, editar, publicar, eliminar.
+
+### 📡 Centro de Notificaciones In-App
+- Drawer interactivo en el Navbar (`NotificationCenterDrawer.tsx`) conectado al backend.
+- Notificaciones de inscripciones aprobadas, pagos revisados, resultados de partidos, sanciones y apelaciones.
 
 ### 💬 Comunidad
 - Publicaciones con categorías (General, Estrategia, Equipos, etc.).
 - Sistema de reacciones tipo emoji (una reacción por usuario por post).
 - Comentarios con hilos y media URL.
-
-### 👑 Panel de Administración
-- Listado de usuarios registrados con roles y estado.
-- Cambio de roles (`STUDENT` ↔ `ORGANIZER` ↔ `ADMIN`).
-- Gestión de torneos: crear, editar, publicar, eliminar.
 
 ### 📧 Correo Transaccional
 - Servicio de email con Brevo (Sendinblue) REST API + Nodemailer SMTP fallback.
@@ -493,21 +513,17 @@ RankingSeason ── RankingEntry
 
 ### 🔴 Prioridad Alta (Sprint actual)
 - [ ] **OAuth real con Google**: Integrar `@react-oauth/google` en el frontend para popup de Google real (actualmente se simula enviando email directamente al backend).
-- [ ] **Notificaciones push/in-app**: El componente `NotificationCenterDrawer` existe en UI pero no tiene backend conectado.
-- [ ] **Validación de certificados**: El `CertificateModal` tiene UI, falta generación PDF y firma digital.
 - [ ] **Tests E2E completos**: Configurar Vitest para tests de integración del API.
 
 ### 🟡 Prioridad Media (Próximo sprint)
 - [ ] **WebSockets para brackets en vivo**: Actualización en tiempo real del estado del bracket durante torneos.
-- [ ] **Subida de imágenes**: Integrar almacenamiento (Supabase Storage o Cloudinary) para avatares, banners y comprobantes de pago.
-- [ ] **Dashboard del competidor**: La ruta `/dashboard` existe pero necesita desarrollo de métricas personalizadas.
-- [ ] **Historial de partidas**: Registrar historial completo de todas las partidas jugadas por un competidor.
-- [ ] **Multi-campus**: Soporte para sedes Arequipa y Trujillo.
+- [ ] **Subida de imágenes en la nube**: Integrar Supabase Storage o Cloudinary para almacenamiento persistente de comprobantes y banners.
+- [ ] **Dashboard del competidor**: Métricas personalizadas de rendimiento en torneos.
+- [ ] **Multi-campus**: Soporte específico para sedes Arequipa y Trujillo.
 
 ### 🟢 Prioridad Baja (Futuro)
 - [ ] **App móvil** con React Native o Expo.
-- [ ] **Integración Discord** para notificaciones de torneos.
-- [ ] **Sistema de equipos** para torneos por equipo (3v3, 5v5).
+- [ ] **Integración Discord** para anuncios de torneos.
 - [ ] **Streaming/VODs** integrados para partidas destacadas.
 - [ ] **Deploy a producción**: Vercel (frontend) + Railway/Render (backend).
 - [ ] **CI/CD con GitHub Actions**: Build automático, lint, tests, deploy preview.
