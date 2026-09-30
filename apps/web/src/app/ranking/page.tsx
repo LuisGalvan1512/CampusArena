@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { GAME_LIST, type GameCode, GAME_CATALOG } from '@/lib/games';
 import { capitalizeWords } from '../profile/page';
+import { RankingRowSkeleton } from '@/components/Skeleton';
 
 interface LeaderboardEntry {
   id: string;
@@ -126,9 +127,17 @@ export default function RankingPage() {
       </div>
 
       {isLoading ? (
-        <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-amber-400" />
-          <p className="text-xs text-[#8E92A4]">Calculando posiciones del ranking...</p>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+            <div className="h-64 skeleton-shimmer rounded-2xl" />
+            <div className="h-76 skeleton-shimmer rounded-2xl" />
+            <div className="h-64 skeleton-shimmer rounded-2xl" />
+          </div>
+          <div className="space-y-2 pt-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <RankingRowSkeleton key={i} />
+            ))}
+          </div>
         </div>
       ) : (
         <>

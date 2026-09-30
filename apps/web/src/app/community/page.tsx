@@ -25,6 +25,9 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { uploadCommunityMedia } from '@/lib/storage';
+import { CommunityPostSkeleton } from '@/components/Skeleton';
+import { fireCelebration } from '@/lib/confetti';
+import { sounds } from '@/lib/sound';
 
 type UserProfile = {
   nickname?: string;
@@ -270,6 +273,8 @@ export default function CommunityPage() {
         setNewDescription('');
         setNewMediaUrl('');
         setIsPosting(false);
+        fireCelebration();
+        sounds.playSuccess();
         fetchPosts(1, false);
       } else {
         alert(res.error?.message || 'Error al publicar.');
@@ -308,6 +313,7 @@ export default function CommunityPage() {
 
   const handleReact = async (postId: string, type: string) => {
     if (!isAuthenticated) return alert('Debes iniciar sesión para reaccionar');
+    sounds.playClick();
     
     // Optimistic Update
     setPosts(prev => prev.map(p => {
@@ -651,9 +657,10 @@ export default function CommunityPage() {
           {/* FEED */}
           <div className="space-y-5">
             {loading ? (
-              <div className="text-center py-12 text-[#8E92A4] flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin text-[#E63946]" />
-                <span>Cargando el feed comunitario...</span>
+              <div className="space-y-4">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <CommunityPostSkeleton key={i} />
+                ))}
               </div>
             ) : filteredPosts.length === 0 ? (
               <div className="text-center py-12 text-[#8E92A4] arena-card p-8">

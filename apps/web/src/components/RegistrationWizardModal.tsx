@@ -24,6 +24,8 @@ import {
 
 import { uploadPaymentVoucher } from '@/lib/storage';
 import { GAME_CATALOG, GameCode } from '@/lib/games';
+import { fireCelebration } from '@/lib/confetti';
+import { sounds } from '@/lib/sound';
 
 interface GameProfile {
   id: string;
@@ -196,9 +198,12 @@ export function RegistrationWizardModal({
       setRegistrationResult(res.data);
       if (res.data.is_free) {
         setStep(4);
+        fireCelebration();
+        sounds.playFanfare();
         onSuccess();
       } else {
         setStep(3);
+        sounds.playClick();
       }
     } else {
       setErrorMessage(res.error?.message || 'Error al iniciar la inscripción.');
@@ -223,6 +228,8 @@ export function RegistrationWizardModal({
 
     if (res.success) {
       setStep(4);
+      fireCelebration();
+      sounds.playFanfare();
       onSuccess();
     } else {
       setErrorMessage(res.error?.message || 'Error al enviar el comprobante.');

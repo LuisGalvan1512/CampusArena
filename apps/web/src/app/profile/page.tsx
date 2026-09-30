@@ -31,6 +31,8 @@ import {
   Eye,
   Mail
 } from 'lucide-react';
+import { HolographicCard } from '@/components/HolographicCard';
+import { sounds } from '@/lib/sound';
 
 export const SYSTEM_AVATARS = [
   { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
@@ -330,7 +332,7 @@ export default function ProfilePage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
       {/* 1. HEADER HERO */}
-      <div className="relative arena-card p-8 sm:p-10 overflow-hidden">
+      <HolographicCard className="p-8 sm:p-10 relative overflow-hidden" glowColor="rgba(230, 57, 70, 0.25)">
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -422,7 +424,7 @@ export default function ProfilePage() {
             </div>
           </div>
         </div>
-      </div>
+      </HolographicCard>
 
       {/* SANCTIONS & APPEALS ALERT BANNER */}
       {userSanctions.length > 0 && (

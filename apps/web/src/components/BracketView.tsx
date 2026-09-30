@@ -21,6 +21,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
+import { sounds } from '@/lib/sound';
+import { MatchupModal } from '@/components/MatchupModal';
 
 interface MatchupItem {
   id: string;
@@ -64,6 +66,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   
   // Referee modal state
   const [selectedMatchup, setSelectedMatchup] = useState<MatchupItem | null>(null);
+  const [matchupForModal, setMatchupForModal] = useState<{ matchup: MatchupItem; roundName: string } | null>(null);
   const [scoreA, setScoreA] = useState(2);
   const [scoreB, setScoreB] = useState(0);
   const [selectedWinnerTag, setSelectedWinnerTag] = useState<string>('');
@@ -185,16 +188,23 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     );
   }
 
-  const handleMatchupClick = (matchup: MatchupItem) => {
-    // Only allow reporting if matchup is ready or in progress or already has both players
-    if (matchup.participant_a_tag && matchup.participant_b_tag && matchup.status !== 'COMPLETED') {
-      setSelectedMatchup(matchup);
-      setScoreA(2);
-      setScoreB(0);
-      setSelectedWinnerTag(matchup.participant_a_tag);
-      setIsWalkover(false);
-      setFeedback(null);
+  const handleMatchupClick = (matchup: MatchupItem, roundName: string) => {
+    // Open the visual VS showdown modal if there are participants
+    if (matchup.participant_a_name || matchup.participant_b_name) {
+      sounds.playClick();
+      setMatchupForModal({ matchup, roundName });
     }
+  };
+
+  const handleOpenReferee = (e: React.MouseEvent, matchup: MatchupItem) => {
+    e.stopPropagation();
+    sounds.playClick();
+    setSelectedMatchup(matchup);
+    setScoreA(2);
+    setScoreB(0);
+    setSelectedWinnerTag(matchup.participant_a_tag || '');
+    setIsWalkover(false);
+    setFeedback(null);
   };
 
   const handleSubmitResult = async (e: React.FormEvent) => {
@@ -259,15 +269,15 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 return (
                   <div
                     key={m.id}
-                    onClick={() => handleMatchupClick(m)}
-                    className={`relative rounded-xl p-3.5 border transition-all select-none shadow-sm ${
+                    onClick={() => handleMatchupClick(m, round.name)}
+                    className={`relative rounded-xl p-3.5 border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
                       isFinal
-                        ? 'bg-gradient-to-b from-[#1D3557]/20 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10'
+                        ? 'bg-gradient-to-b from-[#1D3557]/20 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
                         : isCompleted
-                        ? 'bg-[var(--bg-card)] border-[var(--border-card)] opacity-95'
+                        ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-[#E63946]/50'
                         : isReady
-                        ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] cursor-pointer shadow-lg shadow-[#E63946]/10 group ring-1 ring-[#E63946]/20'
-                        : 'bg-[var(--bg-card)]/60 border-[var(--border-card)] opacity-60'
+                        ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
+                        : 'bg-[var(--bg-card)]/60 border-[var(--border-card)] opacity-70 hover:opacity-100'
                     }`}
                   >
                     {/* Top status indicator */}
@@ -345,6 +355,21 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         </span>
                       </div>
                     </div>
+
+                    {/* Referee button for admins/organizers */}
+                    {canManage && hasBoth && !isCompleted && (
+                      <div className="mt-2.5 pt-2 border-t border-[var(--border-card)] flex items-center justify-between">
+                        <span className="text-[10px] text-[var(--text-secondary)] font-bold">Arbitraje</span>
+                        <button
+                          type="button"
+                          onClick={(e) => handleOpenReferee(e, m)}
+                          className="btn-primary py-1 px-2.5 text-[10px] flex items-center gap-1 cursor-pointer"
+                        >
+                          <Swords className="w-3 h-3" />
+                          <span>Marcador</span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* Final Crown Badge on Grand Final */}
                     {isFinal && isCompleted && (
@@ -568,6 +593,27 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
           </div>
         </div>
       )}
+
+      {/* CINEMATIC MATCHUP VS MODAL */}
+      <MatchupModal
+        isOpen={Boolean(matchupForModal)}
+        onClose={() => setMatchupForModal(null)}
+        tournamentName="Torneo Campus Arena"
+        roundName={matchupForModal?.roundName}
+        status={matchupForModal?.matchup.status === 'COMPLETED' ? 'FINISHED' : matchupForModal?.matchup.status === 'READY' ? 'IN_PROGRESS' : 'SCHEDULED'}
+        player1={matchupForModal ? {
+          name: matchupForModal.matchup.participant_a_name || 'Por Definir',
+          tag: matchupForModal.matchup.participant_a_tag || undefined,
+          score: matchupForModal.matchup.status === 'COMPLETED' ? matchupForModal.matchup.score_a : undefined,
+          is_winner: matchupForModal.matchup.winner_tag === matchupForModal.matchup.participant_a_tag,
+        } : null}
+        player2={matchupForModal ? {
+          name: matchupForModal.matchup.participant_b_name || 'Por Definir',
+          tag: matchupForModal.matchup.participant_b_tag || undefined,
+          score: matchupForModal.matchup.status === 'COMPLETED' ? matchupForModal.matchup.score_b : undefined,
+          is_winner: matchupForModal.matchup.winner_tag === matchupForModal.matchup.participant_b_tag,
+        } : null}
+      />
 
     </div>
   );

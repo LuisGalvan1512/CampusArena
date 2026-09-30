@@ -230,3 +230,35 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(150, 150, 150, 0.35);
 }
+
+/* Skeleton Shimmer Loading Effect */
+@keyframes shimmerSweep {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.14) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.6s infinite ease-in-out;
+  border-radius: 8px;
+}
+
+.light .skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #E2E8F0 0%,
+    #FFFFFF 50%,
+    #E2E8F0 100%
+  );
+  background-size: 200% 100%;
+}

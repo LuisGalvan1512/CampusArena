@@ -25,6 +25,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
+import { sounds } from '@/lib/sound';
+import { HolographicCard } from '@/components/HolographicCard';
 import { Medal, LegacySummary, capitalizeWords } from '../page';
 
 export interface ProfileSignature {
@@ -163,6 +165,7 @@ export default function PublicProfilePage() {
 
       if (res.success) {
         fireCelebration();
+        sounds.playSuccess();
         toast.success('¡Firma agregada exitosamente al muro!');
         if (res.data && res.data.author) {
           setSignatures((prev) => [res.data, ...prev]);
@@ -276,7 +279,7 @@ export default function PublicProfilePage() {
       )}
 
       {/* 1. HEADER HERO */}
-      <div className="relative arena-card p-8 sm:p-10 overflow-hidden">
+      <HolographicCard className="p-8 sm:p-10 relative overflow-hidden" glowColor="rgba(230, 57, 70, 0.25)">
         <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -365,7 +368,7 @@ export default function PublicProfilePage() {
             &ldquo;{competitor.profile.biography}&rdquo;
           </div>
         )}
-      </div>
+      </HolographicCard>
 
       {/* 2. MEDALLERO DE HONOR & PALMARÉS */}
       <div className="arena-card p-6 sm:p-8 space-y-6">

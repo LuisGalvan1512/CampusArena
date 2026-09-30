@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { TournamentCard, TournamentItem } from '@/components/TournamentCard';
+import { TournamentCardSkeleton } from '@/components/Skeleton';
 import { 
   Trophy, 
   Swords, 
@@ -169,9 +170,10 @@ export default function TournamentsPage() {
 
       {/* 3. TOURNAMENTS GRID */}
       {isLoading ? (
-        <div className="min-h-[40vh] flex flex-col items-center justify-center space-y-3">
-          <Loader2 className="w-8 h-8 animate-spin text-[#E63946]" />
-          <p className="text-xs text-[var(--text-secondary)]">Cargando torneos de la liga...</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <TournamentCardSkeleton key={i} />
+          ))}
         </div>
       ) : tournaments.length === 0 ? (
         <div className="arena-card p-12 text-center space-y-4">
