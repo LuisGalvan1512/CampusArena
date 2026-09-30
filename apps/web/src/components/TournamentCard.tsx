@@ -110,8 +110,15 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
       {/* Banner Image / Gradient */}
       <div className="relative h-44 w-full overflow-hidden bg-black/80">
         <img
-          src={tournament.banner_url}
+          src={tournament.banner_url || game?.bannerUrl || '/games/clash_royale_banner.jpg'}
           alt={tournament.name}
+          onError={(e) => {
+            const fallback = game?.bannerUrl || '/games/clash_royale_banner.jpg';
+            if (e.currentTarget.getAttribute('data-failed') !== 'true') {
+              e.currentTarget.setAttribute('data-failed', 'true');
+              e.currentTarget.src = fallback;
+            }
+          }}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-90"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-transparent" />
@@ -122,7 +129,11 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
             className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md text-white border border-white/20"
             style={{ backgroundColor: `${gameColor}E6` }}
           >
-            {gameIcon}
+            {game?.logoUrl ? (
+              <img src={game.logoUrl} alt={gameName} className="w-4 h-4 object-contain shrink-0" />
+            ) : (
+              gameIcon
+            )}
             <span>{gameName}</span>
           </div>
 

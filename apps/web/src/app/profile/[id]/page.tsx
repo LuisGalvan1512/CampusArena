@@ -28,6 +28,7 @@ import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
 import { HolographicCard } from '@/components/HolographicCard';
 import { Medal, LegacySummary, capitalizeWords } from '../page';
+import { GAME_CATALOG, type GameCode } from '@/lib/games';
 
 export interface ProfileSignature {
   id: string;
@@ -549,8 +550,22 @@ export default function PublicProfilePage() {
               >
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-3">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
-                      {tour.game_code}
+                    <span 
+                      className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider border flex items-center gap-1.5"
+                      style={{
+                        backgroundColor: `${GAME_CATALOG[tour.game_code as GameCode]?.color || '#10B981'}20`,
+                        color: GAME_CATALOG[tour.game_code as GameCode]?.color || '#10B981',
+                        borderColor: `${GAME_CATALOG[tour.game_code as GameCode]?.color || '#10B981'}40`,
+                      }}
+                    >
+                      {GAME_CATALOG[tour.game_code as GameCode]?.logoUrl && (
+                        <img 
+                          src={GAME_CATALOG[tour.game_code as GameCode]?.logoUrl} 
+                          alt="" 
+                          className="w-3.5 h-3.5 object-contain" 
+                        />
+                      )}
+                      <span>{GAME_CATALOG[tour.game_code as GameCode]?.shortName || tour.game_code}</span>
                     </span>
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-card)]">
                       {tour.registration_status === 'CONFIRMED' ? 'Inscripción Confirmada' : 'En Revisión'}

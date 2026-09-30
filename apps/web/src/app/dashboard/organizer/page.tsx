@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { GAME_CATALOG } from '@/lib/games';
+import { GAME_CATALOG, GAME_BANNER_PRESETS } from '@/lib/games';
 import { EditTournamentModal } from '@/components/EditTournamentModal';
 import { 
   Trophy, 
@@ -20,25 +20,15 @@ import {
   FileText, 
   Calendar, 
   QrCode, 
-  ExternalLink,
-  ShieldCheck,
-  Flame,
-  ArrowRight,
-  Eye,
-  Image as ImageIcon,
-  Edit3,
-  MapPin
+  ExternalLink, 
+  ShieldCheck, 
+  Flame, 
+  ArrowRight, 
+  Eye, 
+  Image as ImageIcon, 
+  Edit3, 
+  MapPin 
 } from 'lucide-react';
-
-const GAME_BANNER_PRESETS: Record<string, string> = {
-  CLASH_ROYALE: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-  BRAWL_STARS: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
-  SMASH_ULTIMATE: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80',
-  DOTA_2: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
-  LEFT_4_DEAD_2: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=1200&q=80',
-  EFOOTBALL: 'https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1200&q=80',
-  FORTNITE: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?auto=format&fit=crop&w=1200&q=80',
-};
 
 interface PendingPayment {
   payment_id: string;
@@ -186,7 +176,7 @@ export default function OrganizerDashboardPage() {
     e.preventDefault();
     setActionLoading('creating-tour');
 
-    const defaultBanner = GAME_BANNER_PRESETS[newTourGame] || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1200&q=80';
+    const defaultBanner = GAME_BANNER_PRESETS[newTourGame] || '/games/clash_royale_banner.jpg';
     const bannerUrl = newTourBanner.trim() || defaultBanner;
     const modalityStr = newTourTeamSize > 1 ? `${newTourTeamSize} vs ${newTourTeamSize}` : '1 vs 1';
     const formatStr = `${modalityStr} (${newTourSeriesFormat})`;
@@ -771,13 +761,13 @@ export default function OrganizerDashboardPage() {
                   type="url"
                   value={newTourBanner}
                   onChange={(e) => setNewTourBanner(e.target.value)}
-                  placeholder={GAME_BANNER_PRESETS[newTourGame] || 'https://images.unsplash.com/...'}
+                  placeholder={GAME_BANNER_PRESETS[newTourGame] || '/games/clash_royale_banner.jpg'}
                   className="input-arena text-xs font-mono"
                 />
                 <div className="flex items-center gap-3">
                   <div className="h-16 w-32 rounded-lg overflow-hidden border border-[var(--border-card)] shrink-0 bg-black/40">
                     <img
-                      src={newTourBanner.trim() || GAME_BANNER_PRESETS[newTourGame] || 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=600&q=80'}
+                      src={newTourBanner.trim() || GAME_BANNER_PRESETS[newTourGame] || '/games/clash_royale_banner.jpg'}
                       alt="Banner Preview"
                       className="w-full h-full object-cover"
                     />

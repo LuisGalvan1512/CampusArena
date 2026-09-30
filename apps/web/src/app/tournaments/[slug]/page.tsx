@@ -12,6 +12,7 @@ import { RegistrationWizardModal } from '@/components/RegistrationWizardModal';
 import { BracketView } from '@/components/BracketView';
 import { EditTournamentModal } from '@/components/EditTournamentModal';
 import { DeleteTournamentModal } from '@/components/DeleteTournamentModal';
+import { GAME_CATALOG, type GameCode } from '@/lib/games';
 import { 
   Trophy, 
   Swords, 
@@ -174,6 +175,7 @@ export default function TournamentDetailPage() {
     );
   }
 
+  const gameDef = GAME_CATALOG[tournament.game_code as GameCode];
   const isClash = tournament.game_code === 'CLASH_ROYALE';
   const startDate = new Date(tournament.tournament_start_at).toLocaleDateString('es-PE', {
     weekday: 'long',
@@ -331,19 +333,33 @@ export default function TournamentDetailPage() {
       <div className="relative rounded-2xl overflow-hidden arena-card border border-white/10 shadow-2xl">
         <div className="relative h-64 sm:h-80 w-full bg-[#0B0C10]">
           <img
-            src={tournament.banner_url}
+            src={tournament.banner_url || gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
             alt={tournament.name}
+            onError={(e) => {
+              const fallback = gameDef?.bannerUrl || '/games/clash_royale_banner.jpg';
+              if (e.currentTarget.getAttribute('data-failed') !== 'true') {
+                e.currentTarget.setAttribute('data-failed', 'true');
+                e.currentTarget.src = fallback;
+              }
+            }}
             className="w-full h-full object-cover object-center opacity-50"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#15161E] via-[#15161E]/60 to-transparent" />
 
           {/* Floating Badges */}
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
-            <div className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md ${
-              isClash ? 'bg-[#E63946] text-white' : 'bg-[#457B9D] text-white'
-            }`}>
-              {isClash ? <Swords className="w-4 h-4" /> : <Gamepad2 className="w-4 h-4" />}
-              <span>{isClash ? 'Clash Royale' : 'Brawl Stars'}</span>
+            <div 
+              className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg backdrop-blur-md text-white border border-white/20"
+              style={{ backgroundColor: gameDef?.color ? `${gameDef.color}E6` : '#E63946' }}
+            >
+              {gameDef?.logoUrl ? (
+                <img src={gameDef.logoUrl} alt={gameDef.name} className="w-5 h-5 object-contain" />
+              ) : isClash ? (
+                <Swords className="w-4 h-4" />
+              ) : (
+                <Gamepad2 className="w-4 h-4" />
+              )}
+              <span>{gameDef?.name || tournament.game_code}</span>
             </div>
 
             {getStatusBadge()}

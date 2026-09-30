@@ -141,7 +141,11 @@ export default function TournamentsPage() {
                 boxShadow: `0 4px 15px ${game.shadowColor}`,
               } : {}}
             >
-              {GAME_ICON_MAP[game.iconName]}
+              {game.logoUrl ? (
+                <img src={game.logoUrl} alt={game.name} className="w-4 h-4 object-contain shrink-0" />
+              ) : (
+                GAME_ICON_MAP[game.iconName]
+              )}
               {game.shortName}
             </button>
           ))}

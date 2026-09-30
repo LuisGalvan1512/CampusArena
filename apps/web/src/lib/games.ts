@@ -19,6 +19,14 @@ export interface GameDefinition {
   shortName: string;
   /** Lucide icon name */
   iconName: string;
+  /** Official game transparent logo / emblem */
+  logoUrl: string;
+  /** Official high-res game banner / key art */
+  bannerUrl: string;
+  /** Fallback remote logo URL */
+  remoteLogoUrl: string;
+  /** Fallback remote banner URL */
+  remoteBannerUrl: string;
   color: string;
   colorSecondary: string;
   bgGradient: string;
@@ -40,6 +48,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Clash Royale',
     shortName: 'CR',
     iconName: 'Swords',
+    logoUrl: '/games/clash_royale_logo.webp',
+    bannerUrl: '/games/clash_royale_banner.jpg',
+    remoteLogoUrl: 'https://supercell.com/images/53c91cc7ddf17d5b6fa13cae4762af1b/main_logo_clashroyale.5e3fbb70__1_.webp',
+    remoteBannerUrl: 'https://supercell.com/images/c96611b5b4ccd331e2b4dcb797811894/hero_bg_clashroyale.612fcf42.jpg',
     color: '#E63946',
     colorSecondary: '#1D3557',
     bgGradient: 'from-[#E63946] to-[#1D3557]',
@@ -57,6 +69,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Brawl Stars',
     shortName: 'BS',
     iconName: 'Gamepad2',
+    logoUrl: '/games/brawl_stars_logo.png',
+    bannerUrl: '/games/brawl_stars_banner.jpg',
+    remoteLogoUrl: 'https://supercell.com/images/0f037a93198129e58a26e509722f04a7/output.png',
+    remoteBannerUrl: 'https://supercell.com/images/1a5b69311180a4a1c374e10556941f05/hero_bg_brawlstars.a385872a.jpg',
     color: '#457B9D',
     colorSecondary: '#1D3557',
     bgGradient: 'from-[#457B9D] to-[#1D3557]',
@@ -74,6 +90,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Super Smash Bros',
     shortName: 'SSBU',
     iconName: 'Zap',
+    logoUrl: '/games/smash_ultimate_logo.png',
+    bannerUrl: '/games/smash_ultimate_banner.jpg',
+    remoteLogoUrl: 'https://upload.wikimedia.org/wikipedia/commons/c/c2/Super_Smash_Bros._Ultimate_Logo.png',
+    remoteBannerUrl: 'https://www.smashbros.com/assets_v2/img/top/hero01_en.jpg',
     color: '#FF6B35',
     colorSecondary: '#D62839',
     bgGradient: 'from-[#FF6B35] to-[#D62839]',
@@ -94,6 +114,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Left 4 Dead 2',
     shortName: 'L4D2',
     iconName: 'Crosshair',
+    logoUrl: '/games/left_4_dead_2_logo.png',
+    bannerUrl: '/games/left_4_dead_2_banner.jpg',
+    remoteLogoUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/550/logo.png',
+    remoteBannerUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/550/header.jpg',
     color: '#4CAF50',
     colorSecondary: '#1B5E20',
     bgGradient: 'from-[#4CAF50] to-[#1B5E20]',
@@ -111,6 +135,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'eFootball',
     shortName: 'eFB',
     iconName: 'CircleDot',
+    logoUrl: '/games/efootball_logo.jpg',
+    bannerUrl: '/games/efootball_banner.jpg',
+    remoteLogoUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1665460/capsule_616x353.jpg',
+    remoteBannerUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/1665460/header.jpg',
     color: '#2196F3',
     colorSecondary: '#0D47A1',
     bgGradient: 'from-[#2196F3] to-[#0D47A1]',
@@ -132,6 +160,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Dota 2',
     shortName: 'DOTA',
     iconName: 'Swords',
+    logoUrl: '/games/dota_2_logo.png',
+    bannerUrl: '/games/dota_2_banner.jpg',
+    remoteLogoUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/570/logo.png',
+    remoteBannerUrl: 'https://cdn.cloudflare.steamstatic.com/steam/apps/570/header.jpg',
     color: '#D32F2F',
     colorSecondary: '#B71C1C',
     bgGradient: 'from-[#D32F2F] to-[#B71C1C]',
@@ -149,6 +181,10 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     name: 'Fortnite',
     shortName: 'FN',
     iconName: 'Crosshair',
+    logoUrl: '/games/fortnite_logo.png',
+    bannerUrl: '/games/fortnite_banner.jpg',
+    remoteLogoUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Fortnite_F_lettermark_logo.png',
+    remoteBannerUrl: 'https://cdn-live.prm.ol.epicgames.com/prod/c9d5be52e48745d9b71b43693015543b.jpeg?width=1920&height=1080&aspect=fill',
     color: '#9C27B0',
     colorSecondary: '#4A148C',
     bgGradient: 'from-[#9C27B0] to-[#4A148C]',
@@ -161,6 +197,19 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     description: 'Battle Royale en modalidades Individual (Solos), Dúos (2v2), Tríos (3v3) o Escuadras (4v4). Puntos por victoria y eliminaciones.',
     badge: 'Solos, Dúos y Escuadras',
   },
+};
+
+/**
+ * High-res official banner preset mapping by game code.
+ */
+export const GAME_BANNER_PRESETS: Record<string, string> = {
+  CLASH_ROYALE: GAME_CATALOG.CLASH_ROYALE.bannerUrl,
+  BRAWL_STARS: GAME_CATALOG.BRAWL_STARS.bannerUrl,
+  SMASH_ULTIMATE: GAME_CATALOG.SMASH_ULTIMATE.bannerUrl,
+  LEFT_4_DEAD_2: GAME_CATALOG.LEFT_4_DEAD_2.bannerUrl,
+  EFOOTBALL: GAME_CATALOG.EFOOTBALL.bannerUrl,
+  DOTA_2: GAME_CATALOG.DOTA_2.bannerUrl,
+  FORTNITE: GAME_CATALOG.FORTNITE.bannerUrl,
 };
 
 /**
@@ -189,3 +238,4 @@ export function getGameName(code: string): string {
 export function getGame(code: string): GameDefinition | undefined {
   return (GAME_CATALOG as Record<string, GameDefinition>)[code];
 }
+

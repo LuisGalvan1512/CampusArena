@@ -86,6 +86,12 @@ export default function RankingPage() {
       
       {/* 1. HEADER HERO */}
       <div className="relative arena-card p-8 sm:p-12 overflow-hidden">
+        {currentGame?.bannerUrl && (
+          <div className="absolute inset-0 opacity-15 pointer-events-none">
+            <img src={currentGame.bannerUrl} alt="" className="w-full h-full object-cover object-center" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)] via-[var(--bg-card)]/90 to-transparent" />
+          </div>
+        )}
         <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 max-w-3xl space-y-4">
@@ -99,10 +105,10 @@ export default function RankingPage() {
           </h1>
 
           <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-            Los mejores competidores de la universidad clasificados por sus copas oficiales sincronizadas con Supercell y torneos ganados en la Arena.
+            Los mejores competidores de la universidad clasificados por sus estadísticas oficiales y torneos ganados en la Arena.
           </p>
 
-          {/* Game Selector Tabs — 5 Juegos */}
+          {/* Game Selector Tabs */}
           <div className="pt-3 flex items-center gap-2 flex-wrap">
             {GAME_LIST.map((game) => (
               <button
@@ -118,7 +124,11 @@ export default function RankingPage() {
                   boxShadow: `0 4px 15px ${game.shadowColor}`,
                 } : {}}
               >
-                {GAME_ICON_MAP_SM[game.iconName]}
+                {game.logoUrl ? (
+                  <img src={game.logoUrl} alt={game.name} className="w-4 h-4 object-contain shrink-0" />
+                ) : (
+                  GAME_ICON_MAP_SM[game.iconName]
+                )}
                 {game.shortName}
               </button>
             ))}

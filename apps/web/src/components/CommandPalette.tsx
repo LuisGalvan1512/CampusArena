@@ -28,6 +28,7 @@ import { useTheme } from 'next-themes';
 import { sounds } from '@/lib/sound';
 import { fireCelebration } from '@/lib/confetti';
 import { useAuth } from '@/context/AuthContext';
+import { GAME_LIST } from '@/lib/games';
 
 interface PaletteItem {
   id: string;
@@ -134,55 +135,19 @@ export function CommandPalette() {
       action: () => router.push('/dashboard/organizer'),
     }] : []),
 
-    // Games
-    {
-      id: 'game-cr',
-      title: 'Clash Royale',
-      subtitle: '1v1 Arena de Batalla en Tiempo Real',
-      category: 'Juegos',
-      icon: <Swords className="w-4 h-4 text-[#E63946]" />,
-      action: () => router.push('/tournaments?game_code=CLASH_ROYALE'),
-    },
-    {
-      id: 'game-bs',
-      title: 'Brawl Stars',
-      subtitle: 'Supercell 3v3 & Supervivencia',
-      category: 'Juegos',
-      icon: <Gamepad2 className="w-4 h-4 text-[#F4A261]" />,
-      action: () => router.push('/tournaments?game_code=BRAWL_STARS'),
-    },
-    {
-      id: 'game-ssbu',
-      title: 'Super Smash Bros Ultimate',
-      subtitle: 'Plataformas de Combate Nintendo Switch',
-      category: 'Juegos',
-      icon: <Zap className="w-4 h-4 text-[#E76F51]" />,
-      action: () => router.push('/tournaments?game_code=SMASH_BROS'),
-    },
-    {
-      id: 'game-dota',
-      title: 'Dota 2',
-      subtitle: 'MOBA Estratégico 5v5 Valve',
-      category: 'Juegos',
-      icon: <Crosshair className="w-4 h-4 text-[#D62839]" />,
-      action: () => router.push('/tournaments?game_code=DOTA_2'),
-    },
-    {
-      id: 'game-l4d2',
-      title: 'Left 4 Dead 2',
-      subtitle: 'Campaña & Versus Cooperativo 4v4',
-      category: 'Juegos',
-      icon: <Flame className="w-4 h-4 text-[#2A9D8F]" />,
-      action: () => router.push('/tournaments?game_code=LEFT_4_DEAD_2'),
-    },
-    {
-      id: 'game-efb',
-      title: 'eFootball',
-      subtitle: 'Simulación de Fútbol Konami 1v1',
-      category: 'Juegos',
-      icon: <CircleDot className="w-4 h-4 text-[#06D6A0]" />,
-      action: () => router.push('/tournaments?game_code=E_FOOTBALL'),
-    },
+    // Games (all 7 official disciplines)
+    ...GAME_LIST.map((game) => ({
+      id: `game-${game.code.toLowerCase()}`,
+      title: game.name,
+      subtitle: `${game.badge} • ${game.description.slice(0, 60)}...`,
+      category: 'Juegos' as const,
+      icon: game.logoUrl ? (
+        <img src={game.logoUrl} alt={game.name} className="w-4 h-4 object-contain" />
+      ) : (
+        <Gamepad2 className="w-4 h-4" style={{ color: game.color }} />
+      ),
+      action: () => router.push(`/tournaments?game_code=${game.code}`),
+    })),
 
     // Actions
     {

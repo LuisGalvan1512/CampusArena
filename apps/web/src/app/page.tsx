@@ -71,7 +71,7 @@ export default function HomePage() {
           {/* Badge */}
           <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/70 text-xs font-bold text-sky-600 dark:text-[#A8DADC] tracking-widest uppercase">
             <Flame className="w-4 h-4 text-[#E63946]" />
-            Temporada 2026 — 6 Disciplinas Oficiales
+            Temporada 2026 — 7 Disciplinas Oficiales
           </motion.div>
 
           {/* Epic Title */}
@@ -87,7 +87,8 @@ export default function HomePage() {
             La plataforma oficial de esports universitarios. Demuestra tu nivel en{' '}
             <span className="text-[var(--text-primary)] font-bold">Clash Royale</span>,{' '}
             <span className="text-[var(--text-primary)] font-bold">Dota 2</span>,{' '}
-            <span className="text-[var(--text-primary)] font-bold">Left 4 Dead 2</span> y más.
+            <span className="text-[var(--text-primary)] font-bold">Left 4 Dead 2</span>,{' '}
+            <span className="text-[var(--text-primary)] font-bold">Fortnite</span> y más.
           </motion.p>
 
           {/* Action CTAs */}
@@ -123,7 +124,7 @@ export default function HomePage() {
           {/* Quick Stats Grid */}
           <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16 max-w-4xl mx-auto border-t border-[var(--border-card)] mt-10">
             <div className="p-4 text-center arena-card">
-              <p className="text-3xl font-black text-[var(--text-primary)]">6</p>
+              <p className="text-3xl font-black text-[var(--text-primary)]">7</p>
               <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Juegos Oficiales</p>
             </div>
             <div className="p-4 text-center arena-card">
@@ -182,14 +183,32 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="relative h-full min-h-[300px] rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl">
-                {/* Simulated Map/Campus Image Graphic */}
-                <div className="absolute inset-0 bg-gradient-to-br from-[#1D3557] to-[#0B0C10]" />
-                <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-                  <Building2 className="w-24 h-24 text-[#E63946] mb-6 drop-shadow-[0_0_15px_rgba(230,57,70,0.5)]" />
-                  <h3 className="text-2xl font-black tracking-widest text-white uppercase">Campus Tecsup</h3>
-                  <p className="text-[#A8DADC] mt-2 font-mono text-sm">Lima, Perú</p>
+              <div className="relative h-full min-h-[360px] rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl group">
+                {/* Real Campus Photo from Tecsup */}
+                <img 
+                  src="/brand/tecsup_sede_lima.jpg" 
+                  alt="Campus Tecsup Lima" 
+                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                
+                {/* Top Institution Badge */}
+                <div className="absolute top-4 left-4 z-10 flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 shadow-lg">
+                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-5 h-5 object-contain" />
+                  <span className="text-xs font-black tracking-wider text-white uppercase">Tecsup • Innovación & Tecnología</span>
+                </div>
+
+                {/* Bottom Campus Details */}
+                <div className="absolute bottom-4 left-4 right-4 z-10 p-4 rounded-xl bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-card)]">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-black text-[var(--text-primary)]">Campus Central Lima</h4>
+                      <p className="text-xs text-[var(--text-secondary)]">Av. Cascanueces 2221, Santa Anita</p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
+                      Sede Oficial
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -207,8 +226,8 @@ export default function HomePage() {
             Elige tu campo de batalla
           </h3>
           <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-base">
-            6 juegos soportados oficialmente. Registro rápido y sin validaciones restrictivas. 
-            Simplemente ingresa tu nickname y estás dentro.
+            7 disciplinas soportadas oficialmente con rankings y torneos en vivo. 
+            Vincula tu tag oficial o nickname y empieza a competir.
           </p>
         </div>
 
@@ -219,12 +238,24 @@ export default function HomePage() {
           viewport={{ once: true, margin: "-50px" }}
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
         >
-          {GAME_LIST.map((game, index) => (
+          {GAME_LIST.map((game) => (
             <motion.div 
               variants={fadeUp}
               key={game.code} 
               className="arena-card p-6 relative overflow-hidden group cursor-pointer arena-card-glow"
             >
+              {/* Game Official Key Art Background */}
+              {game.bannerUrl && (
+                <div className="absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none overflow-hidden">
+                  <img 
+                    src={game.bannerUrl} 
+                    alt={game.name} 
+                    className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/80 to-[var(--bg-card)]/40" />
+                </div>
+              )}
+
               {/* Background dynamic glow */}
               <div 
                 className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-500 opacity-0 group-hover:opacity-30"
@@ -234,9 +265,13 @@ export default function HomePage() {
               {/* Header: Icon + Badge */}
               <div className="flex items-start justify-between relative z-10">
                 <div 
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${game.bgGradient}`}
+                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center p-2.5 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${game.bgGradient}`}
                 >
-                  {GAME_ICONS[game.iconName]}
+                  {game.logoUrl ? (
+                    <img src={game.logoUrl} alt={game.name} className="w-full h-full object-contain filter drop-shadow" />
+                  ) : (
+                    GAME_ICONS[game.iconName]
+                  )}
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span 
@@ -350,15 +385,15 @@ export default function HomePage() {
 
               <div className="space-y-3 relative z-10">
                 <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
-                  <span className="flex items-center gap-2 font-bold text-[var(--text-secondary)]">
-                    <Swords className="w-4 h-4 text-[#E63946]" />
+                  <span className="flex items-center gap-2.5 font-bold text-[var(--text-secondary)]">
+                    <img src="/games/dota_2_logo.png" alt="Dota 2" className="w-5 h-5 object-contain" />
                     Dota 2
                   </span>
                   <span className="font-mono font-bold text-[var(--text-primary)]">Arteezy</span>
                 </div>
                 <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
-                  <span className="flex items-center gap-2 font-bold text-[var(--text-secondary)]">
-                    <Crosshair className="w-4 h-4 text-[#4CAF50]" />
+                  <span className="flex items-center gap-2.5 font-bold text-[var(--text-secondary)]">
+                    <img src="/games/left_4_dead_2_logo.png" alt="Left 4 Dead 2" className="w-5 h-5 object-contain" />
                     Left 4 Dead 2
                   </span>
                   <span className="font-mono font-bold text-[var(--text-primary)]">Luis_L4D</span>

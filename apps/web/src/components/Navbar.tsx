@@ -51,15 +51,18 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           
           {/* Brand Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform">
-              <Swords className="w-5 h-5 text-white" />
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform overflow-hidden p-1.5 border border-white/10">
+                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
+              </div>
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1">
+              <span className="text-lg font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 leading-none">
                 CAMPUS <span className="text-[#E63946]">ARENA</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded bg-[#002B49] text-sky-300 font-black border border-sky-400/30">TECSUP</span>
               </span>
-              <span className="text-[10px] tracking-widest text-[var(--text-secondary)] uppercase font-semibold">
+              <span className="text-[10px] tracking-widest text-[var(--text-secondary)] uppercase font-semibold mt-1">
                 Esports Universitarios
               </span>
             </div>
