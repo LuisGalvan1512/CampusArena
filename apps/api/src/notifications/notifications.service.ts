@@ -70,4 +70,30 @@ export class NotificationsService {
       data: { is_read: true },
     });
   }
+
+  /**
+   * Deletes a specific notification belonging to the user.
+   */
+  async delete(userId: string, id: string) {
+    const notif = await this.prisma.notification.findFirst({
+      where: { id, user_id: userId },
+    });
+
+    if (!notif) {
+      throw new NotFoundException('Notificación no encontrada.');
+    }
+
+    return this.prisma.notification.delete({
+      where: { id },
+    });
+  }
+
+  /**
+   * Deletes all notifications for the user.
+   */
+  async clearAll(userId: string) {
+    return this.prisma.notification.deleteMany({
+      where: { user_id: userId },
+    });
+  }
 }

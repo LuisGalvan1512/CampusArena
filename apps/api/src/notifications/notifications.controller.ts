@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Patch,
+  Delete,
   Param,
   UseGuards,
   HttpCode,
@@ -46,5 +47,28 @@ export class NotificationsController {
   @HttpCode(HttpStatus.OK)
   async markAllAsRead(@CurrentUser('id') userId: string) {
     return this.notificationsService.markAllAsRead(userId);
+  }
+
+  /**
+   * DELETE /api/v1/notifications/clear-all
+   * Elimina todas las notificaciones del usuario.
+   */
+  @Delete('clear-all')
+  @HttpCode(HttpStatus.OK)
+  async clearAll(@CurrentUser('id') userId: string) {
+    return this.notificationsService.clearAll(userId);
+  }
+
+  /**
+   * DELETE /api/v1/notifications/:id
+   * Elimina una notificación específica.
+   */
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async deleteNotification(
+    @CurrentUser('id') userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.notificationsService.delete(userId, id);
   }
 }
