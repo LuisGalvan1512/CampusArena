@@ -27,7 +27,8 @@ import {
   Eye, 
   Image as ImageIcon, 
   Edit3, 
-  MapPin 
+  MapPin,
+  Crown
 } from 'lucide-react';
 
 interface PendingPayment {
@@ -75,7 +76,7 @@ interface ManagedTournament {
 }
 
 export default function OrganizerDashboardPage() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isAdmin } = useAuth();
   
   const [pendingPayments, setPendingPayments] = useState<PendingPayment[]>([]);
   const [tournaments, setTournaments] = useState<ManagedTournament[]>([]);
@@ -251,13 +252,25 @@ export default function OrganizerDashboardPage() {
             </p>
           </div>
 
-          <button
-            onClick={() => setIsCreateModalOpen(true)}
-            className="btn-primary px-5 py-3 text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/20 shrink-0"
-          >
-            <Plus className="w-4 h-4" />
-            Crear Nuevo Torneo
-          </button>
+          <div className="flex flex-wrap items-center gap-3 shrink-0">
+            {isAdmin && (
+              <Link
+                href="/admin/organizers"
+                className="btn-secondary px-4 py-3 text-xs flex items-center gap-2 border-amber-500/40 text-amber-500 dark:text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 font-bold transition-all"
+              >
+                <Crown className="w-4 h-4 text-amber-500" />
+                Gestión de Organizadores
+              </Link>
+            )}
+
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="btn-primary px-5 py-3 text-xs flex items-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/20"
+            >
+              <Plus className="w-4 h-4" />
+              Crear Nuevo Torneo
+            </button>
+          </div>
         </div>
       </div>
 

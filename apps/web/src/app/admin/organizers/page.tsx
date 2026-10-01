@@ -415,28 +415,28 @@ export default function AdminOrganizersPage() {
       )}
 
       {/* NAVIGATION TABS */}
-      <div className="flex border-b border-[var(--border-card)] gap-2">
+      <div className="flex border-b border-[var(--border-card)] gap-2 overflow-x-auto pb-px">
         <button
           onClick={() => setActiveTab('USERS')}
-          className={`px-5 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+          className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'USERS'
               ? 'border-[#E63946] text-[var(--text-primary)] bg-[var(--bg-card)] rounded-t-xl'
               : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
-          <Users className="w-4 h-4" />
+          <Users className="w-4 h-4 shrink-0" />
           Directorio y Moderación
         </button>
 
         <button
           onClick={() => setActiveTab('APPEALS')}
-          className={`px-5 py-3 text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer ${
+          className={`px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap shrink-0 ${
             activeTab === 'APPEALS'
               ? 'border-amber-400 text-amber-600 dark:text-amber-300 bg-amber-500/5 rounded-t-xl'
               : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
           }`}
         >
-          <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400" />
+          <Scale className="w-4 h-4 text-amber-500 dark:text-amber-400 shrink-0" />
           Bandeja de Apelaciones
         </button>
       </div>
@@ -469,7 +469,7 @@ export default function AdminOrganizersPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-col sm:flex-row items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-[#5A5E73] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               <input
@@ -483,12 +483,12 @@ export default function AdminOrganizersPage() {
             </div>
 
             {/* Role pills */}
-            <div className="flex items-center gap-1.5 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)] shrink-0">
+            <div className="flex items-center gap-1.5 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)] shrink-0 overflow-x-auto max-w-full">
               {(['ALL', 'STUDENT', 'ORGANIZER', 'ADMIN'] as const).map((r) => (
                 <button
                   key={r}
                   onClick={() => setRoleFilter(r)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer whitespace-nowrap shrink-0 ${
                     roleFilter === r
                       ? 'bg-[#E63946] text-white shadow-md'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
@@ -512,8 +512,8 @@ export default function AdminOrganizersPage() {
               <p className="text-xs text-[var(--text-secondary)]">Intenta con otro término de búsqueda o filtro de rol.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
+            <div className="overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
+              <table className="w-full text-left border-collapse min-w-[720px]">
                 <thead>
                   <tr className="border-b border-[var(--border-card)] text-[11px] font-bold text-[var(--text-secondary)] uppercase tracking-wider">
                     <th className="py-3 px-4">Usuario</th>

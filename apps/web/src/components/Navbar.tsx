@@ -213,19 +213,66 @@ export function Navbar() {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[var(--bg-card)] border-b border-[var(--border-card)] backdrop-blur-xl px-4 pt-2 pb-6 space-y-3">
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className="block py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-            >
-              {link.name}
-            </Link>
-          ))}
+        <div className="md:hidden bg-[var(--bg-card)] border-b border-[var(--border-card)] backdrop-blur-xl px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2 duration-200">
+          
+          {/* User profile preview on mobile if authenticated */}
+          {isAuthenticated && user && (
+            <div className="p-3 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center font-bold text-white text-xs overflow-hidden shrink-0 shadow-sm">
+                {user.avatar_url ? (
+                  <img src={user.avatar_url} alt={user.first_name} className="w-full h-full object-cover" />
+                ) : (
+                  <span>{user.first_name[0]}{user.last_name[0]}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-xs font-bold text-[var(--text-primary)] truncate">
+                  {user.first_name} {user.last_name}
+                </p>
+                <p className="text-[10px] text-[var(--text-muted)] truncate">{user.email}</p>
+              </div>
+              {isAdmin ? (
+                <span className="px-2 py-0.5 rounded text-[9px] font-black bg-amber-500/20 text-amber-500 dark:text-amber-400 border border-amber-500/30 flex items-center gap-1">
+                  <Crown className="w-3 h-3 text-amber-500" />
+                  ADMIN
+                </span>
+              ) : isOrganizer ? (
+                <span className="px-2 py-0.5 rounded text-[9px] font-black bg-blue-500/20 text-blue-400 border border-blue-500/30 flex items-center gap-1">
+                  <ShieldCheck className="w-3 h-3 text-blue-400" />
+                  ORG
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded text-[9px] font-bold bg-[var(--bg-card)] text-[var(--text-muted)] border border-[var(--border-card)]">
+                  ESTUDIANTE
+                </span>
+              )}
+            </div>
+          )}
 
-          <div className="pt-4 border-t border-white/5 flex flex-col gap-2">
+          {/* Navigation Links */}
+          <div className="space-y-1">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`py-2 px-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                    isActive 
+                      ? 'bg-[#E63946]/10 text-[#E63946] font-bold' 
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-arena)]'
+                  }`}
+                >
+                  {link.badge}
+                  <span>{link.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Actions & Role Based Panels */}
+          <div className="pt-3 border-t border-[var(--border-card)] flex flex-col gap-2">
             {isAuthenticated && user ? (
               <>
                 <Link
@@ -236,38 +283,46 @@ export function Navbar() {
                   <UserIcon className="w-4 h-4" />
                   Mi Perfil & Medallero
                 </Link>
-                <Link
-                  href="/dashboard/organizer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="btn-secondary text-xs py-2.5 text-center flex items-center justify-center gap-2"
-                >
-                  <ShieldCheck className="w-4 h-4 text-[#457B9D]" />
-                  Panel Organizador
-                </Link>
+
+                {(isAdmin || isOrganizer) && (
+                  <Link
+                    href="/dashboard/organizer"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn-secondary text-xs py-2.5 text-center flex items-center justify-center gap-2 text-blue-500 dark:text-blue-400 border-blue-500/30 bg-blue-500/5 hover:bg-blue-500/10 font-semibold"
+                  >
+                    <ShieldCheck className="w-4 h-4 text-blue-500" />
+                    Panel Organizador
+                  </Link>
+                )}
+
+                {isAdmin && (
+                  <Link
+                    href="/admin/organizers"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="btn-secondary text-xs py-2.5 text-center flex items-center justify-center gap-2 text-amber-500 dark:text-amber-400 border-amber-500/40 bg-amber-500/10 hover:bg-amber-500/20 font-bold"
+                  >
+                    <Crown className="w-4 h-4 text-amber-500" />
+                    Gestión de Organizadores
+                  </Link>
+                )}
+
                 <button
                   onClick={handleLogout}
-                  className="btn-primary text-xs py-2.5 text-center"
+                  className="w-full py-2.5 px-4 rounded-xl border border-red-500/30 text-[#E63946] hover:bg-red-500/10 text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer mt-1"
                 >
+                  <LogOut className="w-4 h-4" />
                   Cerrar Sesión
                 </button>
               </>
             ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="btn-secondary text-xs py-2.5 text-center"
-                >
-                  Iniciar Sesión
-                </Link>
-                <Link
-                  href="/auth/register"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="btn-primary text-xs py-2.5 text-center"
-                >
-                  Registrarme
-                </Link>
-              </>
+              <Link
+                href="/auth/login"
+                onClick={() => setMobileMenuOpen(false)}
+                className="btn-primary text-xs py-3 text-center flex items-center justify-center gap-2 font-bold shadow-lg shadow-[#E63946]/20"
+              >
+                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
+                Ingresar con Google Tecsup
+              </Link>
             )}
           </div>
         </div>
