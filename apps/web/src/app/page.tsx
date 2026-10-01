@@ -10,7 +10,6 @@ import {
   Flame, 
   ArrowRight, 
   CheckCircle2, 
-  Medal, 
   Zap,
   Crosshair,
   CircleDot,
@@ -300,106 +299,7 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* 4. SISTEMA DE LEGADO */}
-      <section id="legado" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-10">
-        <motion.div 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="arena-card p-8 sm:p-14 relative overflow-hidden shadow-2xl"
-        >
-          <div className="absolute top-0 right-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] pointer-events-none" />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
-            <div className="space-y-8">
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-widest">
-                <Medal className="w-4 h-4" />
-                Historial Inmutable
-              </div>
-              <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] leading-[1.1]">
-                Tu legado competitivo registrado <span className="text-[#E63946]">para siempre</span>
-              </h3>
-              <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
-                Cada partida alimenta tu tarjeta de competidor. Tus victorias y campeonatos forman un perfil deportivo verificable que define tu reputación.
-              </p>
-
-              <div className="space-y-4">
-                {[
-                  'Cálculo automático de Win Rate.',
-                  'Insignias y trofeos digitales por cada torneo.',
-                  'Registro multi-juego desde un solo lugar.',
-                  'Integración de pagos Yape/Plin directa.'
-                ].map((text, i) => (
-                  <div key={i} className="flex items-center gap-4 text-base text-[var(--text-primary)] bg-[var(--bg-arena)] p-3 rounded-lg border border-[var(--border-card)]">
-                    <CheckCircle2 className="w-5 h-5 text-[#E63946] shrink-0" />
-                    <span className="font-medium">{text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Preview Card Mock */}
-            <motion.div 
-              whileHover={{ scale: 1.02, rotateY: 5, rotateX: 5 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="arena-card bg-[var(--bg-card)] p-8 rounded-2xl border border-[var(--border-card)] space-y-6 shadow-2xl relative"
-              style={{ transformStyle: 'preserve-3d', perspective: '1000px' }}
-            >
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#E63946]/10 blur-2xl rounded-full" />
-              
-              <div className="flex items-center justify-between pb-6 border-b border-[var(--border-card)] relative z-10">
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-tr from-[#E63946] to-[#457B9D] flex items-center justify-center text-white font-black text-xl shadow-lg border-2 border-white/10">
-                    LG
-                  </div>
-                  <div>
-                    <h5 className="font-black text-xl text-[var(--text-primary)]">Luis Galvan</h5>
-                    <p className="text-sm text-[var(--text-secondary)] mt-0.5">Diseño y Desarrollo de Software</p>
-                  </div>
-                </div>
-                <span className="px-3 py-1.5 rounded-lg bg-[#E63946]/20 text-[#E63946] text-sm font-black uppercase tracking-wider">
-                  PRO
-                </span>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 text-center relative z-10">
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
-                  <p className="text-2xl font-black text-[var(--text-primary)]">12</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Torneos</p>
-                </div>
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
-                  <p className="text-2xl font-black text-[#E63946]">2</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Copas</p>
-                </div>
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)]">
-                  <p className="text-2xl font-black text-teal-600 dark:text-[#A8DADC]">80.9%</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text-secondary)] mt-1">Win Rate</p>
-                </div>
-              </div>
-
-              <div className="space-y-3 relative z-10">
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
-                  <span className="flex items-center gap-2.5 font-bold text-[var(--text-secondary)]">
-                    <img src="/games/dota_2_logo.png" alt="Dota 2" className="w-5 h-5 object-contain" />
-                    Dota 2
-                  </span>
-                  <span className="font-mono font-bold text-[var(--text-primary)]">Arteezy</span>
-                </div>
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between text-sm transition-colors hover:bg-[var(--bg-card)]">
-                  <span className="flex items-center gap-2.5 font-bold text-[var(--text-secondary)]">
-                    <img src="/games/left_4_dead_2_logo.png" alt="Left 4 Dead 2" className="w-5 h-5 object-contain" />
-                    Left 4 Dead 2
-                  </span>
-                  <span className="font-mono font-bold text-[var(--text-primary)]">Luis_L4D</span>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* 5. FINAL CTA */}
+      {/* 4. FINAL CTA */}
       <section className="text-center max-w-4xl mx-auto px-4 space-y-8 relative pb-20 mt-10">
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
