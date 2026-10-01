@@ -173,16 +173,16 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
           
           {/* Slots progress */}
           <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] text-[#8E92A4]">
+            <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
               <span className="flex items-center gap-1">
-                <Users className="w-3 h-3 text-[#A8DADC]" />
+                <Users className="w-3 h-3 text-sky-600 dark:text-[#A8DADC]" />
                 Cupos Registrados
               </span>
-              <span className="font-bold text-white">
+              <span className="font-bold text-[var(--text-primary)]">
                 {tournament.current_participants} / {tournament.max_slots}
               </span>
             </div>
-            <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-[var(--bg-arena)] dark:bg-black/50 rounded-full overflow-hidden border border-[var(--border-card)]">
               <div 
                 className="h-full rounded-full transition-all"
                 style={{ 
@@ -195,7 +195,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
 
           {/* Date & Action */}
           <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-1.5 text-[#8E92A4]">
+            <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
               <Calendar className="w-3.5 h-3.5" style={{ color: gameColor }} />
               <span className="text-[11px] font-medium">{startDate}</span>
             </div>

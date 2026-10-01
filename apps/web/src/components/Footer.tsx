@@ -31,9 +31,9 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Plataforma</h4>
             <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
-              <li><Link href="/#torneos" className="hover:text-[#E63946] transition-colors">Torneos Activos</Link></li>
+              <li><Link href="/tournaments" className="hover:text-[#E63946] transition-colors">Torneos Activos</Link></li>
               <li><Link href="/#juegos" className="hover:text-[#E63946] transition-colors">Juegos Oficiales</Link></li>
-              <li><Link href="/#legado" className="hover:text-[#E63946] transition-colors">Sistema de Legado</Link></li>
+              <li><Link href="/ranking" className="hover:text-[#E63946] transition-colors">Ranking Institucional</Link></li>
               <li><Link href="/profile" className="hover:text-[#E63946] transition-colors">Perfil de Jugador</Link></li>
             </ul>
           </div>
@@ -42,10 +42,10 @@ export function Footer() {
           <div className="space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Institucional</h4>
             <ul className="space-y-2 text-sm text-[var(--text-muted)]">
-              <li><span>Reglamento General</span></li>
-              <li><span>Términos y Condiciones</span></li>
-              <li><span>Política de Privacidad</span></li>
-              <li><span>Soporte Técnico</span></li>
+              <li><span className="cursor-default opacity-60" title="Próximamente">Reglamento General</span></li>
+              <li><span className="cursor-default opacity-60" title="Próximamente">Términos y Condiciones</span></li>
+              <li><span className="cursor-default opacity-60" title="Próximamente">Política de Privacidad</span></li>
+              <li><Link href="/community" className="hover:text-[#E63946] transition-colors">Comunidad & Soporte</Link></li>
             </ul>
           </div>
 
@@ -53,9 +53,10 @@ export function Footer() {
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[var(--text-muted)] gap-4">
-          <p>© 2026 Campus Arena. Todos los derechos reservados.</p>
-          <p className="flex items-center gap-1">
-            Diseñado para la comunidad universitaria gamer
+          <p>© {new Date().getFullYear()} Campus Arena. Todos los derechos reservados.</p>
+          <p className="flex items-center gap-1.5">
+            Hecho con <Heart className="w-3.5 h-3.5 text-[#E63946] fill-[#E63946]" /> para la comunidad gamer de
+            <span className="font-bold text-[var(--text-secondary)]">Tecsup</span>
           </p>
         </div>
       </div>

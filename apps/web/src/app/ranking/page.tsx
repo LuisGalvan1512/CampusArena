@@ -278,8 +278,13 @@ export default function RankingPage() {
             </div>
 
             {/* Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
+            <div className="relative">
+              {/* Mobile scroll hint */}
+              <div className="sm:hidden text-center pb-2">
+                <span className="text-[10px] text-[var(--text-muted)] font-medium">← Desliza horizontalmente para ver más →</span>
+              </div>
+              <div className="overflow-x-auto -mx-2 px-2">
+              <table className="w-full text-left text-xs min-w-[640px]">
                 <thead>
                   <tr className="border-b border-[var(--border-card)] text-[10px] uppercase tracking-wider text-[var(--text-muted)]">
                     <th className="py-3 px-3"># Rank</th>
@@ -342,6 +347,7 @@ export default function RankingPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
 
           </div>

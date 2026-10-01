@@ -5,6 +5,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
 import { CommandPalette } from '@/components/CommandPalette';
+import { PageTransition } from '@/components/PageTransition';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
@@ -25,7 +26,9 @@ export default function RootLayout({
             <Navbar />
             <CommandPalette />
             <main className="flex-1 pt-16">
-              {children}
+              <PageTransition>
+                {children}
+              </PageTransition>
             </main>
             <Footer />
             <Toaster richColors position="bottom-right" closeButton theme="system" />

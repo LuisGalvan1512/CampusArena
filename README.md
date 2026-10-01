@@ -62,10 +62,12 @@
 |---|---|---|
 | 🔐 Autenticación (Google Workspace / JWT) | ✅ Funcional | 100% |
 | 👤 Perfiles Públicos, Vista de Visitante y Muro de Firmas | ✅ Funcional | 100% |
+| 🎨 Centro de Personalización de Perfil (Colores, Moods, Efectos) | ✅ Funcional | 100% |
+| ✨ Transiciones de Página Fluidas & Carrusel Interactivo | ✅ Funcional | 100% |
 | 🏆 CRUD de Torneos (Admin / Org) | ✅ Funcional | 100% |
 | 📋 Inscripción a Torneos (Individual y Equipos con Roster) | ✅ Funcional | 100% |
 | 🗡️ Generación de Brackets (Sorteo Aleatorio Oficial) | ✅ Funcional | 95% |
-| 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 90% |
+| 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 95% |
 | 💬 Comunidad / Foro | ✅ Funcional | 90% |
 | 📧 Correos Transaccionales (Brevo SMTP) | ✅ Funcional | 90% |
 | 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 95% |
@@ -467,6 +469,13 @@ RankingSeason ── RankingEntry
 - **Perfil Público (`/profile/[id]`)**: Visualización del avatar, nombre completo, correo institucional sutil, carrera, ciclo y estado oficial.
 - **Vista de Visitante**: Botón en el perfil propio (`/profile`) para previsualizar la cuenta tal como la ven los demás competidores, con banner superior de modo visitante y retorno rápido a edición.
 - **Muro de Firmas & Mensajes de la Comunidad**: Espacio social en cada perfil para recibir dedicatorias, firmas de honor, stickers rápidos (*"🏆 ¡A romperla!", "👑 Leyenda de Tecsup", "🔥 GG WP"*) y soporte para adjuntar imágenes/memes. Control de moderación para eliminar mensajes.
+- **Centro de Personalización Client-Side (`ProfileCustomizationPanel.tsx`)**: Personalización profunda y persistente en el navegador sin dependencia de backend:
+  - 🎨 **8 Colores de Acento Gamer**: Rojo Arena, Azul Estratega, Violeta Místico, Esmeralda Táctico, Dorado Campeón, Cyan Digital, Rosa Neón y Verde Respawn.
+  - ⚡ **Estados de Ánimo / Mood**: En línea (🟢), Compitiendo (⚔️), Entrenando (🎯), Descansando (😴), Buscando equipo (🔎).
+  - 🏷️ **Título Competitivo Personalizado**: E.g. *"Capitán de Dota 2"*, *"Pro Rusher"*.
+  - ✨ **Efectos Visuales de Tarjeta**: Holográfico, Resplandor (Glow), Neón Cyberpunk con animación pulsante y Gradiente Dinámico rotativo.
+- **Transiciones de Página Fluidas (`PageTransition.tsx`)**: Animaciones suaves de entrada/salida basadas en Framer Motion que otorgan una experiencia fluida entre rutas sin parpadeos.
+- **Carrusel Interactivo de Novedades & Guía de Inicio**: Carrusel de destacados en el landing page con rotación automática y pausa al pasar el cursor, más guía visual de 4 pasos (*"De la inscripción a la gloria"*).
 - **Torneos Activos Reales**: Listado en vivo de torneos en los que el competidor está participando actualmente (eliminados tags y copas simuladas).
 - **Medallero de Honor**: Palmarés oficial de podios y participaciones en torneos finalizados (🥇 Oro, 🥈 Plata, 🥉 Bronce).
 

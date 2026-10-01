@@ -338,3 +338,140 @@ body {
   background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
 }
 
+/* Light Mode arena-card-glow refinement */
+.light .arena-card-glow:hover {
+  border-color: rgba(220, 38, 38, 0.35);
+  box-shadow: 0 0 20px rgba(230, 57, 70, 0.12), 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+}
+
+/* Scrollbar-hide utility for horizontal tab strips */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Focus-visible accessibility ring */
+.btn-primary:focus-visible,
+.btn-secondary:focus-visible,
+.input-arena:focus-visible {
+  outline: 2px solid #E63946;
+  outline-offset: 2px;
+}
+
+/* Light mode select dropdown */
+.light select option {
+  background-color: #FFFFFF;
+  color: #0F172A;
+}
+
+/* Smooth link underline hover for footer and nav */
+.link-hover-underline {
+  position: relative;
+}
+.link-hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0%;
+  height: 2px;
+  background: #E63946;
+  transition: width 0.25s ease;
+}
+.link-hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Animated Gradient Border (for profile customization accent colors) */
+@keyframes gradientRotate {
+  0% { --angle: 0deg; }
+  100% { --angle: 360deg; }
+}
+
+.animated-gradient-border {
+  position: relative;
+  z-index: 0;
+}
+.animated-gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: conic-gradient(from var(--angle, 0deg), #E63946, #F59E0B, #10B981, #3B82F6, #8B5CF6, #E63946);
+  animation: gradientRotate 4s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.animated-gradient-border:hover::before {
+  opacity: 0.6;
+}
+
+/* Neon Glow Effect */
+@keyframes neonPulse {
+  0%, 100% { box-shadow: 0 0 5px var(--neon-color, #E63946), 0 0 15px var(--neon-color, #E63946)22; }
+  50% { box-shadow: 0 0 15px var(--neon-color, #E63946), 0 0 35px var(--neon-color, #E63946)33; }
+}
+
+.neon-glow {
+  animation: neonPulse 2.5s ease-in-out infinite;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Ring (for status indicators) */
+@keyframes pulseRing {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+.pulse-ring {
+  animation: pulseRing 2s ease-in-out infinite;
+}
+
+/* Staggered Entrance for carousel items */
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+  animation: slideInFromRight 0.4s ease-out forwards;
+}
+
+/* Glass morphism improvements */
+.glass-premium {
+  background: var(--bg-card);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--border-card);
+  border-radius: 20px;
+}
+
+/* Sparkle Animation for badges */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+
+.sparkle-effect::before {
+  content: '\u2728';
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  font-size: 12px;
+  animation: sparkle 2s ease-in-out infinite;
+  pointer-events: none;
+}

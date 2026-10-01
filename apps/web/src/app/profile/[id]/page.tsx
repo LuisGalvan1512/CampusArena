@@ -29,6 +29,8 @@ import { sounds } from '@/lib/sound';
 import { HolographicCard } from '@/components/HolographicCard';
 import { Medal, LegacySummary, capitalizeWords } from '../page';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { ProfileCustomizationPanel } from '@/components/ProfileCustomizationPanel';
+import { useProfileCustomization, ACCENT_COLORS, STATUS_MOODS } from '@/lib/useProfileCustomization';
 
 export interface ProfileSignature {
   id: string;
@@ -86,6 +88,7 @@ export default function PublicProfilePage() {
   const [competitor, setCompetitor] = useState<PublicCompetitor | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { accentColor, statusMood, customTitle, cardEffect } = useProfileCustomization();
 
   // Signatures / Wall State
   const [signatures, setSignatures] = useState<ProfileSignature[]>([]);
@@ -305,7 +308,7 @@ export default function PublicProfilePage() {
         
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-xl shrink-0 overflow-hidden">
+            <div className={`w-20 h-20 rounded-2xl bg-gradient-to-tr ${isOwnProfile ? ACCENT_COLORS[accentColor]?.gradient : 'from-[#E63946] via-[#1D3557] to-[#457B9D]'} p-1 shadow-xl shrink-0 overflow-hidden`}>
               {competitor.profile?.avatar_url ? (
                 <img
                   src={competitor.profile.avatar_url}
@@ -360,18 +363,34 @@ export default function PublicProfilePage() {
                 <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400 shrink-0" />
                 <span>Perfil Oficial Verificado en Campus Arena</span>
               </div>
+
+              {/* Status Mood Badge (When viewing own profile) */}
+              {isOwnProfile && (
+                <div className="flex items-center gap-2 pt-1">
+                  <span className={`text-xs font-bold flex items-center gap-1.5 ${STATUS_MOODS[statusMood].color}`}>
+                    <span>{STATUS_MOODS[statusMood].emoji}</span>
+                    {STATUS_MOODS[statusMood].label}
+                  </span>
+                  {customTitle && (
+                    <span className="text-[11px] text-[var(--text-muted)] italic">— {customTitle}</span>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
             {isOwnProfile ? (
-              <Link
-                href="/profile"
-                className="btn-primary px-4 py-2.5 text-xs flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-[#E63946]/20"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                Editar Mi Perfil
-              </Link>
+              <>
+                <ProfileCustomizationPanel />
+                <Link
+                  href="/profile"
+                  className="btn-primary px-4 py-2.5 text-xs flex items-center justify-center gap-2 shrink-0 shadow-lg shadow-[#E63946]/20"
+                >
+                  <Edit3 className="w-3.5 h-3.5" />
+                  <span>Editar Mi Perfil</span>
+                </Link>
+              </>
             ) : (
               <div className="bg-[var(--bg-arena)] px-5 py-3 rounded-xl border border-[var(--border-card)] text-left sm:text-right">
                 <p className="text-xs text-[var(--text-muted)]">Representando a</p>

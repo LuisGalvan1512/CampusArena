@@ -36,6 +36,8 @@ import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
 import { HolographicCard } from '@/components/HolographicCard';
 import { sounds } from '@/lib/sound';
+import { ProfileCustomizationPanel } from '@/components/ProfileCustomizationPanel';
+import { useProfileCustomization, ACCENT_COLORS, STATUS_MOODS } from '@/lib/useProfileCustomization';
 
 export const SYSTEM_AVATARS = [
   { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
@@ -121,6 +123,7 @@ interface UserRegistration {
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { accentColor, statusMood, customTitle, cardEffect } = useProfileCustomization();
   const router = useRouter();
 
   const [profile, setProfile] = useState<ProfileData>({
@@ -363,12 +366,16 @@ export default function ProfilePage() {
       {/* 1. HEADER HERO */}
       <HolographicCard 
         className={`p-8 sm:p-10 relative overflow-hidden transition-all duration-500 ${
+          cardEffect === 'neon' ? 'neon-glow' :
+          cardEffect === 'gradient' ? 'animated-gradient-border' : ''
+        } ${
           bannerTheme === 'cyberpunk' ? 'banner-cyberpunk' :
           bannerTheme === 'carbon' ? 'banner-carbon' :
           bannerTheme === 'aurora' ? 'banner-aurora' :
           bannerTheme === 'gold' ? 'banner-gold' : 'banner-obsidian'
         }`} 
         glowColor={
+          cardEffect === 'glow' ? ACCENT_COLORS[accentColor]?.hex :
           bannerTheme === 'gold' ? 'rgba(245, 158, 11, 0.35)' :
           bannerTheme === 'aurora' ? 'rgba(16, 185, 129, 0.3)' :
           bannerTheme === 'carbon' ? 'rgba(148, 163, 184, 0.25)' :
@@ -382,7 +389,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-5">
             {/* AVATAR WITH CAMERA EDIT BADGE */}
             <div className="relative group">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-xl shrink-0 overflow-hidden">
+              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr ${ACCENT_COLORS[accentColor]?.gradient || 'from-[#E63946] via-[#1D3557] to-[#457B9D]'} p-1 shadow-xl shrink-0 overflow-hidden`}>
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -443,12 +450,24 @@ export default function ProfilePage() {
               </p>
               <div className="flex items-center gap-2 pt-1 text-xs text-[var(--text-secondary)]">
                 <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-                <span>Cuenta Verificada en Supabase Cloud</span>
+                <span>Cuenta Institucional Verificada</span>
+              </div>
+              {/* Status Mood Badge */}
+              <div className="flex items-center gap-2 pt-1">
+                <span className={`text-xs font-bold flex items-center gap-1.5 ${STATUS_MOODS[statusMood].color}`}>
+                  <span>{STATUS_MOODS[statusMood].emoji}</span>
+                  {STATUS_MOODS[statusMood].label}
+                </span>
+                {customTitle && (
+                  <span className="text-[11px] text-[var(--text-muted)] italic">— {customTitle}</span>
+                )}
               </div>
             </div>
           </div>
 
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+            <ProfileCustomizationPanel />
+
             <button
               type="button"
               onClick={() => {
@@ -1019,7 +1038,7 @@ export default function ProfilePage() {
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold uppercase tracking-wider text-[#8E92A4]">
+            <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
               Biografía del Competidor
             </label>
             <textarea

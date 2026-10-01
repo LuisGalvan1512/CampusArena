@@ -479,7 +479,7 @@ export default function CommunityPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[var(--bg-arena)] pt-24 pb-12 transition-colors">
+    <div className="min-h-screen bg-[var(--bg-arena)] pt-8 pb-12 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 flex flex-col lg:flex-row gap-8">
         
         {/* SIDEBAR (Desktop) */}

@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { 
   Trophy, 
   Swords, 
@@ -17,9 +18,18 @@ import {
   Sparkles,
   MapPin,
   Building2,
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  Medal,
+  Target,
+  Shield,
+  Rocket,
+  Crown,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { GAME_LIST } from '@/lib/games';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 const GAME_ICONS: Record<string, React.ReactNode> = {
   Swords: <Swords className="w-7 h-7 text-white" />,
@@ -43,8 +53,92 @@ const fadeUp: Variants = {
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
 };
 
+// Carousel highlights data
+const HIGHLIGHTS = [
+  {
+    title: 'Temporada 2026 Activa',
+    subtitle: '7 disciplinas oficiales con brackets en vivo',
+    description: 'Compite en Clash Royale, Dota 2, Fortnite, Left 4 Dead 2, Brawl Stars, eFootball y Super Smash Bros. con rankings en tiempo real.',
+    gradient: 'from-[#E63946]/30 via-[#1D3557]/20 to-[#457B9D]/30',
+    icon: Trophy,
+    iconColor: '#F59E0B',
+    tag: 'En vivo',
+    tagColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+  },
+  {
+    title: 'Premios Reales',
+    subtitle: 'Medallas oficiales + premios en efectivo',
+    description: 'Gana medallas de oro, plata y bronce que quedan permanentemente en tu perfil de competidor. Algunos torneos incluyen premio monetario.',
+    gradient: 'from-amber-500/30 via-[#1D3557]/20 to-amber-700/20',
+    icon: Medal,
+    iconColor: '#F59E0B',
+    tag: 'Nuevo',
+    tagColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+  },
+  {
+    title: 'Perfil Competitivo',
+    subtitle: 'Personaliza tu carnet de competidor',
+    description: 'Elige tu avatar, color de acento, estado de ánimo y efecto visual. Tu perfil es tu carta de presentación en la Arena.',
+    gradient: 'from-purple-500/30 via-[#1D3557]/20 to-cyan-500/20',
+    icon: Crown,
+    iconColor: '#8B5CF6',
+    tag: 'Personalizable',
+    tagColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+  },
+];
+
+// How It Works steps
+const HOW_IT_WORKS = [
+  {
+    step: 1,
+    title: 'Inicia Sesión',
+    desc: 'Usa tu correo institucional @tecsup.edu.pe con Google para verificar tu identidad automáticamente.',
+    icon: Shield,
+    color: '#457B9D',
+  },
+  {
+    step: 2,
+    title: 'Elige tu Juego',
+    desc: 'Selecciona el torneo de tu disciplina favorita y vincula tu cuenta de juego oficial.',
+    icon: Target,
+    color: '#E63946',
+  },
+  {
+    step: 3,
+    title: 'Inscríbete',
+    desc: 'Registra tu participación, conforma tu equipo si es grupal y confirma tu lugar en el bracket.',
+    icon: Users,
+    color: '#10B981',
+  },
+  {
+    step: 4,
+    title: '¡Compite y Gana!',
+    desc: 'Juega tus partidas, escala en el bracket oficial y gana medallas que quedan en tu legado para siempre.',
+    icon: Rocket,
+    color: '#F59E0B',
+  },
+];
+
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
+
+  // Carousel state
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev + 1) % HIGHLIGHTS.length);
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide((prev) => (prev - 1 + HIGHLIGHTS.length) % HIGHLIGHTS.length);
+  }, []);
+
+  useEffect(() => {
+    if (!isAutoPlaying) return;
+    const timer = setInterval(nextSlide, 5000);
+    return () => clearInterval(timer);
+  }, [isAutoPlaying, nextSlide]);
 
   return (
     <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
@@ -123,19 +217,19 @@ export default function HomePage() {
 
           {/* Quick Stats Grid */}
           <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16 max-w-4xl mx-auto border-t border-[var(--border-card)] mt-10">
-            <div className="p-4 text-center arena-card">
+            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
               <p className="text-3xl font-black text-[var(--text-primary)]">7</p>
               <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Juegos Oficiales</p>
             </div>
-            <div className="p-4 text-center arena-card">
+            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
               <p className="text-3xl font-black text-[#E63946]">Tecsup</p>
               <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Sede Principal</p>
             </div>
-            <div className="p-4 text-center arena-card">
-              <p className="text-3xl font-black text-[#457B9D]">100%</p>
+            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
+              <p className="text-3xl font-black text-sky-600 dark:text-[#457B9D]">100%</p>
               <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Registro Autónomo</p>
             </div>
-            <div className="p-4 text-center arena-card">
+            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
               <p className="text-3xl font-black text-teal-600 dark:text-[#A8DADC]">24/7</p>
               <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Disponibilidad</p>
             </div>
@@ -299,7 +393,155 @@ export default function HomePage() {
         </motion.div>
       </section>
 
-      {/* 4. FINAL CTA */}
+      {/* 4. HIGHLIGHTS CAROUSEL */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="text-center space-y-4 mb-12">
+          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
+            Destacados
+          </h2>
+          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
+            ¿Por qué Campus Arena?
+          </h3>
+        </div>
+
+        <div 
+          className="relative arena-card p-0 overflow-hidden"
+          onMouseEnter={() => setIsAutoPlaying(false)}
+          onMouseLeave={() => setIsAutoPlaying(true)}
+        >
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, x: 60 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -60 }}
+              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className={`p-8 sm:p-12 relative bg-gradient-to-br ${HIGHLIGHTS[currentSlide].gradient}`}
+            >
+              <div className="max-w-3xl relative z-10 space-y-5">
+                <div className="flex items-center gap-3">
+                  <div
+                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+                    style={{ backgroundColor: `${HIGHLIGHTS[currentSlide].iconColor}20` }}
+                  >
+                    {(() => {
+                      const Icon = HIGHLIGHTS[currentSlide].icon;
+                      return <Icon className="w-7 h-7" style={{ color: HIGHLIGHTS[currentSlide].iconColor }} />;
+                    })()}
+                  </div>
+                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider ${HIGHLIGHTS[currentSlide].tagColor}`}>
+                    {HIGHLIGHTS[currentSlide].tag}
+                  </span>
+                </div>
+
+                <h3 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] leading-tight">
+                  {HIGHLIGHTS[currentSlide].title}
+                </h3>
+                <p className="text-lg font-semibold text-sky-600 dark:text-[#A8DADC]">
+                  {HIGHLIGHTS[currentSlide].subtitle}
+                </p>
+                <p className="text-[var(--text-secondary)] text-base leading-relaxed max-w-xl">
+                  {HIGHLIGHTS[currentSlide].description}
+                </p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Carousel Controls */}
+          <div className="absolute bottom-4 right-4 flex items-center gap-2 z-20">
+            <button
+              onClick={prevSlide}
+              className="w-9 h-9 rounded-xl bg-[var(--bg-card)]/80 backdrop-blur-sm border border-[var(--border-card)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <div className="flex items-center gap-1.5 px-2">
+              {HIGHLIGHTS.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`rounded-full transition-all cursor-pointer ${
+                    idx === currentSlide
+                      ? 'w-6 h-2 bg-[#E63946]'
+                      : 'w-2 h-2 bg-[var(--text-muted)]/40 hover:bg-[var(--text-muted)]'
+                  }`}
+                />
+              ))}
+            </div>
+            <button
+              onClick={nextSlide}
+              className="w-9 h-9 rounded-xl bg-[var(--bg-card)]/80 backdrop-blur-sm border border-[var(--border-card)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. HOW IT WORKS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="text-center space-y-4 mb-16">
+          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
+            Proceso Simple
+          </h2>
+          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
+            De la inscripción a la gloria
+          </h3>
+          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-base">
+            4 pasos para comenzar tu carrera competitiva oficial en Tecsup.
+          </p>
+        </div>
+
+        <motion.div
+          variants={staggerContainer}
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: '-50px' }}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {HOW_IT_WORKS.map((step, idx) => {
+            const Icon = step.icon;
+            return (
+              <motion.div
+                key={step.step}
+                variants={fadeUp}
+                className="arena-card p-6 relative overflow-hidden group text-center space-y-4"
+              >
+                {/* Step number bg */}
+                <div className="absolute -top-4 -right-4 text-[80px] font-black text-[var(--text-primary)] opacity-[0.04] leading-none select-none pointer-events-none">
+                  {step.step}
+                </div>
+
+                {/* Connecting line */}
+                {idx < HOW_IT_WORKS.length - 1 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-[var(--border-card)] to-transparent" />
+                )}
+
+                <div
+                  className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
+                  style={{ backgroundColor: `${step.color}20` }}
+                >
+                  <Icon className="w-7 h-7" style={{ color: step.color }} />
+                </div>
+
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: step.color }}>
+                    Paso {step.step}
+                  </span>
+                  <h4 className="text-lg font-black text-[var(--text-primary)]">
+                    {step.title}
+                  </h4>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                    {step.desc}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </section>
+
+      {/* 6. FINAL CTA */}
       <section className="text-center max-w-4xl mx-auto px-4 space-y-8 relative pb-20 mt-10">
         <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
