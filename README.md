@@ -70,7 +70,8 @@
 | 📧 Correos Transaccionales (Brevo SMTP) | ✅ Funcional | 90% |
 | 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 95% |
 | 🎓 Onboarding de Nuevos Estudiantes | ✅ Funcional | 100% |
-| 📡 Centro de Notificaciones In-App | ✅ Funcional | 85% |
+| 📡 Centro de Notificaciones In-App (con Borrado y Vaciado) | ✅ Funcional | 100% |
+| 🎨 Sistema de Diseño, Dual Theme y Branding Oficial | ✅ Funcional | 100% |
 | 🌐 Deploy a Producción | 🔴 Pendiente | 0% |
 
 ---
@@ -157,14 +158,15 @@ CampusArena/
 │           │   ├── live/              # Vista de brackets en vivo
 │           │   └── dashboard/         # Dashboard del organizador / competidor
 │           ├── components/
-│           │   ├── Navbar.tsx         # Barra de navegación global
-│           │   ├── Footer.tsx         # Footer institucional
-│           │   ├── BracketView.tsx    # Visualizador de brackets interactivo
-│           │   ├── TournamentCard.tsx # Tarjeta de torneo
+│           │   ├── Navbar.tsx         # Barra de navegación optimizada y despejada
+│           │   ├── Footer.tsx         # Footer institucional Tecsup
+│           │   ├── BracketView.tsx    # Visualizador de brackets interactivo con SVG láser
+│           │   ├── TournamentCard.tsx # Tarjeta de torneo con arte oficial HD
 │           │   ├── RegistrationWizardModal.tsx  # Wizard de inscripción (1v1 y equipos)
 │           │   ├── EditTournamentModal.tsx      # Editar torneo (admin)
 │           │   ├── DeleteTournamentModal.tsx    # Eliminar torneo (admin)
-│           │   └── NotificationCenterDrawer.tsx # Panel de notificaciones
+│           │   ├── NotificationCenterDrawer.tsx # Centro de notificaciones con descarte y vaciado
+│           │   └── ThemeToggle.tsx    # Selector de tema dual (Oscuro / Claro)
 │           ├── context/
 │           │   └── AuthContext.tsx     # Zustand auth store global
 │           └── lib/
@@ -387,8 +389,11 @@ Rol:      ADMIN (acceso total al panel de administración)
 ### Notificaciones In-App (`/notifications`)
 | Método | Endpoint | Descripción | Auth |
 |---|---|---|---|
-| `GET` | `/notifications` | Listar mis notificaciones | 🔒 JWT |
-| `PATCH` | `/notifications/:id/read` | Marcar notificación como leída | 🔒 JWT |
+| `GET` | `/notifications` | Listar mis notificaciones y cantidad no leídas | 🔒 JWT |
+| `PATCH` | `/notifications/:id/read` | Marcar notificación específica como leída | 🔒 JWT |
+| `PATCH` | `/notifications/read-all` | Marcar todas las notificaciones como leídas | 🔒 JWT |
+| `DELETE` | `/notifications/:id` | Eliminar notificación específica de la bandeja | 🔒 JWT |
+| `DELETE` | `/notifications/clear-all` | Vaciar y eliminar todas las notificaciones del usuario | 🔒 JWT |
 
 ### Administración y Moderación (`/admin`)
 | Método | Endpoint | Descripción | Auth |
@@ -494,8 +499,22 @@ RankingSeason ── RankingEntry
 - Gestión de torneos: crear, editar, publicar, eliminar.
 
 ### 📡 Centro de Notificaciones In-App
-- Drawer interactivo en el Navbar (`NotificationCenterDrawer.tsx`) conectado al backend.
-- Notificaciones de inscripciones aprobadas, pagos revisados, resultados de partidos, sanciones y apelaciones.
+- **Drawer interactivo (`NotificationCenterDrawer.tsx`)**: Desplegable lateral con acceso directo desde la campana del Navbar, con contador dinámico de no leídas (`9+` / pulso animado).
+- **Gestión Completa de Mensajes**:
+  - **Eliminación individual**: Cada tarjeta cuenta con su propio botón de papelera (`Trash2`) con descarte optimista inmediato (sin recargas de página).
+  - **Vaciado completo ("Vaciar")**: Botón superior para limpiar la bandeja completa de notificaciones en un clic.
+  - **Marcar como leídas**: Lectura automática al interactuar con una notificación o masiva mediante *"Marcar leídas"*.
+- **Eventos soportados**: Notificaciones de pagos revisados (`PAYMENT`), llamado a partidas (`MATCH_CALL`), transmisiones en vivo (`STREAM`), diplomas y medallas (`DIPLOMA`), avisos de torneos (`TOURNAMENT`) y resoluciones disciplinarias.
+
+### 🎨 Identidad Visual Gamer, Dual Theme y UI Streamlined
+- **Branding Oficial Tecsup**: Integración del emblema oficial institucional en alta calidad y tipografía deportiva (`CAMPUS ARENA / TECSUP ESPORTS`).
+- **Catálogo Oficial de Juegos en HD**: Sustitución definitiva de placeholders por arte oficial y fondos en alta definición para Clash Royale, Brawl Stars, Super Smash Bros Ultimate, Left 4 Dead 2, eFootball y Dota 2 vía [`games.ts`](apps/web/src/lib/games.ts).
+- **Dual Theme (Dark Obsidian / Warm Slate Light)**: Soporte completo para modo oscuro y claro con tokens CSS pulidos, contraste equilibrado y excelente legibilidad para entornos competitivos.
+- **Brackets Interactivos con Conectores Láser SVG**: Llaves de torneo con trazados vectoriales dinámicos que animan el flujo de victorias hacia la gran final.
+- **Barra de Navegación Depurada (Navbar)**:
+  - Navegación pública directa y espaciosa (Inicio, Torneos, Comunidad, En Vivo con indicador sutil, Ranking).
+  - Menú de perfil (`Avatar`) que agrupa el rol, acceso al panel de Organizador y Admin, Mi Perfil, cambio de tema y cerrar sesión.
+  - Landing page con Call To Action unificado hacia ingreso institucional con Google Tecsup y catálogo de torneos.
 
 ### 💬 Comunidad
 - Publicaciones con categorías (General, Estrategia, Equipos, etc.).
