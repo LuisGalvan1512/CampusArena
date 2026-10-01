@@ -295,12 +295,6 @@ export default function HomePage() {
                   {game.description}
                 </p>
               </div>
-
-              {/* Footer */}
-              <div className="mt-6 pt-4 border-t border-[var(--border-card)] flex items-center gap-2 text-xs relative z-10">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span className="text-[var(--text-secondary)]">Identificador: <span className="font-mono font-bold text-[var(--text-primary)] ml-1">{game.tagPlaceholder}</span></span>
-              </div>
             </motion.div>
           ))}
         </motion.div>
@@ -420,25 +414,57 @@ export default function HomePage() {
           viewport={{ once: true }}
           className="relative z-10 space-y-6"
         >
-          <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest">
-            <Sparkles className="w-4 h-4" />
-            Inscripciones Abiertas
-          </div>
-          <h3 className="text-5xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
-            ¿Listo para ingresar a la arena?
-          </h3>
-          <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
-            Crea tu cuenta de competidor en menos de 1 minuto y prepárate para los próximos torneos en Tecsup.
-          </p>
-          <div className="pt-6">
-            <Link
-              href="/auth/login"
-              className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
-            >
-              <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-6 h-6 object-contain" />
-              Ingresar con Google Tecsup
-            </Link>
-          </div>
+          {isAuthenticated ? (
+            <>
+              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest">
+                <CheckCircle2 className="w-4 h-4" />
+                Sesión Activa — {user?.first_name || 'Competidor'}
+              </div>
+              <h3 className="text-4xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
+                ¿Listo para competir en la arena?
+              </h3>
+              <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
+                Explora los torneos oficiales disponibles, inscríbete con tu escuadra y defiende los colores de Tecsup.
+              </p>
+              <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/tournaments"
+                  className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
+                >
+                  <Trophy className="w-6 h-6 text-amber-300" />
+                  Explorar Torneos Disponibles
+                </Link>
+                <Link
+                  href="/profile"
+                  className="btn-secondary px-8 py-5 text-lg inline-flex items-center gap-2 rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all"
+                >
+                  Ver Mi Perfil & Medallero
+                </Link>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest">
+                <Sparkles className="w-4 h-4" />
+                Inscripciones Abiertas
+              </div>
+              <h3 className="text-4xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
+                ¿Listo para ingresar a la arena?
+              </h3>
+              <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
+                Inicia sesión con tu correo institucional de Tecsup y participa en los torneos oficiales.
+              </p>
+              <div className="pt-6">
+                <Link
+                  href="/auth/login"
+                  className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
+                >
+                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-6 h-6 object-contain" />
+                  Ingresar con Google Tecsup
+                </Link>
+              </div>
+            </>
+          )}
         </motion.div>
       </section>
 
