@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
 import { api } from '@/lib/api';
@@ -13,6 +13,7 @@ import { BracketView } from '@/components/BracketView';
 import { EditTournamentModal } from '@/components/EditTournamentModal';
 import { DeleteTournamentModal } from '@/components/DeleteTournamentModal';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { 
   Trophy, 
   Swords, 
@@ -92,6 +93,113 @@ interface Participant {
   roster_members?: any;
   status: string;
   confirmed_at?: string;
+}
+
+function TournamentCountdown({ targetDate, status }: { targetDate: string; status: string }) {
+  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; isPassed: boolean }>({
+    days: 0,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+    isPassed: false,
+  });
+
+  useEffect(() => {
+    const calculate = () => {
+      const now = new Date().getTime();
+      const target = new Date(targetDate).getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setTimeLeft({ days: 0, hours: 0, minutes: 0, seconds: 0, isPassed: true });
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % 1000) / 1000);
+
+      setTimeLeft({
+        days,
+        hours,
+        minutes,
+        seconds: Math.floor((diff / 1000) % 60),
+        isPassed: false,
+      });
+    };
+
+    calculate();
+    const interval = setInterval(calculate, 1000);
+    return () => clearInterval(interval);
+  }, [targetDate]);
+
+  if (status === 'IN_PROGRESS') {
+    return (
+      <div className="p-3.5 rounded-2xl bg-[#E63946]/10 border border-[#E63946]/30 flex items-center justify-between shadow-lg shadow-[#E63946]/10">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#E63946] animate-ping" />
+          <span className="text-xs font-black uppercase tracking-wider text-[#E63946]">Partidas en Disputa</span>
+        </div>
+        <span className="text-[11px] font-mono font-bold text-white bg-[#E63946] px-2.5 py-0.5 rounded-md shadow-sm">
+          EN VIVO
+        </span>
+      </div>
+    );
+  }
+
+  if (status === 'FINISHED') {
+    return (
+      <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Crown className="w-4 h-4 text-amber-400" />
+          <span className="text-xs font-black uppercase tracking-wider text-amber-400">Torneo Concluido</span>
+        </div>
+        <span className="text-[11px] font-mono text-amber-300 font-semibold">Podio Definido</span>
+      </div>
+    );
+  }
+
+  if (timeLeft.isPassed) {
+    return (
+      <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Clock className="w-4 h-4 text-blue-400" />
+          <span className="text-xs font-bold text-blue-400">Comenzando en breve...</span>
+        </div>
+        <span className="text-[10px] font-mono text-blue-300 font-bold">Check-in Activo</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 p-3.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md shadow-inner">
+      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
+        <span className="flex items-center gap-1.5 text-[#E63946] font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#E63946] animate-pulse" />
+          Cuenta Regresiva
+        </span>
+        <span className="text-[var(--text-secondary)]">Hora de Apertura</span>
+      </div>
+      <div className="grid grid-cols-4 gap-1.5 text-center">
+        {[
+          { label: 'DÍAS', val: timeLeft.days },
+          { label: 'HORAS', val: timeLeft.hours },
+          { label: 'MIN', val: timeLeft.minutes },
+          { label: 'SEG', val: timeLeft.seconds },
+        ].map((unit, idx) => (
+          <div key={idx} className="bg-white/5 rounded-xl py-2 border border-white/5 shadow-sm">
+            <span className="text-base font-black font-mono text-white block leading-none tracking-tight">
+              {String(unit.val).padStart(2, '0')}
+            </span>
+            <span className="text-[8px] font-mono font-bold text-[var(--text-muted)] block mt-1 tracking-wider">
+              {unit.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export default function TournamentDetailPage() {
@@ -447,8 +555,17 @@ export default function TournamentDetailPage() {
             })}
           </div>
 
-          {/* Tab: Brackets */}
-          {activeTab === 'brackets' && (
+          {/* Tab content animated container */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeTab}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -6 }}
+              transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+            >
+              {/* Tab: Brackets */}
+              {activeTab === 'brackets' && (
             <div className="space-y-4">
               <BracketView
                 tournamentId={tournament.id}
@@ -683,6 +800,8 @@ export default function TournamentDetailPage() {
               )}
             </div>
           )}
+        </motion.div>
+      </AnimatePresence>
 
         </div>
 
@@ -700,6 +819,12 @@ export default function TournamentDetailPage() {
                 <span className="text-xs text-[var(--text-secondary)]">/ por competidor</span>
               </div>
             </div>
+
+            {/* Live Competition Countdown Box */}
+            <TournamentCountdown 
+              targetDate={tournament.tournament_start_at} 
+              status={tournament.status} 
+            />
 
             {/* Inscription Status Alert if Already Registered */}
             {userRegistration ? (
@@ -763,17 +888,33 @@ export default function TournamentDetailPage() {
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
-                <Users className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[var(--text-primary)]">Cupos Disponibles</p>
-                  <p className="text-[var(--text-secondary)]">
-                    {tournament.current_participants} inscritos de {tournament.max_slots} cupos
-                  </p>
+              {/* Animated Live Capacity Bar */}
+              <div className="space-y-2 pt-1 border-t border-[var(--border-card)]">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-amber-500 shrink-0" />
+                    <span className="font-semibold text-[var(--text-primary)]">Cupos Disponibles</span>
+                  </div>
+                  <div className="font-mono text-xs font-bold text-[var(--text-primary)] flex items-center gap-1">
+                    <AnimatedCounter target={tournament.current_participants} /> / {tournament.max_slots}
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-[var(--bg-arena)] dark:bg-black/50 rounded-full overflow-hidden border border-[var(--border-card)]">
+                  <motion.div 
+                    className="h-full rounded-full"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${Math.min(100, Math.round((tournament.current_participants / tournament.max_slots) * 100))}%` }}
+                    transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+                    style={{ 
+                      background: tournament.current_participants >= tournament.max_slots 
+                        ? '#E63946' 
+                        : 'linear-gradient(90deg, #10B981, #059669)',
+                    }}
+                  />
                 </div>
               </div>
 
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 pt-1">
                 <Mail className="w-4 h-4 text-[#A8DADC] shrink-0 mt-0.5" />
                 <div>
                   <p className="font-semibold text-[var(--text-primary)]">Organización y Soporte</p>

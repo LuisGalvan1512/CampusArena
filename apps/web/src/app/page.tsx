@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { 
   Trophy, 
   Swords, 
@@ -26,7 +26,6 @@ import {
   ChevronRight, 
   Heart, 
   Volume2, 
-  VolumeX,
   Share2, 
   Clock, 
   Loader2,
@@ -35,7 +34,8 @@ import {
   Copy,
   PartyPopper,
   HelpCircle,
-  Vote
+  Vote,
+  Layers
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
@@ -43,6 +43,8 @@ import { GAME_LIST, GAME_CATALOG, type GameCode } from '@/lib/games';
 import { sounds } from '@/lib/sound';
 import { fireCelebration } from '@/lib/confetti';
 import { toast } from 'sonner';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { SpotlightCard } from '@/components/SpotlightCard';
 
 // Subtle physics-based motion variants
 const staggerContainer: Variants = {
@@ -144,6 +146,11 @@ export default function HomePage() {
   // Game Poll Voting State
   const [gameVotes, setGameVotes] = useState(INITIAL_GAME_VOTES);
   const [hasVotedGame, setHasVotedGame] = useState<string | null>(null);
+
+  // Scroll Parallax Hooks for the Hero
+  const { scrollY } = useScroll();
+  const heroParallaxY = useTransform(scrollY, [0, 400], [0, 40]);
+  const heroParallaxOpacity = useTransform(scrollY, [0, 400], [1, 0.85]);
 
   // Fetch REAL active tournaments from backend API
   useEffect(() => {
@@ -343,6 +350,7 @@ export default function HomePage() {
 
           {/* Right Column: REAL TOURNAMENT SPOTLIGHT OR GRACEFUL PRE-SEASON (5 Cols) */}
           <motion.div
+            style={{ y: heroParallaxY, opacity: heroParallaxOpacity }}
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.15 }}
@@ -354,8 +362,11 @@ export default function HomePage() {
                 <p className="text-xs text-[var(--text-muted)]">Sincronizando torneos activos de la Arena...</p>
               </div>
             ) : featuredTournament ? (
-              /* REAL TOURNAMENT CARD (Directly connected to DB) */
-              <div className="arena-card p-5 relative overflow-hidden border border-[var(--border-card)] hover:border-[#E63946]/40 transition-all shadow-xl bg-[var(--bg-card)] rounded-2xl group">
+              /* REAL TOURNAMENT CARD WITH SPOTLIGHT */
+              <SpotlightCard 
+                spotlightColor={`${GAME_CATALOG[featuredTournament.game_code as GameCode]?.color || '#E63946'}25`}
+                className="arena-card p-5 relative overflow-hidden border border-[var(--border-card)] hover:border-[#E63946]/40 transition-all shadow-xl bg-[var(--bg-card)] rounded-2xl group"
+              >
                 
                 {/* Header Tag */}
                 <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-card)]">
@@ -462,7 +473,7 @@ export default function HomePage() {
                   </div>
                 </div>
 
-              </div>
+              </SpotlightCard>
             ) : (
               /* GRACEFUL PRE-SEASON & POLL STAGE (When no tournaments exist) */
               <div className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-5 shadow-xl relative overflow-hidden">
@@ -534,11 +545,13 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 2. REFINED METRIC TICKER STRIP */}
+      {/* 2. REFINED METRIC TICKER STRIP WITH LIVING ANIMATED COUNTERS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full -mt-6">
         <div className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl grid grid-cols-2 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-[var(--border-card)] shadow-sm">
           <div className="text-center md:text-left md:px-4 space-y-0.5">
-            <p className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">7</p>
+            <p className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+              <AnimatedCounter target={7} duration={1} />
+            </p>
             <p className="text-xs text-[var(--text-secondary)] font-medium">Disciplinas Oficiales</p>
           </div>
           <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
@@ -546,8 +559,10 @@ export default function HomePage() {
             <p className="text-xs text-[var(--text-secondary)] font-medium">Sede Central de Finales</p>
           </div>
           <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
-            <p className="text-2xl sm:text-3xl font-black text-sky-500 dark:text-sky-400">1 Clic</p>
-            <p className="text-xs text-[var(--text-secondary)] font-medium">Acceso con @tecsup.edu.pe</p>
+            <p className="text-2xl sm:text-3xl font-black text-sky-500 dark:text-sky-400">
+              <AnimatedCounter target={100} suffix="%" duration={1.2} />
+            </p>
+            <p className="text-xs text-[var(--text-secondary)] font-medium">Acceso @tecsup.edu.pe</p>
           </div>
           <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
             <p className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400">Oro / Plata</p>
@@ -556,7 +571,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 3. INTERACTIVE BATTLE ARENA (PLAYFUL DISCIPLINE SELECTOR WITH SOUND & KEY ART) */}
+      {/* 3. INTERACTIVE BATTLE ARENA (PLAYFUL DISCIPLINE SELECTOR WITH VOLUMETRIC AURA) */}
       <section id="arena-disciplinas" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-6">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="space-y-1">
@@ -611,8 +626,18 @@ export default function HomePage() {
           })}
         </div>
 
-        {/* Interactive Discipline Showcase Stage */}
+        {/* Interactive Discipline Showcase Stage with Volumetric Ambient Aura */}
         <div className="arena-card p-6 sm:p-8 rounded-2xl bg-[var(--bg-card)] border border-[var(--border-card)] relative overflow-hidden shadow-xl">
+          {/* Volumetric Aura that reacts to selected game */}
+          <div 
+            className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none transition-all duration-700 ease-out"
+            style={{ backgroundColor: activeGame.color }}
+          />
+          <div 
+            className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-3xl opacity-15 pointer-events-none transition-all duration-700 ease-out"
+            style={{ backgroundColor: activeGame.colorSecondary || '#1D3557' }}
+          />
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
             
             {/* Info details */}
@@ -667,12 +692,19 @@ export default function HomePage() {
 
             {/* Visual Game Stage Key Art */}
             <div className="lg:col-span-5 relative h-56 sm:h-64 rounded-xl overflow-hidden border border-[var(--border-card)] shadow-lg group">
-              <img
-                src={activeGame.bannerUrl}
-                alt={activeGame.name}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={activeGame.code}
+                  src={activeGame.bannerUrl}
+                  alt={activeGame.name}
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+                  className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                />
+              </AnimatePresence>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
               
               <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
                 <span className="font-bold flex items-center gap-1.5 bg-black/60 px-2.5 py-1 rounded-md backdrop-blur-md border border-white/10">
@@ -713,33 +745,39 @@ export default function HomePage() {
               <span>⚡</span>
               <span>Balance de Dominación Territorial</span>
             </span>
-            <span className="font-mono text-[var(--text-muted)] text-[11px]">
-              {totalCheers.toLocaleString()} Alientos Registrados
+            <span className="font-mono text-[var(--text-muted)] text-[11px] flex items-center gap-1">
+              <AnimatedCounter target={totalCheers} duration={1.2} /> Alientos Registrados
             </span>
           </div>
 
-          <div className="w-full h-3 bg-[var(--bg-arena)] rounded-full overflow-hidden flex border border-[var(--border-card)]">
+          <div className="w-full h-3.5 bg-[var(--bg-arena)] rounded-full overflow-hidden flex border border-[var(--border-card)] p-0.5 gap-0.5">
             <div 
               style={{ width: `${limaPct}%` }}
-              className="bg-[#E63946] h-full transition-all duration-500 relative group cursor-pointer"
+              className="bg-[#E63946] h-full rounded-l-full transition-all duration-700 ease-out relative group cursor-pointer"
               title={`Sede Lima: ${limaPct}%`}
             />
             <div 
               style={{ width: `${arequipaPct}%` }}
-              className="bg-amber-500 h-full transition-all duration-500 relative group cursor-pointer"
+              className="bg-amber-500 h-full transition-all duration-700 ease-out relative group cursor-pointer"
               title={`Sede Arequipa: ${arequipaPct}%`}
             />
             <div 
               style={{ width: `${trujilloPct}%` }}
-              className="bg-sky-500 h-full transition-all duration-500 relative group cursor-pointer"
+              className="bg-sky-500 h-full rounded-r-full transition-all duration-700 ease-out relative group cursor-pointer"
               title={`Sede Trujillo: ${trujilloPct}%`}
             />
           </div>
 
           <div className="flex items-center justify-between text-[11px] font-mono font-bold pt-1">
-            <span className="text-[#E63946] flex items-center gap-1">🏛️ Lima: {limaPct}%</span>
-            <span className="text-amber-500 flex items-center gap-1">🌋 Arequipa: {arequipaPct}%</span>
-            <span className="text-sky-500 flex items-center gap-1">🌊 Trujillo: {trujilloPct}%</span>
+            <span className="text-[#E63946] flex items-center gap-1">
+              🏛️ Lima: {limaPct}% {limaPct >= arequipaPct && limaPct >= trujilloPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
+            </span>
+            <span className="text-amber-500 flex items-center gap-1">
+              🌋 Arequipa: {arequipaPct}% {arequipaPct > limaPct && arequipaPct >= trujilloPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
+            </span>
+            <span className="text-sky-500 flex items-center gap-1">
+              🌊 Trujillo: {trujilloPct}% {trujilloPct > limaPct && trujilloPct > arequipaPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
+            </span>
           </div>
         </div>
 
@@ -761,14 +799,16 @@ export default function HomePage() {
               </div>
               <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
                 <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">{campusCheers.Lima.toLocaleString()} pts</p>
+                <p className="text-xl font-black text-[var(--text-primary)]">
+                  <AnimatedCounter target={campusCheers.Lima} duration={1.2} suffix=" pts" />
+                </p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => handleCheerCampus('Lima')}
-              className="w-full btn-primary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer shadow-md shadow-[#E63946]/20"
+              className="w-full btn-primary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer shadow-md shadow-[#E63946]/20 active:scale-95 transition-transform"
             >
               <Heart className="w-3.5 h-3.5 fill-current" />
               <span>¡Alentar a Sede Lima!</span>
@@ -790,14 +830,16 @@ export default function HomePage() {
               </div>
               <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
                 <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">{campusCheers.Arequipa.toLocaleString()} pts</p>
+                <p className="text-xl font-black text-[var(--text-primary)]">
+                  <AnimatedCounter target={campusCheers.Arequipa} duration={1.2} suffix=" pts" />
+                </p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => handleCheerCampus('Arequipa')}
-              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-amber-400 hover:text-amber-500"
+              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-amber-400 hover:text-amber-500 active:scale-95 transition-transform"
             >
               <Heart className="w-3.5 h-3.5 fill-current text-amber-500" />
               <span>¡Alentar a Sede Arequipa!</span>
@@ -819,14 +861,16 @@ export default function HomePage() {
               </div>
               <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
                 <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">{campusCheers.Trujillo.toLocaleString()} pts</p>
+                <p className="text-xl font-black text-[var(--text-primary)]">
+                  <AnimatedCounter target={campusCheers.Trujillo} duration={1.2} suffix=" pts" />
+                </p>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => handleCheerCampus('Trujillo')}
-              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-sky-400 hover:text-sky-500"
+              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-sky-400 hover:text-sky-500 active:scale-95 transition-transform"
             >
               <Heart className="w-3.5 h-3.5 fill-current text-sky-500" />
               <span>¡Alentar a Sede Trujillo!</span>
@@ -860,7 +904,7 @@ export default function HomePage() {
                   type="button"
                   onClick={handleSpinRoulette}
                   disabled={isSpinning}
-                  className="btn-primary py-3 px-6 text-xs sm:text-sm font-bold flex items-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/25 cursor-pointer disabled:opacity-50"
+                  className="btn-primary py-3 px-6 text-xs sm:text-sm font-bold flex items-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/25 cursor-pointer disabled:opacity-50 active:scale-95 transition-transform"
                 >
                   <RotateCw className={`w-4 h-4 ${isSpinning ? 'animate-spin' : ''}`} />
                   <span>{isSpinning ? 'Girando la Ruleta...' : '¡Girar Ruleta de Retos!'}</span>
@@ -869,7 +913,7 @@ export default function HomePage() {
                 <button
                   type="button"
                   onClick={handleCopyChallenge}
-                  className="btn-secondary py-3 px-4 text-xs font-bold flex items-center gap-2 rounded-xl cursor-pointer"
+                  className="btn-secondary py-3 px-4 text-xs font-bold flex items-center gap-2 rounded-xl cursor-pointer active:scale-95 transition-transform"
                   title="Copiar reto para WhatsApp"
                 >
                   <Share2 className="w-3.5 h-3.5" />
@@ -957,7 +1001,7 @@ export default function HomePage() {
             {
               title: 'Fair Play Total',
               stat: '100% Limpio',
-              desc: 'Cero sanciones por toxicidad. Arbitraje transparente en cada partida.',
+              desc: 'Cero sanciones por conducta antideportiva. Arbitraje transparente en cada partida.',
               icon: Shield,
               color: '#10B981'
             }
@@ -984,16 +1028,16 @@ export default function HomePage() {
 
       {/* 7. ARCHITECTURAL SHOWCASE: SEDE CENTRAL TECSUP */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="arena-card p-8 sm:p-12 border border-[var(--border-card)] bg-[var(--bg-card)] rounded-2xl shadow-sm">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div className="arena-card p-8 sm:p-12 border border-[var(--border-card)] bg-[var(--bg-card)] rounded-3xl shadow-sm relative overflow-hidden">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             
-            <div className="space-y-5">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
+            <div className="lg:col-span-6 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
                 <Building2 className="w-3.5 h-3.5" />
-                Infraestructura Híbrida
+                <span>Infraestructura Híbrida Oficial</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] leading-tight">
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[var(--text-primary)] leading-tight tracking-tight">
                 La Gran Final se vive en las instalaciones de <span className="text-[#E63946]">TECSUP</span>
               </h2>
 
@@ -1005,7 +1049,7 @@ export default function HomePage() {
                 <div className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
                     <Wifi className="w-4 h-4 text-sky-500" />
-                    <span>Fase Online</span>
+                    <span>Fase Online Automatizada</span>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">
                     Clasificatorias jugadas a distancia con actualización automática de brackets.
@@ -1015,7 +1059,7 @@ export default function HomePage() {
                 <div className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
                     <MapPin className="w-4 h-4 text-[#E63946]" />
-                    <span>Final Presencial</span>
+                    <span>Final Presencial en Lima</span>
                   </div>
                   <p className="text-xs text-[var(--text-muted)]">
                     Los mejores clasificados se enfrentan en vivo en los laboratorios centrales.
@@ -1024,25 +1068,28 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="relative h-72 sm:h-96 rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-lg group">
+            <div className="lg:col-span-6 relative h-80 sm:h-96 rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl group">
               <img 
                 src="/brand/tecsup_sede_lima.jpg" 
                 alt="Campus Tecsup Lima" 
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent pointer-events-none" />
               
-              <div className="absolute top-3.5 left-3.5 flex items-center gap-2 px-3 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/10 text-xs font-bold text-white">
+              <div className="absolute top-3.5 left-3.5 flex items-center gap-2 px-3 py-1 rounded-full bg-black/80 backdrop-blur-md border border-white/10 text-xs font-bold text-white shadow-lg">
                 <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
-                <span>Campus Central Lima</span>
+                <span>Campus Central Lima • Santa Anita</span>
               </div>
 
-              <div className="absolute bottom-3.5 left-3.5 right-3.5 p-3 rounded-xl bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-between text-xs text-white">
+              <div className="absolute bottom-3.5 left-3.5 right-3.5 p-3.5 rounded-2xl bg-black/80 backdrop-blur-md border border-white/15 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-white">
                 <div>
-                  <p className="font-bold">Av. Cascanueces 2221, Santa Anita</p>
-                  <p className="text-[11px] text-[#A8DADC]">Laboratorios Especializados de Ingeniería</p>
+                  <p className="font-bold flex items-center gap-1.5">
+                    <span>Av. Cascanueces 2221, Lima</span>
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                  </p>
+                  <p className="text-[11px] text-[#A8DADC]">Laboratorios de Cómputo de Alto Rendimiento</p>
                 </div>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] uppercase border border-emerald-500/30">
+                <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold text-[10px] uppercase border border-emerald-500/30">
                   Sede Oficial
                 </span>
               </div>
@@ -1052,80 +1099,103 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 8. CHRONOLOGICAL PROCESS: DE LA INSCRIPCIÓN A LA GLORIA */}
+      {/* 8. SCROLL-CONNECTED COMPETITIVE JOURNEY: DE LA INSCRIPCIÓN A LA GLORIA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="space-y-1 mb-8 text-center sm:text-left">
-          <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider">
-            Ruta Competitiva
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-            De la inscripción a la gloria
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
+            <Rocket className="w-3.5 h-3.5" />
+            <span>Senda Competitiva Oficial</span>
+          </div>
+          <h2 className="text-2xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+            De la inscripción a la gloria universitaria
           </h2>
           <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-            4 pasos directos para comenzar tu trayectoria en la Arena sin intermediarios.
+            4 etapas sincronizadas para construir tu historial competitivo oficial en Tecsup.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              step: '01',
-              title: 'Inicia con @tecsup.edu.pe',
-              desc: 'Sin formularios largos. Acceso directo con tu correo institucional de Google Workspace.',
-              icon: Shield,
-              color: '#457B9D',
-            },
-            {
-              step: '02',
-              title: 'Elige tu Disciplina',
-              desc: 'Revisa las bases del torneo, fechas, cupos disponibles y modalidad (virtual o presencial).',
-              icon: Target,
-              color: '#E63946',
-            },
-            {
-              step: '03',
-              title: 'Inscripción en 1 Clic',
-              desc: 'Inscríbete individualmente o crea tu escuadra. Cero vinculaciones obligatorias de terceros.',
-              icon: Users,
-              color: '#10B981',
-            },
-            {
-              step: '04',
-              title: 'Compite y Gana',
-              desc: 'Aparece en el bracket oficial en vivo, juega tus partidas y suma medallas a tu medallero.',
-              icon: Rocket,
-              color: '#F59E0B',
-            },
-          ].map((step) => {
-            const Icon = step.icon;
-            return (
-              <div
-                key={step.step}
-                className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-4 hover:border-[#E63946]/40 transition-all shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono font-bold text-[var(--text-muted)]">
-                    Paso {step.step}
-                  </span>
-                  <div
-                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-[var(--border-card)]"
-                    style={{ backgroundColor: `${step.color}18` }}
-                  >
-                    <Icon className="w-4 h-4" style={{ color: step.color }} />
-                  </div>
-                </div>
+        <div className="relative">
+          {/* Laser energy line connecting cards on desktop */}
+          <div className="hidden lg:block absolute top-1/2 left-8 right-8 h-[2px] bg-gradient-to-r from-[#457B9D] via-[#E63946] to-amber-500 -translate-y-1/2 z-0 opacity-25" />
 
-                <div className="space-y-1.5">
-                  <h3 className="text-base font-bold text-[var(--text-primary)]">
-                    {step.title}
-                  </h3>
-                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-                    {step.desc}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 relative z-10">
+            {[
+              {
+                step: '01',
+                title: 'Inicia con Google Tecsup',
+                desc: 'Sin formularios manuales. Acceso directo con tu correo institucional @tecsup.edu.pe.',
+                tag: '1 Clic',
+                icon: Shield,
+                color: '#457B9D',
+              },
+              {
+                step: '02',
+                title: 'Elige tu Disciplina',
+                desc: 'Revisa bases oficiales, cupos disponibles, fechas límite y modalidad (100% online o presencial).',
+                tag: '7 Juegos',
+                icon: Target,
+                color: '#E63946',
+              },
+              {
+                step: '03',
+                title: 'Arma tu Escuadra',
+                desc: 'Inscríbete individualmente o crea tu equipo con tus compañeros de clase. Sin cuentas de terceros forzosas.',
+                tag: 'Capitán & Roster',
+                icon: Users,
+                color: '#10B981',
+              },
+              {
+                step: '04',
+                title: 'Compite y Corona',
+                desc: 'Avanza en brackets automatizados en vivo, suma medallas a tu medallero y clasifica a la Gran Final.',
+                tag: 'Podio & Copa',
+                icon: Trophy,
+                color: '#F59E0B',
+              },
+            ].map((step, idx) => {
+              const Icon = step.icon;
+              return (
+                <motion.div
+                  key={step.step}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.35, delay: idx * 0.08, ease: [0.23, 1, 0.32, 1] }}
+                  className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-4 hover:border-[#E63946]/40 hover:shadow-xl transition-all shadow-sm group"
+                >
+                  <div className="flex items-center justify-between">
+                    <span 
+                      className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black tracking-wider text-white"
+                      style={{ backgroundColor: step.color }}
+                    >
+                      Paso {step.step}
+                    </span>
+                    <span className="text-[10px] font-bold text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
+                      {step.tag}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 border border-[var(--border-card)] group-hover:scale-110 transition-transform"
+                        style={{ backgroundColor: `${step.color}18` }}
+                      >
+                        <Icon className="w-4 h-4" style={{ color: step.color }} />
+                      </div>
+                      <h3 className="text-sm font-black text-[var(--text-primary)] leading-tight">
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed pt-1">
+                      {step.desc}
+                    </p>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -1149,7 +1219,7 @@ export default function HomePage() {
             {isAuthenticated ? (
               <Link
                 href="/tournaments"
-                className="btn-primary px-7 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/20"
+                className="btn-primary px-7 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/20 active:scale-95 transition-transform"
               >
                 <Trophy className="w-4 h-4" />
                 <span>Explorar Torneos Disponibles</span>
@@ -1157,7 +1227,7 @@ export default function HomePage() {
             ) : (
               <Link
                 href="/auth/login"
-                className="btn-primary px-7 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/20"
+                className="btn-primary px-7 py-3.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 rounded-xl shadow-lg shadow-[#E63946]/20 active:scale-95 transition-transform"
               >
                 <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
                 <span>Ingresar con Google Tecsup</span>
@@ -1167,7 +1237,7 @@ export default function HomePage() {
 
             <Link
               href="/ranking"
-              className="btn-secondary px-6 py-3.5 text-xs sm:text-sm font-bold rounded-xl"
+              className="btn-secondary px-6 py-3.5 text-xs sm:text-sm font-bold rounded-xl active:scale-95 transition-transform"
             >
               Ver Ranking Institucional
             </Link>

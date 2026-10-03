@@ -20,6 +20,8 @@ import {
   Crown
 } from 'lucide-react';
 
+import { motion, useScroll, useSpring } from 'framer-motion';
+
 export function Navbar() {
   const { user, isAuthenticated, isAdmin, isOrganizer, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -27,6 +29,14 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Smooth micro-meter scroll progress bar
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, {
+    stiffness: 120,
+    damping: 30,
+    restDelta: 0.001
+  });
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -343,6 +353,12 @@ export function Navbar() {
           </div>
         </div>
       )}
+
+      {/* Micro-meter scroll progress line */}
+      <motion.div
+        className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#E63946] via-amber-400 to-[#0EA5E9] origin-left pointer-events-none"
+        style={{ scaleX }}
+      />
     </nav>
   );
 }

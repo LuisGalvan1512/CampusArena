@@ -30,6 +30,7 @@ import { sounds } from '@/lib/sound';
 import { HolographicCard } from '@/components/HolographicCard';
 import { Medal, LegacySummary, capitalizeWords, BANNER_THEMES, BannerTheme } from '../page';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 export interface ProfileSignature {
   id: string;
@@ -433,7 +434,9 @@ export default function PublicProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Torneos</p>
-                <p className="text-base font-black text-white">{summary.tournaments_played}</p>
+                <p className="text-base font-black text-white">
+                  <AnimatedCounter target={summary.tournaments_played} />
+                </p>
               </div>
             </div>
 
@@ -443,7 +446,9 @@ export default function PublicProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Campeonatos</p>
-                <p className="text-base font-black text-amber-400">{summary.championships}</p>
+                <p className="text-base font-black text-amber-400">
+                  <AnimatedCounter target={summary.championships} />
+                </p>
               </div>
             </div>
 
@@ -453,7 +458,9 @@ export default function PublicProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Platas</p>
-                <p className="text-base font-black text-slate-300">{summary.silver_medals}</p>
+                <p className="text-base font-black text-slate-300">
+                  <AnimatedCounter target={summary.silver_medals} />
+                </p>
               </div>
             </div>
 
@@ -463,7 +470,9 @@ export default function PublicProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Bronces</p>
-                <p className="text-base font-black text-amber-500">{summary.bronze_medals}</p>
+                <p className="text-base font-black text-amber-500">
+                  <AnimatedCounter target={summary.bronze_medals} />
+                </p>
               </div>
             </div>
           </div>

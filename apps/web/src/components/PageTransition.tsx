@@ -1,22 +1,25 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const shouldReduceMotion = useReducedMotion();
 
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, y: 12, filter: 'blur(4px)' }}
+      initial={{ 
+        opacity: 0, 
+        y: shouldReduceMotion ? 0 : 8 
+      }}
       animate={{ 
         opacity: 1, 
-        y: 0, 
-        filter: 'blur(0px)',
+        y: 0,
         transition: {
-          duration: 0.35,
-          ease: [0.25, 0.46, 0.45, 0.94] as [number, number, number, number],
+          duration: 0.22,
+          ease: [0.23, 1, 0.32, 1], // Emil Kowalski strong ease-out
         },
       }}
     >
@@ -24,4 +27,3 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     </motion.div>
   );
 }
-

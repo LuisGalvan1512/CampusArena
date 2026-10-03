@@ -42,6 +42,7 @@ import { fireCelebration } from '@/lib/confetti';
 import { HolographicCard } from '@/components/HolographicCard';
 import { sounds } from '@/lib/sound';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { AnimatedCounter } from '@/components/AnimatedCounter';
 
 export const SYSTEM_AVATARS = [
   { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
@@ -593,7 +594,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Torneos</p>
-                <p className="text-base font-black text-white">{legacySummary.tournaments_played || registrations.length}</p>
+                <p className="text-base font-black text-white">
+                  <AnimatedCounter target={legacySummary.tournaments_played || registrations.length} />
+                </p>
               </div>
             </div>
 
@@ -603,7 +606,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Campeonatos</p>
-                <p className="text-base font-black text-amber-400">{legacySummary.championships}</p>
+                <p className="text-base font-black text-amber-400">
+                  <AnimatedCounter target={legacySummary.championships} />
+                </p>
               </div>
             </div>
 
@@ -613,7 +618,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Platas</p>
-                <p className="text-base font-black text-slate-300">{legacySummary.silver_medals}</p>
+                <p className="text-base font-black text-slate-300">
+                  <AnimatedCounter target={legacySummary.silver_medals} />
+                </p>
               </div>
             </div>
 
@@ -623,7 +630,9 @@ export default function ProfilePage() {
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Bronces</p>
-                <p className="text-base font-black text-amber-500">{legacySummary.bronze_medals}</p>
+                <p className="text-base font-black text-amber-500">
+                  <AnimatedCounter target={legacySummary.bronze_medals} />
+                </p>
               </div>
             </div>
           </div>
@@ -1246,7 +1255,10 @@ export default function ProfilePage() {
                           <button
                             key={theme.id}
                             type="button"
-                            onClick={() => setEditBannerTheme(theme.id)}
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditBannerTheme(theme.id);
+                            }}
                             className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden ${theme.bgClass} ${
                               isSelected
                                 ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20'
@@ -1285,7 +1297,10 @@ export default function ProfilePage() {
                           <button
                             key={av.id}
                             type="button"
-                            onClick={() => setEditForm({ ...editForm, avatar_url: av.url })}
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditForm({ ...editForm, avatar_url: av.url });
+                            }}
                             className={`p-2 rounded-2xl flex flex-col items-center gap-1.5 transition-all cursor-pointer border ${
                               isSelected
                                 ? 'bg-[#E63946]/20 border-[#E63946] scale-105 shadow-lg shadow-[#E63946]/20'
