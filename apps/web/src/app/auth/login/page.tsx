@@ -134,7 +134,7 @@ export default function LoginPage() {
         </div>
 
         {/* Main Card */}
-        <div className="arena-card p-6 sm:p-8 space-y-5 relative bg-[#111520] border border-[var(--border-card)]">
+        <div className="arena-card p-6 sm:p-8 space-y-5 relative bg-[var(--bg-card)] border border-[var(--border-card)]">
           
           {/* Error Alert */}
           {errorMessage && (

@@ -61,23 +61,49 @@
   color: var(--text-primary);
 }
 
+.light .bg-\[\#111520\],
+.light .bg-\[\#111622\],
+.light .bg-\[\#15161E\],
+.light .bg-\[\#1C1D27\],
+.light .bg-\[\#161B28\],
 .light .bg-\[\#0B0C10\],
 .light .bg-\[\#07080B\],
-.light .bg-\[\#15161E\],
-.light .bg-\[\#1C1D27\] {
+.light [class*="bg-[#111520]"],
+.light [class*="bg-[#0A0D14]"],
+.light [class*="bg-[#0B0C10]"],
+.light [class*="bg-[#111622]"] {
   background-color: var(--bg-card) !important;
 }
 
-.light .bg-\[\#0B0C10\]\/90,
-.light .bg-\[\#0B0C10\]\/80,
-.light .bg-\[\#0B0C10\]\/60 {
-  background-color: var(--bg-card) !important;
+.light .bg-\[\#0A0D14\],
+.light .bg-\[\#0D1018\] {
+  background-color: var(--bg-arena) !important;
+}
+
+.light [class*="from-[#111520]"],
+.light [class*="from-[#0B0C10]"],
+.light [class*="from-[#0A0D14]"] {
+  --tw-gradient-from: var(--bg-card) var(--tw-gradient-from-position, 0%) !important;
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position, 100%) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+
+.light [class*="via-[#111520]"],
+.light [class*="via-[#0B0C10]"] {
+  --tw-gradient-to: rgba(255, 255, 255, 0) var(--tw-gradient-to-position, 100%) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--bg-card) var(--tw-gradient-via-position, 50%), var(--tw-gradient-to) !important;
+}
+
+.light [class*="to-[#0A0D14]"],
+.light [class*="to-[#111520]"] {
+  --tw-gradient-to: var(--bg-card) var(--tw-gradient-to-position, 100%) !important;
 }
 
 .light .border-white\/5,
 .light .border-white\/10,
 .light .border-white\/15,
-.light .border-white\/20 {
+.light .border-white\/20,
+.light .border-white\/30 {
   border-color: var(--border-card) !important;
 }
 
@@ -86,7 +112,7 @@
   border-color: var(--border-card) !important;
 }
 
-/* Guard against invisible text-white in light mode when not inside a dark or colored element */
+/* Guard against invisible text in light mode */
 .light .arena-card h1.text-white,
 .light .arena-card h2.text-white,
 .light .arena-card h3.text-white,
@@ -95,8 +121,27 @@
 .light .arena-card h6.text-white,
 .light .arena-card span.text-white:not([class*="bg-"]):not(.btn-primary *),
 .light .arena-card p.text-white:not([class*="bg-"]):not(.btn-primary *),
-.light .arena-card strong.text-white:not([class*="bg-"]) {
+.light .arena-card strong.text-white:not([class*="bg-"]),
+.light .bg-\[\#111520\] h1,
+.light .bg-\[\#111520\] h2,
+.light .bg-\[\#111520\] h3,
+.light .bg-\[\#111520\] p,
+.light .bg-\[\#111520\] span:not([class*="bg-"]):not(.btn-primary *),
+.light .bg-\[\#0A0D14\] h1,
+.light .bg-\[\#0A0D14\] h2,
+.light .bg-\[\#0A0D14\] h3,
+.light .bg-\[\#0A0D14\] p,
+.light .bg-\[\#0A0D14\] span:not([class*="bg-"]):not(.btn-primary *) {
   color: var(--text-primary);
+}
+
+.light .text-\[\#8E92A4\],
+.light .text-\[\#CBD5E1\] {
+  color: var(--text-secondary) !important;
+}
+
+.light .text-\[\#A8DADC\] {
+  color: var(--cyan-accent) !important;
 }
 
 body {

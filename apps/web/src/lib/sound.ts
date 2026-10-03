@@ -162,6 +162,36 @@ class SoundEffects {
       osc.stop(ctx.currentTime + 0.08);
     } catch {}
   }
+
+  // 5. Pleasant notification chime
+  public playNotification() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+
+    try {
+      [659.25, 880.0].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.1);
+
+        const startTime = ctx.currentTime + i * 0.1;
+        const endTime = startTime + 0.25;
+
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.1, startTime + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, endTime);
+
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        osc.start(startTime);
+        osc.stop(endTime);
+      });
+    } catch {}
+  }
 }
 
 export const sounds = new SoundEffects();

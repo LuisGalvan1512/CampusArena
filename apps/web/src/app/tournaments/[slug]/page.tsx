@@ -166,8 +166,8 @@ export default function TournamentDetailPage() {
   if (!tournament) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-white">Torneo no encontrado</h2>
-        <p className="text-sm text-[#8E92A4]">El torneo que buscas no existe o ha sido despublicado.</p>
+        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Torneo no encontrado</h2>
+        <p className="text-sm text-[var(--text-secondary)]">El torneo que buscas no existe o ha sido despublicado.</p>
         <Link href="/tournaments" className="btn-primary px-6 py-2.5 text-sm inline-block">
           Volver a Torneos
         </Link>
@@ -311,7 +311,7 @@ export default function TournamentDetailPage() {
                 onClick={() => {
                   setActiveTab('brackets');
                 }}
-                className="btn-secondary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer border-white/20 text-white"
+                className="btn-secondary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
               >
                 <GitBranch className="w-3.5 h-3.5 text-[#E63946]" />
                 Brackets & Llaves
@@ -567,12 +567,12 @@ export default function TournamentDetailPage() {
             <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <UserCheck className="w-5 h-5 text-[#A8DADC]" />
-                  <h3 className="text-lg font-bold text-white">
+                  <UserCheck className="w-5 h-5 text-sky-500 dark:text-[#A8DADC]" />
+                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
                     {tournament.team_size && tournament.team_size > 1 ? 'Equipos y Escuadras Confirmadas' : 'Competidores Confirmados'}
                   </h3>
                 </div>
-                <span className="text-xs text-[#8E92A4]">
+                <span className="text-xs text-[var(--text-secondary)]">
                   {tournament.current_participants} de {tournament.max_slots} cupos ocupados
                 </span>
               </div>
@@ -620,7 +620,7 @@ export default function TournamentDetailPage() {
                           <button
                             type="button"
                             onClick={() => setSelectedTeamRoster(p)}
-                            className="btn-secondary py-1.5 px-3.5 text-xs flex items-center gap-1.5 cursor-pointer text-indigo-300 hover:text-white"
+                            className="btn-secondary py-1.5 px-3.5 text-xs flex items-center gap-1.5 cursor-pointer text-indigo-600 dark:text-indigo-300 hover:text-[var(--text-primary)]"
                           >
                             <Users className="w-3.5 h-3.5" />
                             Ver Integrantes

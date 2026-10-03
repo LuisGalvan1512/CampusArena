@@ -85,16 +85,16 @@ export default function RankingPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
       {/* 1. HEADER HERO */}
-      <div className="relative arena-card p-6 sm:p-10 overflow-hidden bg-[#111520] border border-[var(--border-card)]">
+      <div className="relative arena-card p-6 sm:p-10 overflow-hidden bg-[var(--bg-card)] border border-[var(--border-card)]">
         {currentGame?.bannerUrl && (
           <div className="absolute inset-0 opacity-20 pointer-events-none">
             <img src={currentGame.bannerUrl} alt="" className="w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#111520] via-[#111520]/85 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)] via-[var(--bg-card)]/85 to-transparent" />
           </div>
         )}
         
         <div className="relative z-10 max-w-3xl space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-arena)] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
             <span>Tabla de Posiciones Oficial</span>
           </div>

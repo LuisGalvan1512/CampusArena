@@ -246,14 +246,14 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
   if (!initialBracket || !initialBracket.rounds || initialBracket.rounds.length === 0) {
     return (
-      <div className="bg-[#111520] p-10 sm:p-14 text-center space-y-5 border border-white/10 rounded-3xl shadow-2xl">
+      <div className="bg-[var(--bg-card)] p-10 sm:p-14 text-center space-y-5 border border-[var(--border-card)] rounded-3xl shadow-xl">
         <div className="w-16 h-16 rounded-2xl bg-[#E63946]/15 border border-[#E63946]/30 text-[#E63946] flex items-center justify-center mx-auto shadow-lg shadow-[#E63946]/10">
           <Swords className="w-8 h-8" />
         </div>
         
         <div className="space-y-2 max-w-md mx-auto">
-          <h3 className="text-lg font-black text-white">Llaves de Competición en Espera</h3>
-          <p className="text-xs text-[#8E92A4] leading-relaxed">
+          <h3 className="text-lg font-black text-[var(--text-primary)]">Llaves de Competición en Espera</h3>
+          <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
             El sorteo oficial y la estructura de emparejamientos se generarán con los competidores confirmados una vez cerradas las inscripciones.
           </p>
         </div>
@@ -265,8 +265,8 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
         )}
 
         {canManage && (
-          <div className="pt-4 border-t border-white/10 max-w-md mx-auto space-y-3">
-            <span className="text-[11px] font-bold text-[#A8DADC] uppercase tracking-wider block">
+          <div className="pt-4 border-t border-[var(--border-card)] max-w-md mx-auto space-y-3">
+            <span className="text-[11px] font-bold text-sky-500 dark:text-[#A8DADC] uppercase tracking-wider block">
               🛡️ Herramientas de Organizador / Administrador
             </span>
             <div className="flex justify-center">
@@ -362,12 +362,12 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 className={`px-4 py-2.5 rounded-2xl text-xs font-bold transition-all shrink-0 flex items-center gap-2 border cursor-pointer ${
                   isSelected
                     ? 'bg-[#E63946] text-white border-[#E63946] shadow-lg shadow-[#E63946]/25 scale-102'
-                    : 'bg-[#111520] text-[#8E92A4] border-white/10 hover:border-white/30 hover:text-white'
+                    : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-card)] hover:border-[#E63946]/40 hover:text-[var(--text-primary)]'
                 }`}
               >
                 <span>{round.name}</span>
                 <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
-                  isSelected ? 'bg-black/30 text-white' : 'bg-white/10 text-[#CBD5E1]'
+                  isSelected ? 'bg-black/30 text-white' : 'bg-[var(--bg-arena)] text-[var(--text-secondary)]'
                 }`}>
                   {completedCount}/{totalCount}
                 </span>
@@ -380,15 +380,15 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
         </div>
 
         {/* Selected Round Header Strip */}
-        <div className="bg-[#111520] p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+        <div className="bg-[var(--bg-card)] p-4 rounded-2xl border border-[var(--border-card)] flex items-center justify-between shadow-sm">
           <div>
-            <h4 className="text-sm font-black text-white">{currentRound.name}</h4>
-            <p className="text-[11px] text-[#8E92A4]">
+            <h4 className="text-sm font-black text-[var(--text-primary)]">{currentRound.name}</h4>
+            <p className="text-[11px] text-[var(--text-secondary)]">
               {currentRound.matchups.length} {currentRound.matchups.length === 1 ? 'enfrentamiento decisivo' : 'enfrentamientos programados'}
             </p>
           </div>
 
-          <span className="text-[11px] font-mono text-[#CBD5E1] bg-[#0A0D14] px-3 py-1 rounded-xl border border-white/5">
+          <span className="text-[11px] font-mono text-[var(--text-secondary)] bg-[var(--bg-arena)] px-3 py-1 rounded-xl border border-[var(--border-card)]">
             Ronda {selectedRoundIndex + 1} de {initialBracket.rounds.length}
           </span>
         </div>
@@ -407,20 +407,20 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 onClick={() => handleMatchupClick(m, currentRound.name)}
                 className={`p-4 rounded-2xl border transition-all cursor-pointer group shadow-sm ${
                   isFinal
-                    ? 'bg-gradient-to-b from-[#1D3557]/20 via-[#111520] to-[#0A0D14] border-amber-400/50 hover:border-amber-400 shadow-amber-500/10'
+                    ? 'bg-gradient-to-b from-[#1D3557]/15 via-[var(--bg-card)] to-[var(--bg-card)] border-amber-400/50 hover:border-amber-400 shadow-amber-500/10'
                     : isCompleted
-                    ? 'bg-[#111520] border-white/10 hover:border-white/30'
+                    ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-white/30'
                     : isReady
-                    ? 'bg-[#111520] border-[#E63946]/50 hover:border-[#E63946] ring-1 ring-[#E63946]/20'
-                    : 'bg-[#111520]/70 border-white/5 opacity-80'
+                    ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] ring-1 ring-[#E63946]/20'
+                    : 'bg-[var(--bg-card)]/70 border-[var(--border-card)]/50 opacity-80'
                 }`}
               >
                 {/* Match Status Header */}
                 <div className="flex items-center justify-between mb-3 text-[10px] font-mono">
-                  <span className="text-[#8E92A4] font-bold">Match #{m.position}</span>
+                  <span className="text-[var(--text-secondary)] font-bold">Match #{m.position}</span>
                   
                   {isCompleted ? (
-                    <span className="text-emerald-400 flex items-center gap-1 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                    <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
                       <CheckCircle2 className="w-3 h-3" />
                       Finalizado
                     </span>
@@ -430,7 +430,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                       Listo / En Juego
                     </span>
                   ) : (
-                    <span className="text-[#8E92A4]">Esperando rival</span>
+                    <span className="text-[var(--text-muted)]">Esperando rival</span>
                   )}
                 </div>
 
@@ -438,31 +438,31 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 <div className={`p-3 rounded-xl flex items-center justify-between transition-colors ${
                   m.winner_tag && m.winner_tag === m.participant_a_tag
                     ? 'bg-emerald-500/15 border border-emerald-500/30'
-                    : 'bg-[#0A0D14] border border-white/5'
+                    : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                 }`}>
                   <div className="min-w-0 pr-2">
                     <p className={`text-xs font-bold truncate ${
-                      m.winner_tag === m.participant_a_tag ? 'text-emerald-300' : 'text-white'
+                      m.winner_tag === m.participant_a_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                     }`}>
                       {m.participant_a_name || 'Por definir (TBD)'}
                     </p>
                     {m.participant_a_tag && (
-                      <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_a_tag}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
                     {m.winner_tag && m.winner_tag === m.participant_a_tag && (
-                      <Crown className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      <Crown className="w-4 h-4 text-amber-500 dark:text-amber-400 fill-amber-400" />
                     )}
-                    <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-white/10 text-white">
+                    <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
                       {isCompleted ? m.score_a : '-'}
                     </span>
                   </div>
                 </div>
 
                 {/* VS Divider */}
-                <div className="text-center my-1.5 text-[9px] font-mono text-[#8E92A4] font-bold">
+                <div className="text-center my-1.5 text-[9px] font-mono text-[var(--text-muted)] font-bold">
                   VS
                 </div>
 
@@ -470,24 +470,24 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 <div className={`p-3 rounded-xl flex items-center justify-between transition-colors ${
                   m.winner_tag && m.winner_tag === m.participant_b_tag
                     ? 'bg-emerald-500/15 border border-emerald-500/30'
-                    : 'bg-[#0A0D14] border border-white/5'
+                    : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                 }`}>
                   <div className="min-w-0 pr-2">
                     <p className={`text-xs font-bold truncate ${
-                      m.winner_tag === m.participant_b_tag ? 'text-emerald-300' : 'text-white'
+                      m.winner_tag === m.participant_b_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                     }`}>
                       {m.participant_b_name || 'Por definir (TBD)'}
                     </p>
                     {m.participant_b_tag && (
-                      <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_b_tag}</p>
+                      <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
                     {m.winner_tag && m.winner_tag === m.participant_b_tag && (
-                      <Crown className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      <Crown className="w-4 h-4 text-amber-500 dark:text-amber-400 fill-amber-400" />
                     )}
-                    <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-white/10 text-white">
+                    <span className="text-xs font-mono font-black px-2.5 py-1 rounded-lg bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
                       {isCompleted ? m.score_b : '-'}
                     </span>
                   </div>
@@ -617,10 +617,10 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 {/* Round Title */}
                 <div className={`p-3 rounded-xl border text-center transition-all ${
                   isStage 
-                    ? 'bg-[#1D3557]/40 border-cyan-500/30 shadow-lg shadow-cyan-500/10' 
-                    : 'bg-[#111520] border-white/10 shadow-sm'
+                    ? 'bg-[#1D3557]/20 border-cyan-500/40 shadow-lg shadow-cyan-500/10' 
+                    : 'bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm'
                 }`}>
-                  <span className="text-xs font-black uppercase tracking-wider text-white">
+                  <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
                     {round.name}
                   </span>
                 </div>
@@ -646,22 +646,22 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         onMouseLeave={() => setHoveredMatchupId(null)}
                         className={`relative rounded-2xl p-4 border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
                           isFinal
-                            ? 'bg-gradient-to-b from-[#1D3557]/20 to-[#111520] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
+                            ? 'bg-gradient-to-b from-[#1D3557]/15 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
                             : isCardHovered
-                            ? 'bg-[#111520] border-cyan-400/80 shadow-lg shadow-cyan-500/15 ring-1 ring-cyan-400/40'
+                            ? 'bg-[var(--bg-card)] border-cyan-400/80 shadow-lg shadow-cyan-500/15 ring-1 ring-cyan-400/40'
                             : isCompleted
-                            ? 'bg-[#111520] border-white/10 hover:border-[#E63946]/50'
+                            ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-[#E63946]/50'
                             : isReady
-                            ? 'bg-[#111520] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
-                            : 'bg-[#111520]/60 border-white/5 opacity-70 hover:opacity-100'
+                            ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
+                            : 'bg-[var(--bg-card)]/70 border-[var(--border-card)]/50 opacity-70 hover:opacity-100'
                         }`}
                       >
                         {/* Top status indicator */}
                         <div className="flex items-center justify-between mb-2 text-[10px] font-mono">
-                          <span className="text-[#8E92A4]">Match #{m.position}</span>
+                          <span className="text-[var(--text-secondary)]">Match #{m.position}</span>
                           
                           {isCompleted ? (
-                            <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                            <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold">
                               <CheckCircle2 className="w-3 h-3" />
                               Finalizado
                             </span>
@@ -671,7 +671,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                               Listo / En Juego
                             </span>
                           ) : (
-                            <span className="text-[#8E92A4]">Esperando rival</span>
+                            <span className="text-[var(--text-muted)]">Esperando rival</span>
                           )}
                         </div>
 
@@ -679,54 +679,54 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         <div className={`p-2.5 rounded-xl flex items-center justify-between transition-colors ${
                           m.winner_tag && m.winner_tag === m.participant_a_tag
                             ? 'bg-emerald-500/15 border border-emerald-500/30'
-                            : 'bg-[#0A0D14] border border-white/5'
+                            : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
                           <div className="space-y-0.5 truncate pr-2">
                             <p className={`text-xs font-bold truncate ${
-                              m.winner_tag === m.participant_a_tag ? 'text-emerald-300' : 'text-white'
+                              m.winner_tag === m.participant_a_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                             }`}>
                               {m.participant_a_name || 'TBD (Por definir)'}
                             </p>
                             {m.participant_a_tag && (
-                              <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_a_tag}</p>
+                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
                             )}
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
                             {m.winner_tag && m.winner_tag === m.participant_a_tag && (
-                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                              <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400" />
                             )}
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-white">
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
                               {isCompleted ? m.score_a : '-'}
                             </span>
                           </div>
                         </div>
 
                         {/* VS divider */}
-                        <div className="text-center my-1 text-[9px] font-mono text-[#8E92A4] font-bold">VS</div>
+                        <div className="text-center my-1 text-[9px] font-mono text-[var(--text-muted)] font-bold">VS</div>
 
                         {/* Participant B */}
                         <div className={`p-2.5 rounded-xl flex items-center justify-between transition-colors ${
                           m.winner_tag && m.winner_tag === m.participant_b_tag
                             ? 'bg-emerald-500/15 border border-emerald-500/30'
-                            : 'bg-[#0A0D14] border border-white/5'
+                            : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
                           <div className="space-y-0.5 truncate pr-2">
                             <p className={`text-xs font-bold truncate ${
-                              m.winner_tag === m.participant_b_tag ? 'text-emerald-300' : 'text-white'
+                              m.winner_tag === m.participant_b_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                             }`}>
                               {m.participant_b_name || 'TBD (Por definir)'}
                             </p>
                             {m.participant_b_tag && (
-                              <p className="text-[10px] text-[#8E92A4] font-mono">{m.participant_b_tag}</p>
+                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
                             )}
                           </div>
 
                           <div className="flex items-center gap-1.5 shrink-0">
                             {m.winner_tag && m.winner_tag === m.participant_b_tag && (
-                              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
+                              <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400" />
                             )}
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-white">
+                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
                               {isCompleted ? m.score_b : '-'}
                             </span>
                           </div>
@@ -734,8 +734,8 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
                         {/* Referee button for admins/organizers */}
                         {canManage && hasBoth && !isCompleted && (
-                          <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between">
-                            <span className="text-[10px] text-[#8E92A4] font-bold">Arbitraje</span>
+                          <div className="mt-2.5 pt-2 border-t border-[var(--border-card)] flex items-center justify-between">
+                            <span className="text-[10px] text-[var(--text-secondary)] font-bold">Arbitraje</span>
                             <button
                               type="button"
                               onClick={(e) => handleOpenReferee(e, m)}
@@ -772,22 +772,22 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     <div className="space-y-6 animate-in fade-in">
       
       {/* Header Info & View Switcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#111520] p-4 sm:p-5 rounded-3xl border border-white/10">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--bg-card)] p-4 sm:p-5 rounded-3xl border border-[var(--border-card)] shadow-sm">
         
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-[#E63946]/15 text-[#E63946] flex items-center justify-center shrink-0 border border-[#E63946]/20">
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-white">Llaves Oficiales de Eliminación Directa</h3>
-            <p className="text-xs text-[#8E92A4]">Formato BO3 • Toca cualquier emparejamiento para ver el cara a cara</p>
+            <h3 className="text-sm font-black text-[var(--text-primary)]">Llaves Oficiales de Eliminación Directa</h3>
+            <p className="text-xs text-[var(--text-secondary)]">Formato BO3 • Toca cualquier emparejamiento para ver el cara a cara</p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
           
           {/* Mode Switcher: Rounds vs Tree */}
-          <div className="bg-[#0A0D14] p-1 rounded-2xl border border-white/10 flex items-center">
+          <div className="bg-[var(--bg-arena)] p-1 rounded-2xl border border-[var(--border-card)] flex items-center">
             <button
               type="button"
               onClick={() => {
@@ -797,7 +797,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'ROUNDS'
                   ? 'bg-[#E63946] text-white shadow-sm'
-                  : 'text-[#8E92A4] hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="Vista optimizada para móviles por rondas"
             >
@@ -814,7 +814,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                 viewMode === 'TREE'
                   ? 'bg-[#E63946] text-white shadow-sm'
-                  : 'text-[#8E92A4] hover:text-white'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
               title="Vista completa de árbol con conectores láser"
             >
@@ -889,26 +889,26 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
       {/* REFEREE SCORE REPORTING MODAL */}
       {selectedMatchup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-md bg-[#111520] p-6 sm:p-8 border border-white/10 rounded-3xl shadow-2xl space-y-6">
+          <div className="relative w-full max-w-md bg-[var(--bg-card)] p-6 sm:p-8 border border-[var(--border-card)] rounded-3xl shadow-2xl space-y-6">
             
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-2 text-xs font-bold text-[#E63946]">
                 <Swords className="w-4 h-4" />
                 <span>Panel de Arbitraje Oficial</span>
               </div>
               <button
                 onClick={() => setSelectedMatchup(null)}
-                className="text-[#8E92A4] hover:text-white p-1 cursor-pointer"
+                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-2 text-center">
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-[var(--text-primary)]">
                 Match #{selectedMatchup.position} — Registro de Marcador
               </h3>
-              <p className="text-xs text-[#8E92A4]">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Ingresa el resultado de la serie Bo3. El ganador avanzará automáticamente a la siguiente ronda.
               </p>
             </div>
@@ -916,10 +916,10 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             <form onSubmit={handleSubmitResult} className="space-y-5">
               
               {/* Score Input Matrix */}
-              <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[#0A0D14] border border-white/10">
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-[var(--bg-arena)] border border-[var(--border-card)]">
                 
                 <div className="space-y-2 text-center">
-                  <p className="text-xs font-bold text-white truncate">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                     {selectedMatchup.participant_a_name}
                   </p>
                   <input
@@ -928,9 +928,9 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     max={3}
                     value={scoreA}
                     onChange={(e) => setScoreA(Number(e.target.value))}
-                    className="input-arena text-center text-2xl font-black font-mono py-2 bg-[#111520]"
+                    className="input-arena text-center text-2xl font-black font-mono py-2 bg-[var(--bg-card)]"
                   />
-                  <label className="flex items-center justify-center gap-1.5 text-xs text-[#8E92A4] cursor-pointer pt-1">
+                  <label className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer pt-1">
                     <input
                       type="radio"
                       name="winner"
@@ -943,7 +943,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                 </div>
 
                 <div className="space-y-2 text-center">
-                  <p className="text-xs font-bold text-white truncate">
+                  <p className="text-xs font-bold text-[var(--text-primary)] truncate">
                     {selectedMatchup.participant_b_name}
                   </p>
                   <input
@@ -952,9 +952,9 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     max={3}
                     value={scoreB}
                     onChange={(e) => setScoreB(Number(e.target.value))}
-                    className="input-arena text-center text-2xl font-black font-mono py-2 bg-[#111520]"
+                    className="input-arena text-center text-2xl font-black font-mono py-2 bg-[var(--bg-card)]"
                   />
-                  <label className="flex items-center justify-center gap-1.5 text-xs text-[#8E92A4] cursor-pointer pt-1">
+                  <label className="flex items-center justify-center gap-1.5 text-xs text-[var(--text-secondary)] cursor-pointer pt-1">
                     <input
                       type="radio"
                       name="winner"

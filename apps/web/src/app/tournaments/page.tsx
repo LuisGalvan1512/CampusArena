@@ -81,9 +81,9 @@ export default function TournamentsPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
       {/* 1. HEADER & SEARCH HERO */}
-      <div className="arena-card p-6 sm:p-10 bg-[#111520] border border-[var(--border-card)]">
+      <div className="arena-card p-6 sm:p-10 bg-[var(--bg-card)] border border-[var(--border-card)]">
         <div className="max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-arena)] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
             <Flame className="w-3.5 h-3.5 text-[#E63946]" />
             <span>Circuito Oficial de Torneos</span>
           </div>
@@ -168,7 +168,7 @@ export default function TournamentsPage() {
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-[#111520] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
+            className="bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
           >
             <option value="ALL" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Todos los Estados</option>
             <option value="REGISTRATION_OPEN" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Inscripciones Abiertas</option>
