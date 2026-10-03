@@ -59,7 +59,7 @@ export const SYSTEM_AVATARS = [
   { id: 'esports', name: 'Esports Pro', url: 'https://api.dicebear.com/7.x/adventurer/svg?seed=TecsupEsports' },
 ];
 
-export type BannerTheme = 'cyberpunk' | 'carbon' | 'aurora' | 'gold' | 'obsidian' | 'retro' | 'matrix' | 'arena';
+export type BannerTheme = 'cyberpunk' | 'carbon' | 'aurora' | 'gold' | 'obsidian' | 'retro' | 'matrix' | 'arena' | 'sapphire';
 
 export const BANNER_THEMES: Array<{
   id: BannerTheme;
@@ -70,6 +70,7 @@ export const BANNER_THEMES: Array<{
   glowColor: string;
 }> = [
   { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian synthwave oficial', tag: 'Neon', bgClass: 'banner-cyberpunk', glowColor: 'rgba(230, 57, 70, 0.35)' },
+  { id: 'sapphire', name: 'Zafiro Tecsup', desc: 'Resplandor azul cobalto y cian eléctrico', tag: 'Cobalt', bgClass: 'banner-sapphire', glowColor: 'rgba(37, 99, 235, 0.4)' },
   { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', tag: 'Stealth', bgClass: 'banner-carbon', glowColor: 'rgba(148, 163, 184, 0.25)' },
   { id: 'aurora', name: 'Aurora Cósmica', desc: 'Nebulosa esmeralda y cian etérea', tag: 'Cosmic', bgClass: 'banner-aurora', glowColor: 'rgba(16, 185, 129, 0.3)' },
   { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeón', tag: 'Gold', bgClass: 'banner-gold', glowColor: 'rgba(245, 158, 11, 0.35)' },

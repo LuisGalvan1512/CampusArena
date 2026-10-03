@@ -48,6 +48,7 @@ const GAME_ICON_MAP: Record<string, React.ReactNode> = {
 };
 
 import { SpotlightCard } from '@/components/SpotlightCard';
+import { ScrollParallaxImage } from '@/components/ScrollParallaxImage';
 
 export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
   const game = GAME_CATALOG[tournament.game_code as GameCode];
@@ -107,29 +108,26 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
   return (
     <SpotlightCard 
       spotlightColor={`${gameColor}26`}
-      className="arena-card overflow-hidden flex flex-col group h-full hover:border-white/20 hover:shadow-xl transition-all duration-300"
+      className="arena-card overflow-hidden flex flex-col group h-full hover:border-white/20 hover:shadow-xl transition-all duration-300 rounded-3xl"
     >
       
-      {/* Banner Image / Cinematic Gradient Overlay */}
+      {/* Banner Image with Scroll-Linked Parallax */}
       <div className="relative h-48 w-full overflow-hidden bg-black/90">
-        <img
+        <ScrollParallaxImage
           src={tournament.banner_url || game?.bannerUrl || '/games/clash_royale_banner.jpg'}
           alt={tournament.name}
-          onError={(e) => {
-            const fallback = game?.bannerUrl || '/games/clash_royale_banner.jpg';
-            if (e.currentTarget.getAttribute('data-failed') !== 'true') {
-              e.currentTarget.setAttribute('data-failed', 'true');
-              e.currentTarget.src = fallback;
-            }
-          }}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-80 group-hover:opacity-95"
+          fallbackSrc={game?.bannerUrl || '/games/clash_royale_banner.jpg'}
+          scaleRange={[1.02, 1.12]}
+          yRange={[-12, 12]}
+          containerClassName="w-full h-full"
+          className="opacity-80 group-hover:opacity-95 transition-opacity duration-500"
         />
         {/* Subtle game color glow bleed in top-left */}
         <div 
           className="absolute -top-12 -left-12 w-32 h-32 rounded-full blur-2xl opacity-40 pointer-events-none transition-opacity duration-500 group-hover:opacity-70"
           style={{ backgroundColor: gameColor }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-black/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-black/30 pointer-events-none" />
 
         {/* Top Floating Badges */}
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 gap-2">
@@ -210,7 +208,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
 
             <Link
               href={`/tournaments/${tournament.slug}`}
-              className="group/btn btn-primary px-3.5 py-1.5 text-xs inline-flex items-center gap-1.5 shadow-md active:scale-95 transition-all duration-150"
+              className="group/btn btn-primary px-4 py-2 text-xs font-bold rounded-full inline-flex items-center gap-1.5 shadow-md shadow-[#E63946]/20 active:scale-95 transition-all duration-150"
             >
               <span>Ver Torneo</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform duration-200" />

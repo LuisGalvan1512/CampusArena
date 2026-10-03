@@ -37,12 +37,15 @@ import { GAME_LIST, GAME_CATALOG, type GameCode } from '@/lib/games';
 import { sounds } from '@/lib/sound';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SpotlightCard } from '@/components/SpotlightCard';
+import { AppleMediaCarousel, CarouselItem } from '@/components/AppleMediaCarousel';
+import { ScrollParallaxImage } from '@/components/ScrollParallaxImage';
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
 
   // Dynamic Real Tournament State from backend
   const [featuredTournament, setFeaturedTournament] = useState<any | null>(null);
+  const [allTournaments, setAllTournaments] = useState<any[]>([]);
   const [isLoadingTournament, setIsLoadingTournament] = useState(true);
 
   // Active Interactive Discipline for Apple-Style Lineup Showcase
@@ -60,6 +63,7 @@ export default function HomePage() {
       try {
         const res = await api.get('/tournaments');
         if (res.success && res.data?.items && res.data.items.length > 0) {
+          setAllTournaments(res.data.items);
           const openTour = res.data.items.find(
             (t: any) => t.status === 'REGISTRATION_OPEN' || t.status === 'IN_PROGRESS'
           ) || res.data.items[0];
@@ -69,10 +73,12 @@ export default function HomePage() {
           }
         } else {
           setFeaturedTournament(null);
+          setAllTournaments([]);
         }
       } catch (err) {
         console.error('Error fetching tournaments for home:', err);
         setFeaturedTournament(null);
+        setAllTournaments([]);
       } finally {
         setIsLoadingTournament(false);
       }
@@ -87,6 +93,41 @@ export default function HomePage() {
   };
 
   const activeGame = GAME_CATALOG[selectedDiscipline] || GAME_CATALOG.BRAWL_STARS;
+
+  const realTournamentCards: CarouselItem[] = allTournaments.map((t: any) => {
+    const gameInfo = GAME_CATALOG[t.game_code as GameCode];
+    return {
+      id: `real-${t.id}`,
+      title: t.name,
+      category: gameInfo?.name || t.game_code,
+      description: t.description_short || `Torneo oficial en Sede ${t.campus_name || 'Lima'}. Compite y gana reconocimiento institucional.`,
+      imageUrl: t.banner_url || gameInfo?.bannerUrl || '/games/clash_royale_banner.jpg',
+      accentColor: gameInfo?.color || '#E63946',
+      badge: `Sede ${t.campus_name || 'Lima'}`,
+      tag: t.format || (t.team_size && t.team_size > 1 ? `${t.team_size}v${t.team_size}` : '1v1'),
+      prize: t.prize_pool || 'Premio Oficial Tecsup',
+      linkHref: `/tournaments/${t.slug}`,
+      linkText: t.status === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
+    };
+  });
+
+  const remainingDisciplines: CarouselItem[] = GAME_LIST
+    .filter((g) => !allTournaments.some((t: any) => t.game_code === g.code))
+    .map((game) => ({
+      id: `official-${game.code}`,
+      title: `Copa Oficial ${game.name}`,
+      category: game.name,
+      description: game.description,
+      imageUrl: game.bannerUrl,
+      accentColor: game.color,
+      badge: game.badge,
+      tag: game.tagLabel,
+      prize: 'S/ 300 - 500 PEN',
+      linkHref: `/tournaments?game=${game.code}`,
+      linkText: 'Ver Disciplina',
+    }));
+
+  const carouselItems: CarouselItem[] = [...realTournamentCards, ...remainingDisciplines];
 
   return (
     <div className="flex flex-col gap-24 sm:gap-32 pb-28 overflow-x-hidden">
@@ -214,25 +255,22 @@ export default function HomePage() {
                   </span>
                 </div>
 
-                {/* Key Art Hero */}
+                {/* Key Art Hero with Scroll-Linked Parallax */}
                 <div className="relative h-48 rounded-2xl overflow-hidden my-4 bg-black/90">
-                  <img
+                  <ScrollParallaxImage
                     src={
                       featuredTournament.banner_url || 
                       GAME_CATALOG[featuredTournament.game_code as GameCode]?.bannerUrl || 
                       '/games/brawl_stars_banner.jpg'
                     }
                     alt={featuredTournament.name}
-                    onError={(e) => {
-                      const fallback = GAME_CATALOG[featuredTournament.game_code as GameCode]?.bannerUrl || '/games/brawl_stars_banner.jpg';
-                      if (e.currentTarget.getAttribute('data-failed') !== 'true') {
-                        e.currentTarget.setAttribute('data-failed', 'true');
-                        e.currentTarget.src = fallback;
-                      }
-                    }}
-                    className="w-full h-full object-cover object-center opacity-85 group-hover:scale-105 transition-transform duration-700 ease-out"
+                    fallbackSrc={GAME_CATALOG[featuredTournament.game_code as GameCode]?.bannerUrl || '/games/brawl_stars_banner.jpg'}
+                    scaleRange={[1.02, 1.1]}
+                    yRange={[-10, 10]}
+                    containerClassName="w-full h-full"
+                    className="opacity-85 group-hover:opacity-95 transition-opacity duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-black/30" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-black/30 pointer-events-none" />
                   
                   {/* Floating Game Badge */}
                   <div className="absolute top-3 left-3">
@@ -493,14 +531,26 @@ export default function HomePage() {
       </section>
 
       {/* ========================================================================= */}
+      {/* 2.5 "GALERÍA DE LA ARENA": APPLE-STYLE MEDIA SNAP CAROUSEL WITH PARALLAX  */}
+      {/* ========================================================================= */}
+      <section className="w-full">
+        <AppleMediaCarousel 
+          items={carouselItems}
+          tagline="GALERÍA DE LA ARENA"
+          headline="Descubre las copas activas."
+          subheadline="Desliza para explorar los torneos y escenarios oficiales de esta temporada."
+        />
+      </section>
+
+      {/* ========================================================================= */}
       {/* 3. "INGENIERÍA DE TORNEOS": APPLE "A FONDO" & ANTIGRAVITY SPATIAL BENTO   */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-10">
         
         {/* Section Header */}
         <div className="space-y-3 text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-mono font-bold uppercase tracking-wider text-[#E63946]">
-            <ShieldCheck className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-mono font-bold uppercase tracking-wider text-[#38BDF8]">
+            <ShieldCheck className="w-3.5 h-3.5 text-[#E63946]" />
             <span>Infraestructura & Confianza</span>
           </div>
           <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
@@ -547,13 +597,16 @@ export default function HomePage() {
           {/* Bento Card 2: La Gran Final Presencial (5 cols) */}
           <div className="lg:col-span-5 arena-card p-8 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-3xl flex flex-col justify-between space-y-6 shadow-sm relative overflow-hidden group">
             <div className="relative h-44 rounded-2xl overflow-hidden border border-[var(--border-card)]">
-              <img 
+              <ScrollParallaxImage 
                 src="/brand/tecsup_sede_lima.jpg" 
                 alt="Campus Tecsup Lima" 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                scaleRange={[1.0, 1.08]}
+                yRange={[-12, 12]}
+                containerClassName="w-full h-full"
+                className="group-hover:scale-105 transition-transform duration-700 ease-out"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 text-xs text-white font-bold flex items-center gap-1.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-3 left-3 text-xs text-white font-bold flex items-center gap-1.5 z-10">
                 <MapPin className="w-3.5 h-3.5 text-[#E63946]" />
                 <span>Santa Anita • Campus Central</span>
               </div>

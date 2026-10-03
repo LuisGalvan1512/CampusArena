@@ -14,6 +14,7 @@ import { EditTournamentModal } from '@/components/EditTournamentModal';
 import { DeleteTournamentModal } from '@/components/DeleteTournamentModal';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { ScrollParallaxImage } from '@/components/ScrollParallaxImage';
 import { 
   Trophy, 
   Swords, 
@@ -439,27 +440,23 @@ export default function TournamentDetailPage() {
 
       {/* 1. HERO BANNER */}
       <div className="relative rounded-3xl overflow-hidden arena-card border border-white/10 shadow-2xl">
-        <div className="relative h-72 sm:h-96 w-full bg-[#0B0C10]">
-          <img
+        <div className="relative h-72 sm:h-96 w-full bg-[#0B0C10] overflow-hidden">
+          <ScrollParallaxImage
             src={tournament.banner_url || gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
             alt={tournament.name}
-            onError={(e) => {
-              const fallback = gameDef?.bannerUrl || '/games/clash_royale_banner.jpg';
-              if (e.currentTarget.getAttribute('data-failed') !== 'true') {
-                e.currentTarget.setAttribute('data-failed', 'true');
-                e.currentTarget.src = fallback;
-              }
-            }}
-            className="w-full h-full object-cover object-center opacity-75"
+            fallbackSrc={gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
+            scaleRange={[1.0, 1.15]}
+            yRange={[-25, 25]}
+            containerClassName="w-full h-full"
+            className="opacity-80 transition-opacity duration-500"
           />
-          {/* Ambient Game Light Bleed */}
+          {/* Ambient Game Light Bleed with Sapphire Accent */}
           <div 
-            className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
+            className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl opacity-45 pointer-events-none"
             style={{ backgroundColor: gameDef?.color || '#E63946' }}
           />
           <div 
-            className="absolute top-1/2 -right-16 w-72 h-72 rounded-full blur-3xl opacity-20 pointer-events-none"
-            style={{ backgroundColor: gameDef?.colorSecondary || '#1D3557' }}
+            className="absolute top-1/2 -right-16 w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none bg-[#2563EB]"
           />
 
           {/* Cinematic Vignette */}
