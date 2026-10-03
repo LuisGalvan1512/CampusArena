@@ -330,8 +330,8 @@ export default function TournamentDetailPage() {
       )}
 
       {/* 1. HERO BANNER */}
-      <div className="relative rounded-2xl overflow-hidden arena-card border border-white/10 shadow-2xl">
-        <div className="relative h-64 sm:h-80 w-full bg-[#0B0C10]">
+      <div className="relative rounded-3xl overflow-hidden arena-card border border-white/10 shadow-2xl">
+        <div className="relative h-72 sm:h-96 w-full bg-[#0B0C10]">
           <img
             src={tournament.banner_url || gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
             alt={tournament.name}
@@ -342,18 +342,30 @@ export default function TournamentDetailPage() {
                 e.currentTarget.src = fallback;
               }
             }}
-            className="w-full h-full object-cover object-center opacity-50"
+            className="w-full h-full object-cover object-center opacity-75"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#15161E] via-[#15161E]/60 to-transparent" />
+          {/* Ambient Game Light Bleed */}
+          <div 
+            className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl opacity-40 pointer-events-none"
+            style={{ backgroundColor: gameDef?.color || '#E63946' }}
+          />
+          <div 
+            className="absolute top-1/2 -right-16 w-72 h-72 rounded-full blur-3xl opacity-20 pointer-events-none"
+            style={{ backgroundColor: gameDef?.colorSecondary || '#1D3557' }}
+          />
+
+          {/* Cinematic Vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/50 to-black/40" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)]/80 via-transparent to-[var(--bg-card)]/40" />
 
           {/* Floating Badges */}
-          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10">
+          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 gap-2">
             <div 
-              className="px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-lg backdrop-blur-md text-white border border-white/20"
+              className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xl backdrop-blur-md text-white border border-white/20 ring-1 ring-black/30"
               style={{ backgroundColor: gameDef?.color ? `${gameDef.color}E6` : '#E63946' }}
             >
               {gameDef?.logoUrl ? (
-                <img src={gameDef.logoUrl} alt={gameDef.name} className="w-5 h-5 object-contain" />
+                <img src={gameDef.logoUrl} alt={gameDef.name} className="w-5 h-5 object-contain filter drop-shadow" />
               ) : isClash ? (
                 <Swords className="w-4 h-4" />
               ) : (
@@ -365,19 +377,29 @@ export default function TournamentDetailPage() {
             {getStatusBadge()}
           </div>
 
-          {/* Bottom Title & Organization */}
-          <div className="absolute bottom-6 left-6 right-6 space-y-2 z-10">
-            <div className="flex items-center gap-2 text-xs text-[#A8DADC]">
-              <MapPin className="w-4 h-4 text-[#457B9D]" />
-              <span>
-                {tournament.event_modality === 'ONLINE' || (tournament.is_online && tournament.event_modality !== 'PRESENTIAL')
-                  ? `${tournament.organization_name} • Torneo 100% Online / Remoto`
-                  : tournament.event_modality === 'HYBRID'
-                  ? `${tournament.organization_name} • Sede ${tournament.campus_name} (Híbrido)`
-                  : `${tournament.organization_name} • Sede ${tournament.campus_name} (100% Presencial)`}
-              </span>
+          {/* Bottom Title, Modality & Prize */}
+          <div className="absolute bottom-6 left-6 right-6 space-y-3 z-10">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-1.5 text-xs text-[#A8DADC] bg-black/60 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
+                <MapPin className="w-3.5 h-3.5 text-[#457B9D] shrink-0" />
+                <span>
+                  {tournament.event_modality === 'ONLINE' || (tournament.is_online && tournament.event_modality !== 'PRESENTIAL')
+                    ? `${tournament.organization_name} • 100% Online / Remoto`
+                    : tournament.event_modality === 'HYBRID'
+                    ? `${tournament.organization_name} • Sede ${tournament.campus_name} (Híbrido)`
+                    : `${tournament.organization_name} • Sede ${tournament.campus_name} (Presencial)`}
+                </span>
+              </div>
+
+              {tournament.prize_pool && (
+                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 bg-amber-500/20 px-3 py-1 rounded-full backdrop-blur-md border border-amber-400/30">
+                  <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                  <span>Premio: {tournament.prize_pool}</span>
+                </div>
+              )}
             </div>
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight">
+
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-md">
               {tournament.name}
             </h1>
           </div>

@@ -331,9 +331,7 @@ export default function AdminOrganizersPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
       
       {/* 1. HERO HEADER */}
-      <div className="arena-card p-8 sm:p-10 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-amber-500/10 to-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
-
+      <div className="arena-card p-6 sm:p-8 relative overflow-hidden bg-[#111520] border border-[var(--border-card)]">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-2">

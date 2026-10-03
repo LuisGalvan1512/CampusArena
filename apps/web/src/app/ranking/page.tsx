@@ -85,22 +85,21 @@ export default function RankingPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
       {/* 1. HEADER HERO */}
-      <div className="relative arena-card p-8 sm:p-12 overflow-hidden">
+      <div className="relative arena-card p-6 sm:p-10 overflow-hidden bg-[#111520] border border-[var(--border-card)]">
         {currentGame?.bannerUrl && (
-          <div className="absolute inset-0 opacity-15 pointer-events-none">
+          <div className="absolute inset-0 opacity-20 pointer-events-none">
             <img src={currentGame.bannerUrl} alt="" className="w-full h-full object-cover object-center" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)] via-[var(--bg-card)]/90 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#111520] via-[#111520]/85 to-transparent" />
           </div>
         )}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 text-xs font-bold text-amber-400 border border-amber-500/30 uppercase tracking-wider">
-            <Trophy className="w-3.5 h-3.5" />
-            Tabla de Posiciones Oficial
+        <div className="relative z-10 max-w-3xl space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
+            <Trophy className="w-3.5 h-3.5 text-amber-400" />
+            <span>Tabla de Posiciones Oficial</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
             Ranking Institucional Tecsup
           </h1>
 

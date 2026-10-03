@@ -233,9 +233,7 @@ export default function OrganizerDashboardPage() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
       
       {/* 1. HEADER HERO */}
-      <div className="relative arena-card p-8 sm:p-10 overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
-        
+      <div className="relative arena-card p-6 sm:p-8 overflow-hidden bg-[#111520] border border-[var(--border-card)]">
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E63946]/15 text-xs font-bold text-[#E63946] border border-[#E63946]/30 uppercase tracking-wider">

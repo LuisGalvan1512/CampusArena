@@ -34,6 +34,17 @@ export default function TournamentsPage() {
   const [selectedGame, setSelectedGame] = useState<'ALL' | GameCode>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
 
+  // Sync initial game filter if passed in URL query (?game= or ?game_code=)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameParam = urlParams.get('game') || urlParams.get('game_code');
+      if (gameParam && GAME_LIST.some((g) => g.code === gameParam)) {
+        setSelectedGame(gameParam as GameCode);
+      }
+    }
+  }, []);
+
   const fetchTournaments = async () => {
     setIsLoading(true);
     const params = new URLSearchParams();
@@ -67,30 +78,28 @@ export default function TournamentsPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       
       {/* 1. HEADER & SEARCH HERO */}
-      <div className="relative arena-card p-8 sm:p-12 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="relative z-10 max-w-3xl space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E63946]/15 text-xs font-bold text-[#E63946] border border-[#E63946]/30 uppercase tracking-wider">
-            <Flame className="w-3.5 h-3.5" />
-            Arena Competitiva Oficial
+      <div className="arena-card p-6 sm:p-10 bg-[#111520] border border-[var(--border-card)]">
+        <div className="max-w-3xl space-y-4">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] text-xs font-semibold text-[var(--text-secondary)] border border-[var(--border-card)]">
+            <Flame className="w-3.5 h-3.5 text-[#E63946]" />
+            <span>Circuito Oficial de Torneos</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
-            Explorador de Torneos
+          <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight">
+            Catálogo de Torneos Tecsup
           </h1>
 
-          <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-            Inscríbete a los torneos de tu institución, compite en brackets oficiales en vivo y gana premios en efectivo y medallas legendarias.
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed max-w-2xl">
+            Inscríbete a los torneos de tu institución, compite en brackets oficiales en vivo y suma medallas permanentes a tu historial de competidor.
           </p>
 
           {/* Search Bar */}
-          <form onSubmit={handleSearchSubmit} className="pt-2 flex gap-3 max-w-xl">
+          <form onSubmit={handleSearchSubmit} className="pt-2 flex gap-2.5 max-w-lg">
             <div className="relative flex-1">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-secondary)]">
+              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-[var(--text-muted)]">
                 <Search className="w-4 h-4" />
               </div>
               <input
@@ -98,12 +107,12 @@ export default function TournamentsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Buscar por nombre del torneo o sede..."
-                className="input-arena pl-10"
+                className="input-arena pl-10 text-xs sm:text-sm"
               />
             </div>
             <button
               type="submit"
-              className="btn-primary px-6 py-2.5 text-sm flex items-center gap-2 cursor-pointer"
+              className="btn-primary px-5 py-2.5 text-xs font-semibold flex items-center gap-1.5 cursor-pointer rounded-lg"
             >
               Buscar
             </button>
@@ -111,17 +120,17 @@ export default function TournamentsPage() {
         </div>
       </div>
 
-      {/* 2. FILTERS BAR — 5 GAME TABS */}
-      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-2 border-b border-[var(--border-card)]">
+      {/* 2. FILTERS BAR — GAME TABS */}
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-3 border-b border-[var(--border-card)]">
         
         {/* Game Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
+        <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-2 md:pb-0 scrollbar-hide">
           <button
             onClick={() => setSelectedGame('ALL')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer whitespace-nowrap ${
               selectedGame === 'ALL'
-                ? 'bg-[var(--accent-red)] text-white shadow-lg shadow-red-500/20'
-                : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)]'
+                ? 'bg-[#E63946] text-white shadow-sm'
+                : 'bg-white/[0.03] text-[var(--text-secondary)] hover:text-white border border-[var(--border-card)]'
             }`}
           >
             Todos los Juegos
@@ -131,36 +140,35 @@ export default function TournamentsPage() {
             <button
               key={game.code}
               onClick={() => setSelectedGame(game.code)}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 selectedGame === game.code
-                  ? 'text-white shadow-lg'
-                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-card)]'
+                  ? 'text-white shadow-sm'
+                  : 'bg-white/[0.03] text-[var(--text-secondary)] hover:text-white border border-[var(--border-card)]'
               }`}
               style={selectedGame === game.code ? { 
                 backgroundColor: game.color,
-                boxShadow: `0 4px 15px ${game.shadowColor}`,
               } : {}}
             >
               {game.logoUrl ? (
-                <img src={game.logoUrl} alt={game.name} className="w-4 h-4 object-contain shrink-0" />
+                <img src={game.logoUrl} alt={game.name} className="w-3.5 h-3.5 object-contain shrink-0 filter drop-shadow" />
               ) : (
                 GAME_ICON_MAP[game.iconName]
               )}
-              {game.shortName}
+              <span>{game.shortName}</span>
             </button>
           ))}
         </div>
 
         {/* Status Dropdown Filter */}
-        <div className="flex items-center gap-3 self-end md:self-auto">
-          <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1">
+        <div className="flex items-center gap-2.5 self-end md:self-auto">
+          <span className="text-xs text-[var(--text-muted)] flex items-center gap-1">
             <Filter className="w-3.5 h-3.5" />
             Estado:
           </span>
           <select
             value={selectedStatus}
             onChange={(e) => setSelectedStatus(e.target.value)}
-            className="bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
+            className="bg-[#111520] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:border-[#E63946]"
           >
             <option value="ALL" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Todos los Estados</option>
             <option value="REGISTRATION_OPEN" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Inscripciones Abiertas</option>

@@ -10,20 +10,25 @@ export function Footer() {
           
           {/* Col 1: Brand Info */}
           <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center">
-                <Swords className="w-4 h-4 text-white" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-[#111622] border border-white/10 flex items-center justify-center p-1.5 shadow-sm">
+                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
               </div>
-              <span className="text-lg font-black tracking-wider text-[var(--text-primary)]">
-                CAMPUS <span className="text-[#E63946]">ARENA</span>
-              </span>
+              <div className="flex flex-col leading-none">
+                <span className="text-base font-black tracking-wider text-[var(--text-primary)]">
+                  CAMPUS <span className="text-[#E63946]">ARENA</span>
+                </span>
+                <span className="text-[9px] tracking-widest text-sky-400 font-bold uppercase mt-1">
+                  TECSUP ESPORTS
+                </span>
+              </div>
             </div>
-            <p className="text-sm text-[var(--text-secondary)] max-w-sm">
-              La plataforma oficial de esports académicos en Latinoamérica. Compite, representa a tu institución y construye un legado imborrable.
+            <p className="text-sm text-[var(--text-secondary)] max-w-sm leading-relaxed">
+              La plataforma oficial de esports académicos de Tecsup. Compite por tu carrera, representa a tu sede y construye tu legado competitivo.
             </p>
             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
-              <Shield className="w-4 h-4 text-[#457B9D]" />
-              <span>Protegido por reglas de Fair Play & APIs Oficiales</span>
+              <Shield className="w-4 h-4 text-sky-400" />
+              <span>Protegido por reglas de Fair Play institucional</span>
             </div>
           </div>
 

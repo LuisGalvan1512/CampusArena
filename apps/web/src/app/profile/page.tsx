@@ -36,8 +36,6 @@ import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
 import { HolographicCard } from '@/components/HolographicCard';
 import { sounds } from '@/lib/sound';
-import { ProfileCustomizationPanel } from '@/components/ProfileCustomizationPanel';
-import { useProfileCustomization, ACCENT_COLORS, STATUS_MOODS } from '@/lib/useProfileCustomization';
 
 export const SYSTEM_AVATARS = [
   { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
@@ -123,7 +121,6 @@ interface UserRegistration {
 
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { accentColor, statusMood, customTitle, cardEffect } = useProfileCustomization();
   const router = useRouter();
 
   const [profile, setProfile] = useState<ProfileData>({
@@ -158,8 +155,8 @@ export default function ProfilePage() {
   const [customAvatarInput, setCustomAvatarInput] = useState('');
   const [isSavingAvatar, setIsSavingAvatar] = useState(false);
 
-  // Gamer Banner Theme State
-  type BannerTheme = 'cyberpunk' | 'carbon' | 'aurora' | 'gold' | 'obsidian';
+  // Gamer Banner Theme State (Steam-style Profile Backgrounds)
+  type BannerTheme = 'cyberpunk' | 'carbon' | 'aurora' | 'gold' | 'obsidian' | 'retro' | 'matrix' | 'arena';
   const [bannerTheme, setBannerTheme] = useState<BannerTheme>('cyberpunk');
   const [showBannerModal, setShowBannerModal] = useState(false);
 
@@ -175,7 +172,7 @@ export default function ProfilePage() {
     localStorage.setItem('campus_arena_banner_theme', theme);
     sounds.playSuccess();
     fireCelebration();
-    toast.success('¡Tema de tarjeta de competidor actualizado!');
+    toast.success('¡Fondo de perfil actualizado correctamente!');
     setShowBannerModal(false);
   };
 
@@ -366,30 +363,31 @@ export default function ProfilePage() {
       {/* 1. HEADER HERO */}
       <HolographicCard 
         className={`p-8 sm:p-10 relative overflow-hidden transition-all duration-500 ${
-          cardEffect === 'neon' ? 'neon-glow' :
-          cardEffect === 'gradient' ? 'animated-gradient-border' : ''
-        } ${
           bannerTheme === 'cyberpunk' ? 'banner-cyberpunk' :
           bannerTheme === 'carbon' ? 'banner-carbon' :
           bannerTheme === 'aurora' ? 'banner-aurora' :
-          bannerTheme === 'gold' ? 'banner-gold' : 'banner-obsidian'
+          bannerTheme === 'gold' ? 'banner-gold' :
+          bannerTheme === 'retro' ? 'banner-retro' :
+          bannerTheme === 'matrix' ? 'banner-matrix' :
+          bannerTheme === 'arena' ? 'banner-arena' :
+          'banner-obsidian'
         }`} 
         glowColor={
-          cardEffect === 'glow' ? ACCENT_COLORS[accentColor]?.hex :
           bannerTheme === 'gold' ? 'rgba(245, 158, 11, 0.35)' :
           bannerTheme === 'aurora' ? 'rgba(16, 185, 129, 0.3)' :
           bannerTheme === 'carbon' ? 'rgba(148, 163, 184, 0.25)' :
+          bannerTheme === 'retro' ? 'rgba(168, 85, 247, 0.3)' :
+          bannerTheme === 'matrix' ? 'rgba(16, 185, 129, 0.3)' :
+          bannerTheme === 'arena' ? 'rgba(230, 57, 70, 0.35)' :
           bannerTheme === 'obsidian' ? 'rgba(59, 130, 246, 0.25)' :
           'rgba(230, 57, 70, 0.3)'
         }
       >
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#E63946]/10 rounded-full blur-3xl pointer-events-none" />
-        
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             {/* AVATAR WITH CAMERA EDIT BADGE */}
             <div className="relative group">
-              <div className={`w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr ${ACCENT_COLORS[accentColor]?.gradient || 'from-[#E63946] via-[#1D3557] to-[#457B9D]'} p-1 shadow-xl shrink-0 overflow-hidden`}>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-xl shrink-0 overflow-hidden">
                 {profile.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -452,47 +450,37 @@ export default function ProfilePage() {
                 <ShieldCheck className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
                 <span>Cuenta Institucional Verificada</span>
               </div>
-              {/* Status Mood Badge */}
-              <div className="flex items-center gap-2 pt-1">
-                <span className={`text-xs font-bold flex items-center gap-1.5 ${STATUS_MOODS[statusMood].color}`}>
-                  <span>{STATUS_MOODS[statusMood].emoji}</span>
-                  {STATUS_MOODS[statusMood].label}
-                </span>
-                {customTitle && (
-                  <span className="text-[11px] text-[var(--text-muted)] italic">— {customTitle}</span>
-                )}
-              </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-            <ProfileCustomizationPanel />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  sounds.playClick();
+                  setShowBannerModal(true);
+                }}
+                className="btn-secondary px-3.5 py-2.5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-[#E63946]/50 shrink-0"
+                title="Personalizar fondo de perfil estilo Steam"
+              >
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Fondo de Perfil</span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                sounds.playClick();
-                setShowBannerModal(true);
-              }}
-              className="btn-secondary px-3.5 py-2.5 text-xs flex items-center justify-center gap-2 cursor-pointer shadow-sm hover:border-[#E63946]/50 shrink-0"
-              title="Personalizar tema y textura del carnet de competidor"
-            >
-              <Palette className="w-4 h-4 text-[#E63946]" />
-              <span>Tema de Carnet</span>
-            </button>
+              <Link
+                href={`/profile/${user.id}`}
+                className="px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-600 dark:text-emerald-300 hover:text-[var(--text-primary)] border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
+                title="Ver cómo ven tu perfil los demás competidores"
+              >
+                <Eye className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
+                <span>Vista Visitante</span>
+              </Link>
+            </div>
 
-            <Link
-              href={`/profile/${user.id}`}
-              className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500/20 via-teal-500/10 to-emerald-500/20 hover:from-emerald-500/30 hover:to-teal-500/30 text-emerald-600 dark:text-emerald-300 hover:text-[var(--text-primary)] border border-emerald-500/30 text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/10 transition-all group shrink-0"
-              title="Ver cómo ven tu perfil los demás competidores"
-            >
-              <Eye className="w-4 h-4 text-emerald-500 dark:text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span>Vista de Visitante</span>
-            </Link>
-
-            <div className="bg-[var(--bg-arena)] px-5 py-3 rounded-xl border border-[var(--border-card)] text-left sm:text-right">
-              <p className="text-xs text-[var(--text-muted)]">Representando a</p>
-              <p className="text-sm font-bold text-[var(--text-primary)] flex items-center justify-start sm:justify-end gap-1.5">
+            <div className="bg-[var(--bg-arena)] px-4 py-2.5 rounded-xl border border-[var(--border-card)] text-left sm:text-right">
+              <p className="text-[10px] text-[var(--text-muted)] leading-none">Representando a</p>
+              <p className="text-xs font-bold text-[var(--text-primary)] flex items-center justify-start sm:justify-end gap-1.5 mt-1">
                 <span>Tecsup — Sede {profile.campus || 'Lima'}</span>
                 <span className="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
               </p>
@@ -1316,62 +1304,121 @@ export default function ProfilePage() {
         </div>
       )}
 
-      {/* GAMER BANNER THEME SELECTOR MODAL */}
+      {/* STEAM-STYLE PROFILE BACKGROUND SELECTOR MODAL */}
       {showBannerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-          <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in">
+          <div className="relative w-full max-w-xl arena-card p-5 sm:p-7 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-4 max-h-[90vh] flex flex-col overflow-hidden">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-3 shrink-0">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#E63946]/20 text-[#E63946] flex items-center justify-center">
-                  <Palette className="w-4 h-4" />
+                <div className="w-9 h-9 rounded-xl bg-[#E63946]/15 text-[#E63946] flex items-center justify-center border border-[#E63946]/30">
+                  <Sparkles className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-[var(--text-primary)]">Personalizar Carnet Gamer</h3>
-                  <p className="text-xs text-[var(--text-secondary)]">Elige la textura y estética holográfica de tu perfil</p>
+                  <h3 className="text-base font-black text-[var(--text-primary)]">Fondo de Perfil (Estilo Steam)</h3>
+                  <p className="text-[11px] text-[var(--text-secondary)]">Elige la estética y textura que decorará tu carnet en la Arena</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowBannerModal(false)}
-                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1 cursor-pointer"
+                className="text-[var(--text-muted)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {[
-                { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian oficial de Campus Arena', bgClass: 'banner-cyberpunk border-[#E63946]/40' },
-                { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', bgClass: 'banner-carbon border-slate-500/40' },
-                { id: 'aurora', name: 'Aurora Cósmica', desc: 'Onda etérea verde esmeralda y violeta neón', bgClass: 'banner-aurora border-emerald-500/40' },
-                { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeón áureo', bgClass: 'banner-gold border-amber-500/40' },
-                { id: 'obsidian', name: 'Titanio Obsidiana', desc: 'Acabado minimalista de cristal templado', bgClass: 'banner-obsidian border-[var(--border-card)]' },
-              ].map((theme) => {
-                const isSelected = bannerTheme === theme.id;
-                return (
-                  <button
-                    key={theme.id}
-                    type="button"
-                    onClick={() => handleSelectBannerTheme(theme.id as any)}
-                    className={`p-4 rounded-xl border text-left transition-all duration-200 cursor-pointer relative overflow-hidden group hover:scale-[1.02] ${theme.bgClass} ${
-                      isSelected
-                        ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20'
-                        : 'hover:border-[#E63946]/50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-black text-[var(--text-primary)]">{theme.name}</span>
-                      {isSelected && (
-                        <CheckCircle2 className="w-4 h-4 text-[#E63946]" />
-                      )}
-                    </div>
-                    <p className="text-[11px] text-[var(--text-secondary)] leading-snug">{theme.desc}</p>
-                  </button>
-                );
-              })}
+            {/* Live Mini Preview Box */}
+            <div className="shrink-0 p-3.5 rounded-xl border border-[var(--border-card)] bg-[var(--bg-arena)]/60 relative overflow-hidden">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text-muted)] mb-2 flex items-center gap-1.5">
+                <span>Vista Previa en Vivo</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </p>
+              <div className={`p-4 rounded-xl border relative overflow-hidden transition-all duration-300 ${
+                bannerTheme === 'cyberpunk' ? 'banner-cyberpunk border-[#E63946]/40' :
+                bannerTheme === 'carbon' ? 'banner-carbon border-slate-500/40' :
+                bannerTheme === 'aurora' ? 'banner-aurora border-emerald-500/40' :
+                bannerTheme === 'gold' ? 'banner-gold border-amber-500/40' :
+                bannerTheme === 'retro' ? 'banner-retro border-purple-500/40' :
+                bannerTheme === 'matrix' ? 'banner-matrix border-emerald-500/40' :
+                bannerTheme === 'arena' ? 'banner-arena border-[#E63946]/40' :
+                'banner-obsidian border-blue-500/30'
+              }`}>
+                <div className="flex items-center gap-3">
+                  <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#E63946] to-[#1D3557] p-0.5 overflow-hidden shrink-0 shadow">
+                    {profile.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-[10px]" />
+                    ) : (
+                      <div className="w-full h-full bg-[var(--bg-card)] rounded-[10px] flex items-center justify-center text-sm font-black text-white">
+                        {(profile.nickname || user?.first_name || 'U')[0].toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-black text-[var(--text-primary)] truncate">
+                      {profile.nickname || capitalizeWords(user?.first_name || 'Competidor')}
+                    </p>
+                    <p className="text-[10px] text-[var(--text-secondary)] flex items-center gap-1">
+                      <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                      <span>Tecsup Competidor • Sede {profile.campus || 'Lima'}</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="pt-2 flex justify-end">
+            {/* Scrollable Themes Grid */}
+            <div className="overflow-y-auto flex-1 pr-1 space-y-2.5">
+              <p className="text-xs font-semibold text-[var(--text-secondary)]">
+                Selecciona un fondo gamer para aplicar de inmediato:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[
+                  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian synthwave oficial', tag: 'Neon', bgClass: 'banner-cyberpunk border-[#E63946]/40' },
+                  { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', tag: 'Stealth', bgClass: 'banner-carbon border-slate-500/40' },
+                  { id: 'aurora', name: 'Aurora Cósmica', desc: 'Nebulosa esmeralda y violeta etérea', tag: 'Cosmic', bgClass: 'banner-aurora border-emerald-500/40' },
+                  { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeón', tag: 'Gold', bgClass: 'banner-gold border-amber-500/40' },
+                  { id: 'obsidian', name: 'Titanio Obsidiana', desc: 'Acabado minimalista de cristal templado', tag: 'Titanium', bgClass: 'banner-obsidian border-[var(--border-card)]' },
+                  { id: 'retro', name: 'Retro Synthwave 80s', desc: 'Atardecer neón y rejilla arcade retro', tag: 'Arcade', bgClass: 'banner-retro border-purple-500/40' },
+                  { id: 'matrix', name: 'Cyber Matrix', desc: 'Terminal hacker táctica verde fósforo', tag: 'Matrix', bgClass: 'banner-matrix border-emerald-500/40' },
+                  { id: 'arena', name: 'Tecsup Arena Oficial', desc: 'Rojo carmesí y azul marino institucional', tag: 'Oficial', bgClass: 'banner-arena border-[#E63946]/50' },
+                ].map((theme) => {
+                  const isSelected = bannerTheme === theme.id;
+                  return (
+                    <button
+                      key={theme.id}
+                      type="button"
+                      onClick={() => handleSelectBannerTheme(theme.id as any)}
+                      className={`p-3.5 rounded-xl border text-left transition-all duration-200 cursor-pointer relative overflow-hidden group hover:scale-[1.01] ${theme.bgClass} ${
+                        isSelected
+                          ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20 bg-[var(--bg-card)]/90'
+                          : 'bg-[var(--bg-card)]/50 hover:border-[#E63946]/50 hover:bg-[var(--bg-card)]/80'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs font-black text-[var(--text-primary)]">{theme.name}</span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/10 text-[var(--text-secondary)]">
+                            {theme.tag}
+                          </span>
+                          {isSelected && (
+                            <CheckCircle2 className="w-3.5 h-3.5 text-[#E63946]" />
+                          )}
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-secondary)] leading-snug line-clamp-1">{theme.desc}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-[var(--border-card)] flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-[var(--text-muted)]">
+                Se guarda automáticamente en tu navegador
+              </span>
               <button
                 type="button"
                 onClick={() => setShowBannerModal(false)}
@@ -1380,6 +1427,7 @@ export default function ProfilePage() {
                 Cerrar
               </button>
             </div>
+
           </div>
         </div>
       )}

@@ -7,7 +7,6 @@ import {
   Trophy, 
   Swords, 
   Gamepad2, 
-  ShieldCheck, 
   Flame, 
   ArrowRight, 
   CheckCircle2, 
@@ -18,102 +17,110 @@ import {
   Sparkles,
   MapPin,
   Building2,
-  ChevronLeft,
-  ChevronRight,
   Users,
   Medal,
   Target,
   Shield,
   Rocket,
   Crown,
+  ChevronRight
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
-import { GAME_LIST } from '@/lib/games';
-import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { GAME_LIST, GAME_CATALOG } from '@/lib/games';
 
 const GAME_ICONS: Record<string, React.ReactNode> = {
-  Swords: <Swords className="w-7 h-7 text-white" />,
-  Gamepad2: <Gamepad2 className="w-7 h-7 text-white" />,
-  Zap: <Zap className="w-7 h-7 text-white" />,
-  Crosshair: <Crosshair className="w-7 h-7 text-white" />,
-  CircleDot: <CircleDot className="w-7 h-7 text-white" />,
+  Swords: <Swords className="w-5 h-5 text-white" />,
+  Gamepad2: <Gamepad2 className="w-5 h-5 text-white" />,
+  Zap: <Zap className="w-5 h-5 text-white" />,
+  Crosshair: <Crosshair className="w-5 h-5 text-white" />,
+  CircleDot: <CircleDot className="w-5 h-5 text-white" />,
 };
 
-// Animation variants
+// Subtle physics-based motion variants (Emil Kowalski principles)
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.1 }
+    transition: { staggerChildren: 0.08 }
   }
 };
 
 const fadeUp: Variants = {
-  hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 70, damping: 15 } }
+  hidden: { opacity: 0, y: 18 },
+  show: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: 'spring', stiffness: 350, damping: 28 } 
+  }
 };
 
-// Carousel highlights data
-const HIGHLIGHTS = [
+// Interactive Feature Showcase Data
+const HIGHLIGHT_TABS = [
   {
-    title: 'Temporada 2026 Activa',
-    subtitle: '7 disciplinas oficiales con brackets en vivo',
-    description: 'Compite en Clash Royale, Dota 2, Fortnite, Left 4 Dead 2, Brawl Stars, eFootball y Super Smash Bros. con rankings en tiempo real.',
-    gradient: 'from-[#E63946]/30 via-[#1D3557]/20 to-[#457B9D]/30',
+    id: 'season',
+    num: '01',
+    label: 'Temporada 2026',
+    title: '7 disciplinas oficiales con brackets y llaves en tiempo real',
+    desc: 'Compite en Clash Royale, Dota 2, Fortnite, Left 4 Dead 2, Brawl Stars, eFootball y Super Smash Bros. Cada victoria se sincroniza automáticamente con el ranking de la universidad.',
+    badge: 'En Vivo',
+    badgeColor: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/30',
     icon: Trophy,
-    iconColor: '#F59E0B',
-    tag: 'En vivo',
-    tagColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
+    highlightMetric: '7 Juegos Soportados',
+    highlightSub: 'Fases online + presencial',
   },
   {
-    title: 'Premios Reales',
-    subtitle: 'Medallas oficiales + premios en efectivo',
-    description: 'Gana medallas de oro, plata y bronce que quedan permanentemente en tu perfil de competidor. Algunos torneos incluyen premio monetario.',
-    gradient: 'from-amber-500/30 via-[#1D3557]/20 to-amber-700/20',
+    id: 'rewards',
+    num: '02',
+    label: 'Medallero & Premios',
+    title: 'Medallas oficiales institucionales y premios en efectivo',
+    desc: 'Gana medallas de oro, plata y bronce que quedan grabadas de forma permanente en tu carnet de competidor. Cada título conquistado suma prestigio a tu carrera en Tecsup.',
+    badge: 'Reconocimiento',
+    badgeColor: 'text-amber-400 bg-amber-500/15 border-amber-500/30',
     icon: Medal,
-    iconColor: '#F59E0B',
-    tag: 'Nuevo',
-    tagColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30',
+    highlightMetric: 'Oro, Plata y Bronce',
+    highlightSub: 'Historial permanente en perfil',
   },
   {
-    title: 'Perfil Competitivo',
-    subtitle: 'Personaliza tu carnet de competidor',
-    description: 'Elige tu avatar, color de acento, estado de ánimo y efecto visual. Tu perfil es tu carta de presentación en la Arena.',
-    gradient: 'from-purple-500/30 via-[#1D3557]/20 to-cyan-500/20',
-    icon: Crown,
-    iconColor: '#8B5CF6',
-    tag: 'Personalizable',
-    tagColor: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+    id: 'identity',
+    num: '03',
+    label: 'Carnet Estilo Steam',
+    title: 'Personaliza tu identidad competitiva con fondos coleccionables',
+    desc: 'Equipa fondos de perfil procedurales inspirados en la estética gamer de Steam (Cyberpunk, Carbon, Aurora, Gold, Obsidian, Retro y Matrix) sin necesidad de vincular cuentas de terceros.',
+    badge: 'Estilo Steam',
+    badgeColor: 'text-sky-400 bg-sky-500/15 border-sky-500/30',
+    icon: Sparkles,
+    highlightMetric: '8 Temas Procedurales',
+    highlightSub: '100% libre de apps externas',
   },
 ];
 
-// How It Works steps
+// 4 Steps Process
 const HOW_IT_WORKS = [
   {
-    step: 1,
-    title: 'Inicia Sesión',
-    desc: 'Usa tu correo institucional @tecsup.edu.pe con Google para verificar tu identidad automáticamente.',
+    step: '01',
+    title: 'Inicia con @tecsup.edu.pe',
+    desc: 'Sin formularios largos. Acceso directo con tu correo institucional de Google Workspace.',
     icon: Shield,
     color: '#457B9D',
   },
   {
-    step: 2,
-    title: 'Elige tu Juego',
-    desc: 'Selecciona el torneo de tu disciplina favorita y vincula tu cuenta de juego oficial.',
+    step: '02',
+    title: 'Elige tu Disciplina',
+    desc: 'Revisa las bases del torneo, fechas, cupos disponibles y modalidad (virtual o presencial).',
     icon: Target,
     color: '#E63946',
   },
   {
-    step: 3,
-    title: 'Inscríbete',
-    desc: 'Registra tu participación, conforma tu equipo si es grupal y confirma tu lugar en el bracket.',
+    step: '03',
+    title: 'Inscripción en 1 Clic',
+    desc: 'Inscríbete individualmente o crea tu escuadra. Cero vinculaciones obligatorias de terceros.',
     icon: Users,
     color: '#10B981',
   },
   {
-    step: 4,
-    title: '¡Compite y Gana!',
-    desc: 'Juega tus partidas, escala en el bracket oficial y gana medallas que quedan en tu legado para siempre.',
+    step: '04',
+    title: 'Compite y Deja tu Huella',
+    desc: 'Aparece en el bracket oficial en vivo, juega tus partidas y suma medallas a tu medallero.',
     icon: Rocket,
     color: '#F59E0B',
   },
@@ -121,493 +128,527 @@ const HOW_IT_WORKS = [
 
 export default function HomePage() {
   const { isAuthenticated, user } = useAuth();
+  const [activeTabIdx, setActiveTabIdx] = useState(0);
 
-  // Carousel state
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev + 1) % HIGHLIGHTS.length);
+  const nextTab = useCallback(() => {
+    setActiveTabIdx((prev) => (prev + 1) % HIGHLIGHT_TABS.length);
   }, []);
 
-  const prevSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev - 1 + HIGHLIGHTS.length) % HIGHLIGHTS.length);
-  }, []);
-
-  useEffect(() => {
-    if (!isAutoPlaying) return;
-    const timer = setInterval(nextSlide, 5000);
-    return () => clearInterval(timer);
-  }, [isAutoPlaying, nextSlide]);
+  const activeTab = HIGHLIGHT_TABS[activeTabIdx];
 
   return (
-    <div className="flex flex-col gap-24 pb-24 overflow-x-hidden">
+    <div className="flex flex-col gap-20 pb-24 overflow-x-hidden">
       
-      {/* 1. HERO SECTION */}
-      <section className="relative min-h-[90vh] flex items-center justify-center px-4 sm:px-6 lg:px-8">
-        {/* Animated Background glow effects */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#E63946]/20 rounded-full blur-[140px] pointer-events-none" 
-        />
-        <div className="absolute top-1/3 left-1/4 w-[400px] h-[400px] bg-[#1D3557]/40 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-[300px] h-[300px] bg-[#457B9D]/30 rounded-full blur-[100px] pointer-events-none" />
+      {/* 1. ASYMMETRIC HERO SECTION */}
+      <section className="relative pt-12 pb-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* Left Column: Editorial Headline & Actions (7 Cols) */}
+          <motion.div 
+            variants={staggerContainer}
+            initial="hidden"
+            animate="show"
+            className="lg:col-span-7 space-y-6 text-left"
+          >
+            {/* Institution Badge */}
+            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#111622] border border-[var(--border-card)] text-xs font-semibold text-[var(--text-secondary)]">
+              <span className="w-2 h-2 rounded-full bg-[#E63946] animate-pulse" />
+              <span className="font-bold text-[var(--text-primary)]">TECSUP ESPORTS</span>
+              <span className="text-[var(--text-muted)]">•</span>
+              <span>Temporada 2026</span>
+            </motion.div>
 
-        <motion.div 
-          variants={staggerContainer}
-          initial="hidden"
-          animate="show"
-          className="relative z-10 max-w-5xl mx-auto text-center space-y-8"
-        >
-          {/* Badge */}
-          <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/70 text-xs font-bold text-sky-600 dark:text-[#A8DADC] tracking-widest uppercase">
-            <Flame className="w-4 h-4 text-[#E63946]" />
-            Temporada 2026 — 7 Disciplinas Oficiales
-          </motion.div>
+            {/* Asymmetrical High-Craft Headline */}
+            <motion.h1 variants={fadeUp} className="text-4xl sm:text-6xl font-black tracking-tight leading-[1.08] text-[var(--text-primary)]">
+              El circuito oficial de esports universitarios.
+            </motion.h1>
 
-          {/* Epic Title */}
-          <motion.h1 variants={fadeUp} className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter leading-[1.1] text-[var(--text-primary)]">
-            Compite. Evoluciona.{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#E63946] via-[#FF6B35] to-[#D62839] block sm:inline mt-2 sm:mt-0">
-              Deja tu huella.
-            </span>
-          </motion.h1>
+            {/* Subtitle */}
+            <motion.p variants={fadeUp} className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl font-normal">
+              Representa a tu carrera, compite en brackets en vivo y asegura tu lugar en el podio de honor de Tecsup. Torneos presenciales en Campus Lima y clasificatorias online en 7 disciplinas oficiales.
+            </motion.p>
 
-          {/* Subtitle */}
-          <motion.p variants={fadeUp} className="text-lg sm:text-2xl text-[var(--text-secondary)] max-w-3xl mx-auto leading-relaxed font-medium">
-            La plataforma oficial de esports universitarios. Demuestra tu nivel en{' '}
-            <span className="text-[var(--text-primary)] font-bold">Clash Royale</span>,{' '}
-            <span className="text-[var(--text-primary)] font-bold">Dota 2</span>,{' '}
-            <span className="text-[var(--text-primary)] font-bold">Left 4 Dead 2</span>,{' '}
-            <span className="text-[var(--text-primary)] font-bold">Fortnite</span> y más.
-          </motion.p>
-
-          {/* Action CTAs */}
-          <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center gap-5 pt-8">
-            {isAuthenticated ? (
-              <Link
-                href="/profile"
-                className="btn-primary px-10 py-4 text-lg flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl"
-              >
-                <Trophy className="w-5 h-5" />
-                Ir a Mi Perfil ({user?.first_name})
-              </Link>
-            ) : (
-              <>
+            {/* Action Buttons */}
+            <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+              {isAuthenticated ? (
+                <Link
+                  href="/profile"
+                  className="btn-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2.5 rounded-lg shadow-sm"
+                >
+                  <Trophy className="w-4 h-4 text-white" />
+                  <span>Mi Carnet & Medallero ({user?.first_name})</span>
+                </Link>
+              ) : (
                 <Link
                   href="/auth/login"
-                  className="btn-primary px-9 py-4 text-base sm:text-lg flex items-center gap-3 w-full sm:w-auto justify-center rounded-xl shadow-[0_0_35px_rgba(230,57,70,0.35)] hover:scale-105 transition-all"
+                  className="btn-primary px-6 py-3 text-sm font-semibold flex items-center justify-center gap-2.5 rounded-lg shadow-sm"
                 >
-                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-5 h-5 object-contain" />
-                  Ingresar con Google Tecsup
-                  <ArrowRight className="w-5 h-5" />
+                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
+                  <span>Ingresar con Google Tecsup</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
-                <Link
-                  href="/tournaments"
-                  className="btn-secondary px-8 py-4 text-base sm:text-lg w-full sm:w-auto text-center rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all flex items-center justify-center gap-2"
-                >
-                  <Trophy className="w-5 h-5 text-amber-500" />
-                  Explorar Torneos
-                </Link>
-              </>
-            )}
+              )}
+
+              <Link
+                href="/tournaments"
+                className="btn-secondary px-5 py-3 text-sm font-semibold flex items-center justify-center gap-2 rounded-lg"
+              >
+                <span>Explorar Torneos Activos</span>
+                <ChevronRight className="w-4 h-4 text-[var(--text-muted)]" />
+              </Link>
+            </motion.div>
+
+            {/* Trust Proof Footnote */}
+            <motion.div variants={fadeUp} className="pt-4 flex flex-wrap items-center gap-4 text-xs text-[var(--text-muted)] border-t border-[var(--border-card)]">
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                Acceso con @tecsup.edu.pe
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                Cero cuentas externas obligatorias
+              </span>
+              <span className="flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                Fair Play & Brackets oficiales
+              </span>
+            </motion.div>
           </motion.div>
 
-          {/* Quick Stats Grid */}
-          <motion.div variants={fadeUp} className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-16 max-w-4xl mx-auto border-t border-[var(--border-card)] mt-10">
-            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
-              <p className="text-3xl font-black text-[var(--text-primary)]">7</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Juegos Oficiales</p>
-            </div>
-            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
-              <p className="text-3xl font-black text-[#E63946]">Tecsup</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Sede Principal</p>
-            </div>
-            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
-              <p className="text-3xl font-black text-sky-600 dark:text-[#457B9D]">100%</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Registro Autónomo</p>
-            </div>
-            <div className="p-4 text-center arena-card arena-card-glow cursor-default">
-              <p className="text-3xl font-black text-teal-600 dark:text-[#A8DADC]">24/7</p>
-              <p className="text-xs text-[var(--text-secondary)] mt-1 font-semibold uppercase tracking-wider">Disponibilidad</p>
-            </div>
-          </motion.div>
-
-        </motion.div>
-      </section>
-
-      {/* 2. NUEVA SECCIÓN: SEDE OFICIAL TECSUP */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <motion.div 
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={fadeUp}
-          className="arena-card p-1 relative overflow-hidden bg-gradient-to-br from-[#E63946]/20 to-[#1D3557]/40 shadow-2xl"
-        >
-          <div className="bg-[var(--bg-card)]/95 backdrop-blur-xl rounded-xl p-8 sm:p-12 border border-[var(--border-card)] relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-widest">
-                  <Building2 className="w-4 h-4" />
-                  Sede Oficial
+          {/* Right Column: Live Featured Tournament Spotlight (5 Cols) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.4, delay: 0.15 }}
+            className="lg:col-span-5"
+          >
+            <div className="arena-card p-5 relative overflow-hidden border border-white/10 hover:border-white/20 transition-all shadow-xl bg-[#111520]">
+              
+              {/* Card Header Tag */}
+              <div className="flex items-center justify-between pb-3.5 border-b border-[var(--border-card)]">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-emerald-400">
+                    Torneo Destacado de Apertura
+                  </span>
                 </div>
-                <h2 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)] leading-tight">
-                  La Gran Final se vive en <span className="text-[#E63946]">TECSUP</span>
-                </h2>
-                <p className="text-[var(--text-secondary)] text-lg leading-relaxed">
-                  Disfruta de lo mejor de ambos mundos. Nuestra plataforma soporta competencias con <strong>Fase Preliminar Online</strong> para jugar cómodamente desde casa, y eventos <strong>100% Presenciales</strong> en los laboratorios de la sede central.
-                </p>
-                <div className="flex flex-col gap-4 pt-4">
-                  <div className="flex items-center gap-4 bg-[var(--bg-arena)] p-4 rounded-xl border border-[var(--border-card)] transition-colors hover:bg-[var(--bg-card)]">
-                    <Wifi className="w-6 h-6 text-[#A8DADC]" />
-                    <div>
-                      <h4 className="font-bold text-[var(--text-primary)] text-sm">Fases de Grupo Online</h4>
-                      <p className="text-xs text-[var(--text-secondary)]">Clasificatorias jugadas a distancia con brackets automáticos.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4 bg-[var(--bg-arena)] p-4 rounded-xl border border-[var(--border-card)] transition-colors hover:bg-[var(--bg-card)]">
-                    <MapPin className="w-6 h-6 text-[#E63946]" />
-                    <div>
-                      <h4 className="font-bold text-[var(--text-primary)] text-sm">Gran Final Presencial</h4>
-                      <p className="text-xs text-[var(--text-secondary)]">Los mejores equipos se enfrentan cara a cara en las instalaciones.</p>
-                    </div>
-                  </div>
-                </div>
+                <span className="text-[10px] font-mono font-bold text-[var(--text-muted)]">
+                  BO3 • 1vs1
+                </span>
               </div>
-              <div className="relative h-full min-h-[360px] rounded-2xl overflow-hidden border border-[var(--border-card)] shadow-2xl group">
-                {/* Real Campus Photo from Tecsup */}
-                <img 
-                  src="/brand/tecsup_sede_lima.jpg" 
-                  alt="Campus Tecsup Lima" 
-                  className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+
+              {/* Tournament Key Art Banner */}
+              <div className="relative h-44 rounded-lg overflow-hidden my-4 bg-black/90">
+                <img
+                  src="/games/clash_royale_banner.jpg"
+                  alt="Clash Royale Tecsup"
+                  className="w-full h-full object-cover object-center opacity-85"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#111520] via-transparent to-black/30" />
                 
-                {/* Top Institution Badge */}
-                <div className="absolute top-4 left-4 z-10 flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-black/70 backdrop-blur-md border border-white/20 shadow-lg">
-                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-5 h-5 object-contain" />
-                  <span className="text-xs font-black tracking-wider text-white uppercase">Tecsup • Innovación & Tecnología</span>
+                <div className="absolute top-2.5 left-2.5">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold bg-[#E63946] text-white flex items-center gap-1.5 shadow-md">
+                    <Swords className="w-3 h-3" />
+                    Clash Royale
+                  </span>
                 </div>
 
-                {/* Bottom Campus Details */}
-                <div className="absolute bottom-4 left-4 right-4 z-10 p-4 rounded-xl bg-[var(--bg-card)]/90 backdrop-blur-md border border-[var(--border-card)]">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="text-base font-black text-[var(--text-primary)]">Campus Central Lima</h4>
-                      <p className="text-xs text-[var(--text-secondary)]">Av. Cascanueces 2221, Santa Anita</p>
-                    </div>
-                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-wider border border-emerald-500/30">
-                      Sede Oficial
-                    </span>
+                <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-xs">
+                  <span className="font-bold text-amber-300 bg-black/80 px-2 py-0.5 rounded border border-amber-400/20">
+                    Premio: S/ 250 + Medalla de Oro
+                  </span>
+                </div>
+              </div>
+
+              {/* Tournament Meta Info */}
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                    <MapPin className="w-3.5 h-3.5 text-[#457B9D]" />
+                    <span>Campus Central Lima • Sede Santa Anita</span>
                   </div>
+                  <h3 className="text-lg font-black text-[var(--text-primary)]">
+                    Copa Apertura Tecsup 2026
+                  </h3>
+                </div>
+
+                {/* Cupos Bar */}
+                <div className="space-y-1.5 text-xs pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                    <span>Cupos Confirmados</span>
+                    <span className="font-bold text-[var(--text-primary)]">16 / 32 Jugadores</span>
+                  </div>
+                  <div className="w-full h-1.5 bg-black/50 rounded-full overflow-hidden border border-[var(--border-card)]">
+                    <div className="w-1/2 h-full bg-[#E63946] rounded-full" />
+                  </div>
+                </div>
+
+                {/* Direct Action */}
+                <div className="pt-2 flex items-center justify-between">
+                  <span className="text-xs text-[var(--text-muted)]">Modalidad Presencial</span>
+                  <Link
+                    href="/tournaments"
+                    className="btn-primary py-2 px-4 text-xs font-semibold inline-flex items-center gap-1.5"
+                  >
+                    <span>Inscribirme en el Bracket</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
+              </div>
+
+            </div>
+          </motion.div>
+
+        </div>
+      </section>
+
+      {/* 2. REFINED METRIC TICKER STRIP */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full -mt-6">
+        <div className="arena-card p-6 bg-[#111520] border border-[var(--border-card)] grid grid-cols-2 md:grid-cols-4 gap-6 divide-y md:divide-y-0 md:divide-x divide-[var(--border-card)]">
+          <div className="text-center md:text-left md:px-4 space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">7</p>
+            <p className="text-xs text-[var(--text-secondary)] font-medium">Disciplinas Oficiales</p>
+          </div>
+          <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-black text-[#E63946]">Campus Lima</p>
+            <p className="text-xs text-[var(--text-secondary)] font-medium">Sede Presencial Principal</p>
+          </div>
+          <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-black text-sky-400">1 Clic</p>
+            <p className="text-xs text-[var(--text-secondary)] font-medium">Registro con cuenta @tecsup</p>
+          </div>
+          <div className="text-center md:text-left md:px-4 pt-4 md:pt-0 space-y-0.5">
+            <p className="text-2xl sm:text-3xl font-black text-amber-400">Oro / Plata</p>
+            <p className="text-xs text-[var(--text-secondary)] font-medium">Medallero Institucional</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. ARCHITECTURAL SHOWCASE: SEDE CENTRAL TECSUP */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="arena-card p-8 sm:p-12 border border-[var(--border-card)] bg-[#111520]">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
+                <Building2 className="w-3.5 h-3.5" />
+                Infraestructura Híbrida
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] leading-tight">
+                La Gran Final se vive en las instalaciones de <span className="text-[#E63946]">TECSUP</span>
+              </h2>
+
+              <p className="text-[var(--text-secondary)] text-sm sm:text-base leading-relaxed">
+                Nuestra plataforma combina la agilidad de las clasificatorias remotas con la emoción de las finales presenciales en los laboratorios de cómputo de alto rendimiento de Tecsup Lima.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                <div className="p-3.5 bg-[#0D1018] rounded-lg border border-[var(--border-card)] space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                    <Wifi className="w-4 h-4 text-sky-400" />
+                    <span>Fase Online</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Clasificatorias jugadas a distancia con actualización automática de brackets.
+                  </p>
+                </div>
+
+                <div className="p-3.5 bg-[#0D1018] rounded-lg border border-[var(--border-card)] space-y-1">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[var(--text-primary)]">
+                    <MapPin className="w-4 h-4 text-[#E63946]" />
+                    <span>Final Presencial</span>
+                  </div>
+                  <p className="text-xs text-[var(--text-muted)]">
+                    Los mejores clasificados se enfrentan en vivo en los laboratorios centrales.
+                  </p>
                 </div>
               </div>
             </div>
+
+            <div className="relative h-72 sm:h-96 rounded-xl overflow-hidden border border-[var(--border-card)] shadow-lg group">
+              <img 
+                src="/brand/tecsup_sede_lima.jpg" 
+                alt="Campus Tecsup Lima" 
+                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+              
+              <div className="absolute top-3.5 left-3.5 flex items-center gap-2 px-3 py-1 rounded-md bg-black/80 backdrop-blur-md border border-white/10 text-xs font-bold text-white">
+                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
+                <span>Campus Central Lima</span>
+              </div>
+
+              <div className="absolute bottom-3.5 left-3.5 right-3.5 p-3 rounded-lg bg-black/80 backdrop-blur-md border border-white/10 flex items-center justify-between text-xs">
+                <div>
+                  <p className="font-bold text-white">Av. Cascanueces 2221, Santa Anita</p>
+                  <p className="text-[11px] text-[var(--text-muted)]">Laboratorios Especializados de Ingeniería</p>
+                </div>
+                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] uppercase border border-emerald-500/30">
+                  Sede Oficial
+                </span>
+              </div>
+            </div>
+
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* 3. JUEGOS OFICIALES */}
-      <section id="juegos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-10">
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
-            Disciplinas Oficiales
-          </h2>
-          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
-            Elige tu campo de batalla
-          </h3>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-base">
-            7 disciplinas soportadas oficialmente con rankings y torneos en vivo. 
-            Vincula tu tag oficial o nickname y empieza a competir.
-          </p>
+      {/* 4. DISCIPLINAS OFICIALES: CATÁLOGO EN ALTA RESOLUCIÓN */}
+      <section id="juegos" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+          <div className="space-y-1">
+            <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider">
+              Disciplinas Oficiales
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)]">
+              Elige tu campo de batalla
+            </h2>
+          </div>
+          <Link
+            href="/tournaments"
+            className="text-xs font-bold text-[var(--text-secondary)] hover:text-[#E63946] flex items-center gap-1 transition-colors self-start md:self-auto"
+          >
+            <span>Ver todos los torneos programados</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         <motion.div 
           variants={staggerContainer}
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-50px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          viewport={{ once: true, margin: '-50px' }}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
         >
           {GAME_LIST.map((game) => (
             <motion.div 
               variants={fadeUp}
               key={game.code} 
-              className="arena-card p-6 relative overflow-hidden group cursor-pointer arena-card-glow"
+              className="group"
             >
-              {/* Game Official Key Art Background */}
-              {game.bannerUrl && (
-                <div className="absolute inset-0 opacity-15 group-hover:opacity-30 transition-opacity duration-500 pointer-events-none overflow-hidden">
-                  <img 
-                    src={game.bannerUrl} 
-                    alt={game.name} 
-                    className="w-full h-full object-cover object-center group-hover:scale-110 transition-transform duration-700" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/80 to-[var(--bg-card)]/40" />
-                </div>
-              )}
+              <Link 
+                href={`/tournaments?game=${game.code}`}
+                className="arena-card p-5 block h-full relative overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:border-white/20 bg-[#111520]"
+              >
+                {/* Official Game Key Art Background */}
+                {game.bannerUrl && (
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <img 
+                      src={game.bannerUrl} 
+                      alt={game.name} 
+                      className="w-full h-full object-cover object-center opacity-20 group-hover:opacity-40 transition-opacity duration-300" 
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#111520] via-[#111520]/80 to-[#111520]/40" />
+                  </div>
+                )}
 
-              {/* Background dynamic glow */}
-              <div 
-                className="absolute -top-10 -right-10 w-40 h-40 rounded-full blur-3xl transition-all duration-500 opacity-0 group-hover:opacity-30"
-                style={{ backgroundColor: game.color }}
-              />
-
-              {/* Header: Icon + Badge */}
-              <div className="flex items-start justify-between relative z-10">
-                <div 
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br flex items-center justify-center p-2.5 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3 ${game.bgGradient}`}
-                >
-                  {game.logoUrl ? (
-                    <img src={game.logoUrl} alt={game.name} className="w-full h-full object-contain filter drop-shadow" />
-                  ) : (
-                    GAME_ICONS[game.iconName]
-                  )}
-                </div>
-                <div className="flex flex-col items-end gap-2">
+                {/* Card Header: Emblem + Badge */}
+                <div className="flex items-start justify-between relative z-10">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center p-2 shadow-md border border-white/10"
+                    style={{ backgroundColor: `${game.color}22` }}
+                  >
+                    {game.logoUrl ? (
+                      <img src={game.logoUrl} alt={game.name} className="w-full h-full object-contain filter drop-shadow" />
+                    ) : (
+                      GAME_ICONS[game.iconName]
+                    )}
+                  </div>
                   <span 
-                    className="px-3 py-1 rounded-full text-[10px] font-bold border backdrop-blur-md uppercase tracking-wider"
+                    className="px-2.5 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wider"
                     style={{ 
                       backgroundColor: `${game.color}15`,
                       color: game.color,
-                      borderColor: `${game.color}30`,
+                      borderColor: `${game.color}35`,
                     }}
                   >
                     {game.badge}
                   </span>
                 </div>
-              </div>
 
-              {/* Body */}
-              <div className="mt-8 space-y-2 relative z-10">
-                <h4 className="text-2xl font-black text-[var(--text-primary)]">{game.name}</h4>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed line-clamp-3">
-                  {game.description}
-                </p>
-              </div>
+                {/* Card Body */}
+                <div className="mt-6 space-y-2 relative z-10">
+                  <h3 className="text-xl font-black text-[var(--text-primary)] group-hover:text-white transition-colors flex items-center justify-between">
+                    <span>{game.name}</span>
+                    <ArrowRight 
+                      className="w-4 h-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" 
+                      style={{ color: game.color }}
+                    />
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)] leading-relaxed line-clamp-2">
+                    {game.description}
+                  </p>
+                </div>
+              </Link>
             </motion.div>
           ))}
         </motion.div>
       </section>
 
-      {/* 4. HIGHLIGHTS CAROUSEL */}
+      {/* 5. TACTILE FEATURE STAGE (INTERACTIVE TABS REPLACING SLOPPY SLIDERS) */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="text-center space-y-4 mb-12">
-          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
-            Destacados
-          </h2>
-          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
-            ¿Por qué Campus Arena?
-          </h3>
-        </div>
-
-        <div 
-          className="relative arena-card p-0 overflow-hidden"
-          onMouseEnter={() => setIsAutoPlaying(false)}
-          onMouseLeave={() => setIsAutoPlaying(true)}
-        >
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0, x: 60 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -60 }}
-              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className={`p-8 sm:p-12 relative bg-gradient-to-br ${HIGHLIGHTS[currentSlide].gradient}`}
-            >
-              <div className="max-w-3xl relative z-10 space-y-5">
-                <div className="flex items-center gap-3">
-                  <div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
-                    style={{ backgroundColor: `${HIGHLIGHTS[currentSlide].iconColor}20` }}
-                  >
-                    {(() => {
-                      const Icon = HIGHLIGHTS[currentSlide].icon;
-                      return <Icon className="w-7 h-7" style={{ color: HIGHLIGHTS[currentSlide].iconColor }} />;
-                    })()}
-                  </div>
-                  <span className={`px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider ${HIGHLIGHTS[currentSlide].tagColor}`}>
-                    {HIGHLIGHTS[currentSlide].tag}
-                  </span>
-                </div>
-
-                <h3 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] leading-tight">
-                  {HIGHLIGHTS[currentSlide].title}
-                </h3>
-                <p className="text-lg font-semibold text-sky-600 dark:text-[#A8DADC]">
-                  {HIGHLIGHTS[currentSlide].subtitle}
-                </p>
-                <p className="text-[var(--text-secondary)] text-base leading-relaxed max-w-xl">
-                  {HIGHLIGHTS[currentSlide].description}
-                </p>
-              </div>
-            </motion.div>
-          </AnimatePresence>
-
-          {/* Carousel Controls */}
-          <div className="absolute bottom-4 right-4 flex items-center gap-2 z-20">
-            <button
-              onClick={prevSlide}
-              className="w-9 h-9 rounded-xl bg-[var(--bg-card)]/80 backdrop-blur-sm border border-[var(--border-card)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </button>
-            <div className="flex items-center gap-1.5 px-2">
-              {HIGHLIGHTS.map((_, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`rounded-full transition-all cursor-pointer ${
-                    idx === currentSlide
-                      ? 'w-6 h-2 bg-[#E63946]'
-                      : 'w-2 h-2 bg-[var(--text-muted)]/40 hover:bg-[var(--text-muted)]'
-                  }`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={nextSlide}
-              className="w-9 h-9 rounded-xl bg-[var(--bg-card)]/80 backdrop-blur-sm border border-[var(--border-card)] flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-card)] transition-all cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" />
-            </button>
+        <div className="arena-card p-6 sm:p-10 border border-[var(--border-card)] bg-[#111520] space-y-8">
+          
+          {/* Header & Section Title */}
+          <div className="space-y-1 text-center sm:text-left">
+            <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider">
+              Ventajas Competitivas
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
+              Construido específicamente para la comunidad Tecsup
+            </h2>
           </div>
+
+          {/* Segmented Control Tabs */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 p-1.5 rounded-xl bg-[#0A0D14] border border-[var(--border-card)]">
+            {HIGHLIGHT_TABS.map((tab, idx) => {
+              const isSelected = activeTabIdx === idx;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTabIdx(idx)}
+                  className={`p-3 rounded-lg text-left transition-all cursor-pointer flex items-center gap-3 ${
+                    isSelected 
+                      ? 'bg-[#161D2B] text-white border border-white/10 shadow-sm' 
+                      : 'text-[var(--text-secondary)] hover:text-white hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <span className={`text-xs font-mono font-bold ${isSelected ? 'text-[#E63946]' : 'text-[var(--text-muted)]'}`}>
+                    {tab.num}
+                  </span>
+                  <span className="text-xs sm:text-sm font-bold truncate">
+                    {tab.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Active Stage Panel */}
+          <div className="p-6 sm:p-8 rounded-xl bg-[#0D1018] border border-[var(--border-card)] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div className="lg:col-span-8 space-y-4">
+              <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wider border ${activeTab.badgeColor}`}>
+                {activeTab.badge}
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-[var(--text-primary)] leading-tight">
+                {activeTab.title}
+              </h3>
+              <p className="text-sm text-[var(--text-secondary)] leading-relaxed">
+                {activeTab.desc}
+              </p>
+            </div>
+
+            <div className="lg:col-span-4 p-5 rounded-xl bg-[#111520] border border-[var(--border-card)] text-center space-y-2">
+              <div className="w-10 h-10 rounded-lg bg-[#E63946]/10 border border-[#E63946]/20 flex items-center justify-center mx-auto text-[#E63946]">
+                <activeTab.icon className="w-5 h-5" />
+              </div>
+              <p className="text-lg font-black text-[var(--text-primary)]">
+                {activeTab.highlightMetric}
+              </p>
+              <p className="text-xs text-[var(--text-muted)]">
+                {activeTab.highlightSub}
+              </p>
+            </div>
+
+          </div>
+
         </div>
       </section>
 
-      {/* 5. HOW IT WORKS */}
+      {/* 6. CHRONOLOGICAL PROCESS: DE LA INSCRIPCIÓN A LA GLORIA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-        <div className="text-center space-y-4 mb-16">
-          <h2 className="text-sm font-bold text-sky-600 dark:text-[#A8DADC] uppercase tracking-widest">
-            Proceso Simple
-          </h2>
-          <h3 className="text-4xl sm:text-5xl font-black text-[var(--text-primary)]">
+        <div className="space-y-1 mb-10 text-center sm:text-left">
+          <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider">
+            Ruta Competitiva
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)]">
             De la inscripción a la gloria
-          </h3>
-          <p className="text-[var(--text-secondary)] max-w-2xl mx-auto text-base">
-            4 pasos para comenzar tu carrera competitiva oficial en Tecsup.
+          </h2>
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
+            4 pasos directos para comenzar tu trayectoria en la Arena sin intermediarios.
           </p>
         </div>
 
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          whileInView="show"
-          viewport={{ once: true, margin: '-50px' }}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        >
-          {HOW_IT_WORKS.map((step, idx) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {HOW_IT_WORKS.map((step) => {
             const Icon = step.icon;
             return (
-              <motion.div
+              <div
                 key={step.step}
-                variants={fadeUp}
-                className="arena-card p-6 relative overflow-hidden group text-center space-y-4"
+                className="arena-card p-6 bg-[#111520] border border-[var(--border-card)] space-y-4 hover:border-white/20 transition-all"
               >
-                {/* Step number bg */}
-                <div className="absolute -top-4 -right-4 text-[80px] font-black text-[var(--text-primary)] opacity-[0.04] leading-none select-none pointer-events-none">
-                  {step.step}
-                </div>
-
-                {/* Connecting line */}
-                {idx < HOW_IT_WORKS.length - 1 && (
-                  <div className="hidden lg:block absolute top-1/2 -right-3 w-6 h-0.5 bg-gradient-to-r from-[var(--border-card)] to-transparent" />
-                )}
-
-                <div
-                  className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300"
-                  style={{ backgroundColor: `${step.color}20` }}
-                >
-                  <Icon className="w-7 h-7" style={{ color: step.color }} />
-                </div>
-
-                <div className="space-y-2">
-                  <span className="text-[10px] font-black uppercase tracking-widest" style={{ color: step.color }}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-[var(--text-muted)]">
                     Paso {step.step}
                   </span>
-                  <h4 className="text-lg font-black text-[var(--text-primary)]">
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center border border-white/10"
+                    style={{ backgroundColor: `${step.color}18` }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: step.color }} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h3 className="text-base font-bold text-[var(--text-primary)]">
                     {step.title}
-                  </h4>
+                  </h3>
                   <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
                     {step.desc}
                   </p>
                 </div>
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
+        </div>
       </section>
 
-      {/* 6. FINAL CTA */}
-      <section className="text-center max-w-4xl mx-auto px-4 space-y-8 relative pb-20 mt-10">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.5, repeat: Infinity, repeatType: "reverse" }}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#E63946]/10 rounded-full blur-[100px] pointer-events-none" 
-        />
-        
-        <motion.div 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative z-10 space-y-6"
-        >
-          {isAuthenticated ? (
-            <>
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-emerald-500 dark:text-emerald-400 uppercase tracking-widest">
-                <CheckCircle2 className="w-4 h-4" />
-                Sesión Activa — {user?.first_name || 'Competidor'}
-              </div>
-              <h3 className="text-4xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
-                ¿Listo para competir en la arena?
-              </h3>
-              <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
-                Explora los torneos oficiales disponibles, inscríbete con tu escuadra y defiende los colores de Tecsup.
-              </p>
-              <div className="pt-6 flex flex-col sm:flex-row items-center justify-center gap-4">
-                <Link
-                  href="/tournaments"
-                  className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
-                >
-                  <Trophy className="w-6 h-6 text-amber-300" />
-                  Explorar Torneos Disponibles
-                </Link>
-                <Link
-                  href="/profile"
-                  className="btn-secondary px-8 py-5 text-lg inline-flex items-center gap-2 rounded-xl glass-panel hover:bg-[var(--bg-arena)] transition-all"
-                >
-                  Ver Mi Perfil & Medallero
-                </Link>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full glass-panel border border-[var(--border-card)] bg-[var(--bg-card)]/80 text-xs font-bold text-amber-500 dark:text-amber-400 uppercase tracking-widest">
-                <Sparkles className="w-4 h-4" />
-                Inscripciones Abiertas
-              </div>
-              <h3 className="text-4xl sm:text-6xl font-black text-[var(--text-primary)] leading-tight">
-                ¿Listo para ingresar a la arena?
-              </h3>
-              <p className="text-[var(--text-secondary)] max-w-xl mx-auto text-lg font-medium">
-                Inicia sesión con tu correo institucional de Tecsup y participa en los torneos oficiales.
-              </p>
-              <div className="pt-6">
-                <Link
-                  href="/auth/login"
-                  className="btn-primary px-10 py-5 text-lg inline-flex items-center gap-3 rounded-xl hover:scale-105 transition-all duration-300 shadow-[0_0_40px_rgba(230,57,70,0.4)] hover:shadow-[0_0_60px_rgba(230,57,70,0.6)]"
-                >
-                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-6 h-6 object-contain" />
-                  Ingresar con Google Tecsup
-                </Link>
-              </div>
-            </>
-          )}
-        </motion.div>
+      {/* 7. REFINED FINAL CALL TO ACTION */}
+      <section className="max-w-4xl mx-auto px-4 w-full text-center space-y-6 pt-4">
+        <div className="arena-card p-8 sm:p-12 border border-[var(--border-card)] bg-[#111520] space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
+            <Trophy className="w-3.5 h-3.5" />
+            Arena Oficial Tecsup
+          </div>
+
+          <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
+            ¿Listo para defender los colores de tu carrera?
+          </h2>
+
+          <p className="text-sm sm:text-base text-[var(--text-secondary)] max-w-xl mx-auto leading-relaxed">
+            Inscríbete hoy mismo en los torneos activos o explora las tablas de clasificación de la temporada 2026.
+          </p>
+
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            {isAuthenticated ? (
+              <Link
+                href="/tournaments"
+                className="btn-primary px-7 py-3 text-sm font-semibold flex items-center justify-center gap-2 rounded-lg"
+              >
+                <Trophy className="w-4 h-4" />
+                <span>Explorar Torneos Disponibles</span>
+              </Link>
+            ) : (
+              <Link
+                href="/auth/login"
+                className="btn-primary px-7 py-3 text-sm font-semibold flex items-center justify-center gap-2 rounded-lg"
+              >
+                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-4 h-4 object-contain" />
+                <span>Ingresar con Google Tecsup</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
+
+            <Link
+              href="/ranking"
+              className="btn-secondary px-6 py-3 text-sm font-semibold rounded-lg"
+            >
+              Ver Ranking Institucional
+            </Link>
+          </div>
+        </div>
       </section>
 
     </div>

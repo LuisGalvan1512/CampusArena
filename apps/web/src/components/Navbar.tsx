@@ -80,15 +80,17 @@ export function Navbar() {
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden md:flex items-center gap-6 lg:gap-8">
+          <div className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium transition-colors hover:text-[#E63946] flex items-center gap-1.5 ${
-                    isActive ? 'text-[#E63946] font-bold' : 'text-[var(--text-secondary)]'
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-md transition-colors flex items-center gap-1.5 ${
+                    isActive 
+                      ? 'bg-white/[0.08] text-[var(--text-primary)] border border-white/10' 
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-white/[0.04]'
                   }`}
                 >
                   {link.badge}
@@ -201,10 +203,10 @@ export function Navbar() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/auth/login"
-                  className="btn-primary py-2 px-4 text-xs font-bold flex items-center gap-2 shadow-lg shadow-[#E63946]/20"
+                  className="btn-primary py-2 px-3.5 text-xs font-semibold flex items-center gap-1.5 rounded-lg shadow-sm"
                 >
-                  <Crown className="w-3.5 h-3.5" />
-                  Acceso Google Tecsup
+                  <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-3.5 h-3.5 object-contain" />
+                  <span>Acceso Google Tecsup</span>
                 </Link>
               </div>
             )}

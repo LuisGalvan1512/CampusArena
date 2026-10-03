@@ -105,10 +105,13 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
   });
 
   return (
-    <SpotlightCard className="arena-card overflow-hidden flex flex-col group h-full">
+    <SpotlightCard 
+      spotlightColor={`${gameColor}26`}
+      className="arena-card overflow-hidden flex flex-col group h-full hover:border-white/20 hover:shadow-xl transition-all duration-300"
+    >
       
-      {/* Banner Image / Gradient */}
-      <div className="relative h-44 w-full overflow-hidden bg-black/80">
+      {/* Banner Image / Cinematic Gradient Overlay */}
+      <div className="relative h-48 w-full overflow-hidden bg-black/90">
         <img
           src={tournament.banner_url || game?.bannerUrl || '/games/clash_royale_banner.jpg'}
           alt={tournament.name}
@@ -119,22 +122,27 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
               e.currentTarget.src = fallback;
             }
           }}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 opacity-70 group-hover:opacity-90"
+          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out opacity-80 group-hover:opacity-95"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-transparent" />
+        {/* Subtle game color glow bleed in top-left */}
+        <div 
+          className="absolute -top-12 -left-12 w-32 h-32 rounded-full blur-2xl opacity-40 pointer-events-none transition-opacity duration-500 group-hover:opacity-70"
+          style={{ backgroundColor: gameColor }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/40 to-black/30" />
 
         {/* Top Floating Badges */}
-        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10">
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between z-10 gap-2">
           <div 
-            className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md text-white border border-white/20"
+            className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-lg backdrop-blur-md text-white border border-white/20 ring-1 ring-black/20"
             style={{ backgroundColor: `${gameColor}E6` }}
           >
             {game?.logoUrl ? (
-              <img src={game.logoUrl} alt={gameName} className="w-4 h-4 object-contain shrink-0" />
+              <img src={game.logoUrl} alt={gameName} className="w-4 h-4 object-contain shrink-0 filter drop-shadow" />
             ) : (
               gameIcon
             )}
-            <span>{gameName}</span>
+            <span className="truncate max-w-[120px]">{gameName}</span>
           </div>
 
           {getStatusBadge(tournament.status)}
@@ -142,8 +150,8 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
 
         {/* Prize Overlay */}
         <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between text-xs z-10">
-          <div className="flex items-center gap-1.5 font-bold text-amber-400 bg-black/60 px-2.5 py-1 rounded-lg backdrop-blur-sm border border-white/10">
-            <Trophy className="w-3.5 h-3.5 shrink-0" />
+          <div className="flex items-center gap-1.5 font-bold text-amber-400 bg-black/75 px-2.5 py-1 rounded-lg backdrop-blur-md border border-amber-400/20 shadow-[0_2px_12px_rgba(245,158,11,0.15)]">
+            <Trophy className="w-3.5 h-3.5 shrink-0 text-amber-400" />
             <span className="truncate">{tournament.prize_pool}</span>
           </div>
         </div>
@@ -155,11 +163,11 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
         <div className="space-y-2">
           {/* Organization / Campus */}
           <div className="flex items-center gap-2 text-xs text-[var(--text-secondary)]">
-            <MapPin className="w-3.5 h-3.5 text-[#457B9D]" />
-            <span>{tournament.organization_name} • {tournament.campus_name}</span>
+            <MapPin className="w-3.5 h-3.5 text-[#457B9D] shrink-0" />
+            <span className="truncate">{tournament.organization_name} • {tournament.campus_name}</span>
           </div>
 
-          <h3 className="text-lg font-extrabold text-[var(--text-primary)] group-hover:text-[#E63946] transition-colors line-clamp-1">
+          <h3 className="text-lg font-extrabold text-[var(--text-primary)] group-hover:text-[#E63946] transition-colors duration-200 line-clamp-1">
             {tournament.name}
           </h3>
 
@@ -169,7 +177,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
         </div>
 
         {/* Slots & Dates Progress */}
-        <div className="space-y-3 pt-2 border-t border-white/5 text-xs">
+        <div className="space-y-3 pt-3 border-t border-[var(--border-card)] text-xs">
           
           {/* Slots progress */}
           <div className="space-y-1.5">
@@ -184,7 +192,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
             </div>
             <div className="w-full h-1.5 bg-[var(--bg-arena)] dark:bg-black/50 rounded-full overflow-hidden border border-[var(--border-card)]">
               <div 
-                className="h-full rounded-full transition-all"
+                className="h-full rounded-full transition-all duration-500 ease-out"
                 style={{ 
                   width: `${slotsPercentage}%`,
                   background: `linear-gradient(90deg, ${gameColor}, ${gameColor}99)`,
@@ -196,16 +204,16 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
           {/* Date & Action */}
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-1.5 text-[var(--text-muted)]">
-              <Calendar className="w-3.5 h-3.5" style={{ color: gameColor }} />
+              <Calendar className="w-3.5 h-3.5 shrink-0" style={{ color: gameColor }} />
               <span className="text-[11px] font-medium">{startDate}</span>
             </div>
 
             <Link
               href={`/tournaments/${tournament.slug}`}
-              className="btn-primary px-3.5 py-1.5 text-xs inline-flex items-center gap-1 group-hover:shadow-lg"
+              className="group/btn btn-primary px-3.5 py-1.5 text-xs inline-flex items-center gap-1.5 shadow-md active:scale-95 transition-all duration-150"
             >
-              Ver Torneo
-              <ArrowRight className="w-3.5 h-3.5" />
+              <span>Ver Torneo</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform duration-200" />
             </Link>
           </div>
 

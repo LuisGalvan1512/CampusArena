@@ -111,37 +111,30 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-[85vh] flex items-center justify-center px-4 sm:px-6 lg:px-8 py-12 relative">
-      
-      {/* Background Decorative Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#E63946]/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-[350px] h-[350px] bg-[#457B9D]/10 rounded-full blur-[100px] pointer-events-none" />
-
-      <div className="w-full max-w-lg space-y-8 relative z-10">
+      <div className="w-full max-w-md space-y-6 relative z-10">
         
         {/* Header Hero */}
         <div className="text-center space-y-3">
-          <div className="inline-flex w-16 h-16 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-2xl shadow-[#E63946]/30 mb-2">
-            <div className="w-full h-full bg-[var(--bg-card)] rounded-[14px] flex items-center justify-center">
-              <Swords className="w-8 h-8 text-[#E63946]" />
-            </div>
+          <div className="inline-flex w-14 h-14 rounded-xl bg-[#111622] border border-white/10 p-2 shadow-sm mb-1">
+            <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
           </div>
 
           <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold border uppercase tracking-wider bg-[#E63946]/10 text-[#E63946] border-[#E63946]/30">
-              <ShieldCheck className="w-3.5 h-3.5" />
-              Acceso Institucional Supabase Auth
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border uppercase tracking-wider bg-white/[0.04] text-[var(--text-secondary)] border-[var(--border-card)]">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              Acceso Institucional
             </span>
-            <h1 className="text-3xl sm:text-4xl font-black text-[var(--text-primary)] tracking-tight pt-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight pt-1">
               Campus Arena Tecsup
             </h1>
-            <p className="text-sm text-[var(--text-secondary)] max-w-md mx-auto">
-              Plataforma oficial de torneos universitarios. Acceso protegido con tu cuenta institucional de Google Workspace.
+            <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-sm mx-auto leading-relaxed">
+              Inicia sesión con tu cuenta institucional para participar en torneos y registrar tus estadísticas.
             </p>
           </div>
         </div>
 
         {/* Main Card */}
-        <div className="arena-card p-8 sm:p-10 shadow-2xl space-y-6 relative overflow-hidden">
+        <div className="arena-card p-6 sm:p-8 space-y-5 relative bg-[#111520] border border-[var(--border-card)]">
           
           {/* Error Alert */}
           {errorMessage && (
