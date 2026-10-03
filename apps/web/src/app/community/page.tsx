@@ -28,6 +28,7 @@ import { uploadCommunityMedia } from '@/lib/storage';
 import { CommunityPostSkeleton } from '@/components/Skeleton';
 import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
+import { toast } from 'sonner';
 
 type UserProfile = {
   nickname?: string;
@@ -152,12 +153,12 @@ export default function CommunityPage() {
     try {
       const { url, error } = await uploadCommunityMedia(file, user?.id);
       if (error || !url) {
-        alert(error || 'No se pudo procesar la imagen seleccionada.');
+        toast.error(error || 'No se pudo procesar la imagen seleccionada.');
       } else {
         setNewMediaUrl(url);
       }
     } catch (err: any) {
-      alert(err.message || 'Error al subir la imagen local');
+      toast.error(err.message || 'Error al subir la imagen local');
     } finally {
       setUploadingPostMedia(false);
       e.target.value = '';
@@ -172,13 +173,13 @@ export default function CommunityPage() {
     try {
       const { url, error } = await uploadCommunityMedia(file, user?.id);
       if (error || !url) {
-        alert(error || 'No se pudo procesar la imagen.');
+        toast.error(error || 'No se pudo procesar la imagen.');
       } else {
         setNewCommentMediaUrl(url);
         setShowCommentMediaInput(postId);
       }
     } catch (err: any) {
-      alert(err.message || 'Error al subir la imagen');
+      toast.error(err.message || 'Error al subir la imagen');
     } finally {
       setUploadingCommentMedia(null);
       e.target.value = '';
@@ -257,8 +258,8 @@ export default function CommunityPage() {
   };
 
   const handleCreatePost = async () => {
-    if (!isAuthenticated) return alert('Debes iniciar sesión para publicar');
-    if (!newTitle.trim() || !newDescription.trim()) return alert('El título y la descripción son obligatorios');
+    if (!isAuthenticated) return toast.error('Debes iniciar sesión para publicar');
+    if (!newTitle.trim() || !newDescription.trim()) return toast.error('El título y la descripción son obligatorios');
 
     try {
       const res = await api.post('/community/posts', {
@@ -275,12 +276,13 @@ export default function CommunityPage() {
         setIsPosting(false);
         fireCelebration();
         sounds.playSuccess();
+        toast.success('¡Publicación creada exitosamente!');
         fetchPosts(1, false);
       } else {
-        alert(res.error?.message || 'Error al publicar.');
+        toast.error(res.error?.message || 'Error al publicar.');
       }
     } catch (err: any) {
-      alert(err.message || 'Error de conexión');
+      toast.error(err.message || 'Error de conexión');
     }
   };
 
@@ -293,12 +295,13 @@ export default function CommunityPage() {
     try {
       const res = await api.delete(`/community/posts/${postId}`);
       if (res.success) {
+        toast.success('Publicación eliminada correctamente.');
         setPosts(prev => prev.filter(p => p.id !== postId));
       } else {
-        alert(res.error?.message || 'No se pudo eliminar la publicación.');
+        toast.error(res.error?.message || 'No se pudo eliminar la publicación.');
       }
     } catch (err: any) {
-      alert(err.message || 'Error de conexión al eliminar publicación.');
+      toast.error(err.message || 'Error de conexión al eliminar publicación.');
     } finally {
       setActionLoading(null);
     }
@@ -312,7 +315,7 @@ export default function CommunityPage() {
   };
 
   const handleReact = async (postId: string, type: string) => {
-    if (!isAuthenticated) return alert('Debes iniciar sesión para reaccionar');
+    if (!isAuthenticated) return toast.error('Debes iniciar sesión para reaccionar');
     sounds.playClick();
     
     // Optimistic Update
@@ -342,8 +345,8 @@ export default function CommunityPage() {
   };
 
   const handleCreateComment = async (postId: string) => {
-    if (!isAuthenticated) return alert('Debes iniciar sesión para comentar');
-    if (!newCommentContent.trim() && !newCommentMediaUrl.trim()) return alert('Debes ingresar texto o una imagen');
+    if (!isAuthenticated) return toast.error('Debes iniciar sesión para comentar');
+    if (!newCommentContent.trim() && !newCommentMediaUrl.trim()) return toast.error('Debes ingresar texto o una imagen');
 
     const payload: any = {
       content: newCommentContent.trim() || undefined,
@@ -393,13 +396,14 @@ export default function CommunityPage() {
       setNewCommentMediaUrl('');
       setShowCommentMediaInput(null);
       setReplyingTo(null);
+      toast.success('Comentario enviado');
     } else {
-      alert(res.error?.message || 'Error al enviar comentario');
+      toast.error(res.error?.message || 'Error al enviar comentario');
     }
   };
 
   const handleReactComment = async (postId: string, commentId: string, type: string) => {
-    if (!isAuthenticated) return alert('Debes iniciar sesión para reaccionar');
+    if (!isAuthenticated) return toast.error('Debes iniciar sesión para reaccionar');
 
     // Optimistic Update for comments & nested replies
     const updateCommentList = (list: Comment[]): Comment[] => {
@@ -486,7 +490,7 @@ export default function CommunityPage() {
         <div className="lg:w-64 shrink-0 space-y-6">
           <button 
             onClick={() => {
-              if(!isAuthenticated) return alert('Debes iniciar sesión primero');
+              if(!isAuthenticated) return toast.error('Debes iniciar sesión primero');
               setIsPosting(!isPosting);
             }}
             className="w-full btn-primary py-3 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(230,57,70,0.3)] hover:scale-105 transition-transform cursor-pointer"
@@ -831,7 +835,7 @@ export default function CommunityPage() {
                       <button 
                         onClick={() => {
                           navigator.clipboard.writeText(window.location.href);
-                          alert('Enlace copiado al portapapeles');
+                          toast.success('¡Enlace copiado al portapapeles!');
                         }}
                         className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-[var(--bg-card-hover)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
                       >
