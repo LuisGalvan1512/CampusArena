@@ -12,6 +12,7 @@ Para evitar contradicciones entre diseño y rendimiento, se establece la siguien
    - **Frontend UI, Craft & Motion (Emil Kowalski + Impeccable + Taste):**
      - [`emil-design-eng`](.agents/skills/emil-design-eng/SKILL.md) & [`animate`](.agents/skills/animate/SKILL.md): Filosofía de diseño, timing y resortes físicos.
      - [`mobile-native`](.agents/skills/mobile-native/SKILL.md): Experiencia táctil, viewport móvil y micro-detalles en celulares.
+     - [`accessibility-responsive-ux`](.agents/skills/accessibility-responsive-ux/SKILL.md): Estándar de accesibilidad WCAG 2.2 AA, navegación por teclado, touch targets (44px/48px) y diseño fluido sin scroll horizontal.
      - [`ask-sonner`](.agents/skills/ask-sonner/SKILL.md): Gestión óptima de toasts y notificaciones con Sonner.
      - [`impeccable`](.agents/skills/impeccable/SKILL.md): Detección y erradicación de anti-patrones de diseño genérico.
      - [`design-taste-frontend`](.agents/skills/design-taste-frontend/SKILL.md) & [`high-end-visual-design`](.agents/skills/high-end-visual-design/SKILL.md): Criterio estético no genérico, jerarquía tipográfica y acabados premium.
@@ -21,7 +22,18 @@ Para evitar contradicciones entre diseño y rendimiento, se establece la siguien
 
 ---
 
-## 🎨 1. Estándar de Frontend & UI/UX (Emil Kowalski + Impeccable + Steam Style)
+## ♿ 1. Estándar de Accesibilidad & Responsive UX (WCAG 2.2 AA + Fluid Design)
+
+- **Contraste Mínimo:** Texto normal >= 4.5:1, texto grande y bordes de componentes >= 3:1.
+- **Navegación por Teclado:** Nunca suprimir `outline` sin un `:focus-visible` de alto contraste (`focus-visible:ring-2 focus-visible:ring-[#E63946] focus-visible:ring-offset-2`). Modales deben atrapar foco y cerrarse con `Escape`.
+- **Nombres Accesibles:** Botones de solo icono deben tener `aria-label`. Íconos decorativos llevan `aria-hidden="true"`.
+- **Cero Scroll Horizontal:** La web debe ser 100% fluida desde 320px hasta 4K sin desbordar el viewport horizontal.
+- **Touch Targets en Móvil:** Área interactiva mínima de 44x44px (iOS) o 48x48px (WCAG). Inputs con `font-size >= 16px` para evitar el auto-zoom de iOS.
+- **Preferencia de Movimiento:** Respetar `@media (prefers-reduced-motion: reduce)` desactivando animaciones intensas o bucles continuos.
+
+---
+
+## 🎨 2. Estándar de Frontend & UI/UX (Emil Kowalski + Impeccable + Steam Style)
 
 - **Estética Gamer Elegante:** Inspirada en Steam y Riot Games. Fondos con texturas sutiles (`banner-*`), acentos de la paleta oficial Tecsup (`#E63946`, `#1D3557`, `#0F172A`), y cero saturación excesiva.
 - **Mobile First Obligatorio:**
@@ -34,7 +46,7 @@ Para evitar contradicciones entre diseño y rendimiento, se establece la siguien
 
 ---
 
-## ⚡ 2. Estándar de Rendimiento Frontend (Web Performance)
+## ⚡ 3. Estándar de Rendimiento Frontend (Web Performance)
 
 - **Carga Diferida:** Modales pesados, selectores de avatar, brackets interactivos y librerías auxiliares deben importarse dinámicamente con `next/dynamic`.
 - **Zero Layout Shift (CLS = 0):** Reserva espacio con skeletons y dimensiones fijas en avatares e imágenes antes de que carguen los datos.
@@ -42,7 +54,7 @@ Para evitar contradicciones entre diseño y rendimiento, se establece la siguien
 
 ---
 
-## 🛡️ 3. Estándar de Backend, API y Base de Datos (NestJS & Prisma)
+## 🛡️ 4. Estándar de Backend, API y Base de Datos (NestJS & Prisma)
 
 - **Cero Consultas N+1:** Prohibido hacer queries a la base de datos dentro de bucles `map` o `forEach`. Usa relaciones de Prisma (`include`, `_count`) en una única consulta.
 - **Proyección Selectiva:** No seleccionar contraseñas ni datos sensibles en respuestas públicas. Selecciona únicamente los campos necesarios.

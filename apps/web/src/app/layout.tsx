@@ -23,9 +23,15 @@ export default function RootLayout({
       <body className="min-h-screen flex flex-col bg-[var(--bg-arena)] text-[var(--text-primary)] antialiased transition-colors duration-200">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <AuthProvider>
+            <a 
+              href="#main-content" 
+              className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[100] focus:px-4 focus:py-2 focus:bg-[#E63946] focus:text-white focus:rounded-md focus:shadow-xl focus:outline-none text-xs font-bold"
+            >
+              Saltar al contenido principal
+            </a>
             <Navbar />
             <CommandPalette />
-            <main className="flex-1 pt-16">
+            <main id="main-content" className="flex-1 pt-16">
               <PageTransition>
                 {children}
               </PageTransition>
