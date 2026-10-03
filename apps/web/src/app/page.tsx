@@ -24,7 +24,6 @@ import {
   Rocket, 
   Crown, 
   ChevronRight, 
-  Heart, 
   Volume2, 
   Share2, 
   Clock, 
@@ -62,13 +61,6 @@ const fadeUp: Variants = {
     y: 0, 
     transition: { type: 'spring', stiffness: 350, damping: 28 } 
   }
-};
-
-// Initial Campus Rivalry Data
-const INITIAL_CAMPUS_CHEERS = {
-  Lima: 1420,
-  Arequipa: 1285,
-  Trujillo: 1140,
 };
 
 // Fun Campus Gaming Challenges for the Roulette
@@ -136,9 +128,6 @@ export default function HomePage() {
   // Interactive Battle Station Discipline (defaults to Brawl Stars)
   const [selectedDiscipline, setSelectedDiscipline] = useState<GameCode>('BRAWL_STARS');
 
-  // Campus Rivalry Cheers State
-  const [campusCheers, setCampusCheers] = useState(INITIAL_CAMPUS_CHEERS);
-
   // Challenge Roulette State
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentChallenge, setCurrentChallenge] = useState(CAMPUS_CHALLENGES[0]);
@@ -180,17 +169,6 @@ export default function HomePage() {
 
     fetchTournaments();
   }, []);
-
-  // Campus Cheer Handler
-  const handleCheerCampus = (campusKey: 'Lima' | 'Arequipa' | 'Trujillo') => {
-    sounds.playSuccess();
-    fireCelebration();
-    setCampusCheers(prev => ({
-      ...prev,
-      [campusKey]: prev[campusKey] + 1
-    }));
-    toast.success(`¡+1 Punto de Aliento sumado para Sede ${campusKey}! 🏆`);
-  };
 
   // Game Discipline Selector Handler
   const handleSelectGameDiscipline = (code: GameCode) => {
@@ -245,12 +223,6 @@ export default function HomePage() {
     const gameName = GAME_CATALOG[gameCode as GameCode]?.name || gameCode;
     toast.success(`¡Voto registrado para ${gameName}! 🎉`);
   };
-
-  // Calculate rivalry percentages
-  const totalCheers = campusCheers.Lima + campusCheers.Arequipa + campusCheers.Trujillo;
-  const limaPct = Math.round((campusCheers.Lima / totalCheers) * 100);
-  const arequipaPct = Math.round((campusCheers.Arequipa / totalCheers) * 100);
-  const trujilloPct = 100 - limaPct - arequipaPct;
 
   const activeGame = GAME_CATALOG[selectedDiscipline] || GAME_CATALOG.BRAWL_STARS;
 
@@ -723,164 +695,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 4. GUERRA DE SEDES TECSUP (CAMPUS RIVALRY ARENA & CHEER SYSTEM) */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-6">
-        <div className="space-y-1 text-center sm:text-left">
-          <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider flex items-center gap-1.5 justify-center sm:justify-start">
-            <Trophy className="w-3.5 h-3.5" />
-            Rivalidad Inter-Sedes
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-            La Copa de las 3 Sedes Tecsup
-          </h2>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-            ¿Qué sede liderará el ranking este año? Apoya a tu campus universitario para sumar puntos de aliento a la clasificación general.
-          </p>
-        </div>
-
-        {/* Live Territorial Domination Meter */}
-        <div className="arena-card p-5 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-2 shadow-sm">
-          <div className="flex items-center justify-between text-xs font-bold">
-            <span className="text-[var(--text-primary)] flex items-center gap-1.5">
-              <span>⚡</span>
-              <span>Balance de Dominación Territorial</span>
-            </span>
-            <span className="font-mono text-[var(--text-muted)] text-[11px] flex items-center gap-1">
-              <AnimatedCounter target={totalCheers} duration={1.2} /> Alientos Registrados
-            </span>
-          </div>
-
-          <div className="w-full h-3.5 bg-[var(--bg-arena)] rounded-full overflow-hidden flex border border-[var(--border-card)] p-0.5 gap-0.5">
-            <div 
-              style={{ width: `${limaPct}%` }}
-              className="bg-[#E63946] h-full rounded-l-full transition-all duration-700 ease-out relative group cursor-pointer"
-              title={`Sede Lima: ${limaPct}%`}
-            />
-            <div 
-              style={{ width: `${arequipaPct}%` }}
-              className="bg-amber-500 h-full transition-all duration-700 ease-out relative group cursor-pointer"
-              title={`Sede Arequipa: ${arequipaPct}%`}
-            />
-            <div 
-              style={{ width: `${trujilloPct}%` }}
-              className="bg-sky-500 h-full rounded-r-full transition-all duration-700 ease-out relative group cursor-pointer"
-              title={`Sede Trujillo: ${trujilloPct}%`}
-            />
-          </div>
-
-          <div className="flex items-center justify-between text-[11px] font-mono font-bold pt-1">
-            <span className="text-[#E63946] flex items-center gap-1">
-              🏛️ Lima: {limaPct}% {limaPct >= arequipaPct && limaPct >= trujilloPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
-            </span>
-            <span className="text-amber-500 flex items-center gap-1">
-              🌋 Arequipa: {arequipaPct}% {arequipaPct > limaPct && arequipaPct >= trujilloPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
-            </span>
-            <span className="text-sky-500 flex items-center gap-1">
-              🌊 Trujillo: {trujilloPct}% {trujilloPct > limaPct && trujilloPct > arequipaPct && <Crown className="w-3 h-3 text-amber-400 fill-amber-400" />}
-            </span>
-          </div>
-        </div>
-
-        {/* Campus Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          
-          {/* Sede Lima */}
-          <div className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-4 hover:border-[#E63946]/40 transition-all flex flex-col justify-between shadow-sm">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl">🏛️</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#E63946]/15 text-[#E63946] border border-[#E63946]/30">
-                  Campus Central
-                </span>
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-[var(--text-primary)]">Sede Lima</h3>
-                <p className="text-xs text-[var(--text-secondary)]">Santa Anita • Laboratorios Centrales de Cómputo</p>
-              </div>
-              <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
-                <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">
-                  <AnimatedCounter target={campusCheers.Lima} duration={1.2} suffix=" pts" />
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleCheerCampus('Lima')}
-              className="w-full btn-primary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer shadow-md shadow-[#E63946]/20 active:scale-95 transition-transform"
-            >
-              <Heart className="w-3.5 h-3.5 fill-current" />
-              <span>¡Alentar a Sede Lima!</span>
-            </button>
-          </div>
-
-          {/* Sede Arequipa */}
-          <div className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-4 hover:border-amber-500/40 transition-all flex flex-col justify-between shadow-sm">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl">🌋</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                  Sede Sur
-                </span>
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-[var(--text-primary)]">Sede Arequipa</h3>
-                <p className="text-xs text-[var(--text-secondary)]">Campus J.L. Bustamante y Rivero • Los Volcanes</p>
-              </div>
-              <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
-                <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">
-                  <AnimatedCounter target={campusCheers.Arequipa} duration={1.2} suffix=" pts" />
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleCheerCampus('Arequipa')}
-              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-amber-400 hover:text-amber-500 active:scale-95 transition-transform"
-            >
-              <Heart className="w-3.5 h-3.5 fill-current text-amber-500" />
-              <span>¡Alentar a Sede Arequipa!</span>
-            </button>
-          </div>
-
-          {/* Sede Trujillo */}
-          <div className="arena-card p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-4 hover:border-sky-500/40 transition-all flex flex-col justify-between shadow-sm">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-3xl">🌊</span>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-500 border border-sky-500/30">
-                  Sede Norte
-                </span>
-              </div>
-              <div>
-                <h3 className="text-lg font-black text-[var(--text-primary)]">Sede Trujillo</h3>
-                <p className="text-xs text-[var(--text-secondary)]">Campus Víctor Larco Herrera • La Ciudad de la Primavera</p>
-              </div>
-              <div className="p-3 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-0.5">
-                <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Puntos de Aliento</p>
-                <p className="text-xl font-black text-[var(--text-primary)]">
-                  <AnimatedCounter target={campusCheers.Trujillo} duration={1.2} suffix=" pts" />
-                </p>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => handleCheerCampus('Trujillo')}
-              className="w-full btn-secondary py-2.5 text-xs font-bold flex items-center justify-center gap-1.5 rounded-xl cursor-pointer hover:border-sky-400 hover:text-sky-500 active:scale-95 transition-transform"
-            >
-              <Heart className="w-3.5 h-3.5 fill-current text-sky-500" />
-              <span>¡Alentar a Sede Trujillo!</span>
-            </button>
-          </div>
-
-        </div>
-      </section>
-
-      {/* 5. INTERACTIVE MINI-GAME: RULETA DE DESAFÍOS GAMER TECSUP */}
+      {/* 4. INTERACTIVE MINI-GAME: RULETA DE DESAFÍOS GAMER TECSUP */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="arena-card p-8 sm:p-10 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-3xl relative overflow-hidden shadow-xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
@@ -960,73 +775,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 6. TABLERO DE RÉCORDS & HECHOS ÉPICOS DE TECSUP */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-6">
-        <div className="space-y-1 text-center sm:text-left">
-          <span className="text-xs font-bold text-[#E63946] uppercase tracking-wider flex items-center gap-1.5 justify-center sm:justify-start">
-            <Sparkles className="w-3.5 h-3.5" />
-            Hitos Universitarios
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)]">
-            Récords & Hazañas de la Comunidad
-          </h2>
-          <p className="text-xs sm:text-sm text-[var(--text-secondary)]">
-            Momentos legendarios logrados por estudiantes en las finales de Campus Arena.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[
-            {
-              title: 'Victoria Más Veloz',
-              stat: '1m 42s',
-              desc: 'Final de Clash Royale en Campus Lima. Victoria con mazo de ciclo rápido.',
-              icon: Zap,
-              color: '#E63946'
-            },
-            {
-              title: 'Racha Invicta',
-              stat: '14 Victorias',
-              desc: 'Logrado por la escuadra de Diseño de Software en la Copa Apertura.',
-              icon: Crown,
-              color: '#F59E0B'
-            },
-            {
-              title: 'Precisión Headshot',
-              stat: '68% HS Rate',
-              desc: 'Récord de puntería en clasificatorias virtuales de Valorant.',
-              icon: Crosshair,
-              color: '#0EA5E9'
-            },
-            {
-              title: 'Fair Play Total',
-              stat: '100% Limpio',
-              desc: 'Cero sanciones por conducta antideportiva. Arbitraje transparente en cada partida.',
-              icon: Shield,
-              color: '#10B981'
-            }
-          ].map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.title}
-                className="arena-card p-5 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl space-y-3 hover:border-white/20 transition-all shadow-sm"
-              >
-                <div className="w-9 h-9 rounded-xl flex items-center justify-center border border-[var(--border-card)]" style={{ backgroundColor: `${item.color}15` }}>
-                  <Icon className="w-4 h-4" style={{ color: item.color }} />
-                </div>
-                <div>
-                  <p className="text-xl sm:text-2xl font-black text-[var(--text-primary)]">{item.stat}</p>
-                  <p className="text-xs font-bold text-[var(--text-primary)] mt-0.5">{item.title}</p>
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* 7. ARCHITECTURAL SHOWCASE: SEDE CENTRAL TECSUP */}
+      {/* 5. ARCHITECTURAL SHOWCASE: SEDE CENTRAL TECSUP */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="arena-card p-8 sm:p-12 border border-[var(--border-card)] bg-[var(--bg-card)] rounded-3xl shadow-sm relative overflow-hidden">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
