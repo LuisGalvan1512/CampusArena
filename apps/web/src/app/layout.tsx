@@ -30,8 +30,9 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://api.dicebear.com" />
         <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://cdn.cloudflare.steamstatic.com" />
-        <link rel="preconnect" href="https://sxqwztaccmdnpotcfeev.supabase.co" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://sxqwztaccmdnpotcfeev.supabase.co" />
+        {/* Favicon & Brand Icons */}
+        <link rel="icon" href="/brand/logo.jpg" />
+        <link rel="apple-touch-icon" href="/brand/logo.jpg" />
       </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-arena)] text-[var(--text-primary)] antialiased transition-colors duration-200">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>

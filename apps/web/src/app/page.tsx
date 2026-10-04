@@ -126,7 +126,16 @@ export default function HomePage() {
           <div className="lg:col-span-7 space-y-6 text-left">
 
             {/* Monumental Headline (Apple Editorial Scale) */}
-            <div className="space-y-2">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2.5 px-3 py-1.5 rounded-full bg-black/60 border border-white/15 backdrop-blur-md shadow-lg shadow-black/20">
+                <div className="w-5 h-5 rounded-md overflow-hidden bg-black p-0.5 border border-white/20 flex items-center justify-center">
+                  <img src="/brand/logo.jpg" alt="Campus Arena Logo" className="w-full h-full object-contain" />
+                </div>
+                <span className="text-[11px] font-bold tracking-wider uppercase text-white/90">
+                  Campus Arena <span className="text-[#E63946]">•</span> Tecsup Esports
+                </span>
+              </div>
+
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.03] text-[var(--text-primary)]">
                 Campus Arena.
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#E63946] via-[#FF5A67] to-amber-400">
