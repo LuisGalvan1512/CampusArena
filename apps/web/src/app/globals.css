@@ -13,6 +13,7 @@
 
 
 :root {
+  color-scheme: dark;
   /* Default to Dark theme tokens - Midnight Sapphire & Crimson High-Craft Palette */
   --bg-arena: #080B12;
   --bg-card: #0E1424;
@@ -42,6 +43,7 @@
 }
 
 .light, [data-theme='light'] {
+  color-scheme: light;
   /* Warm Slate / Titanium Light Theme with Subtle Sapphire Depth */
   --bg-arena: #F8FAFC;
   --bg-card: #FFFFFF;
