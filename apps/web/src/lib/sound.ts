@@ -6,16 +6,20 @@
 class SoundEffects {
   private ctx: AudioContext | null = null;
   private muted: boolean = false;
+  private isInitialized: boolean = false;
 
-  constructor() {
-    if (typeof window !== 'undefined') {
+  private ensureMuteLoaded() {
+    if (this.isInitialized || typeof window === 'undefined') return;
+    try {
       const saved = localStorage.getItem('campus_arena_muted');
       this.muted = saved === 'true';
-    }
+    } catch {}
+    this.isInitialized = true;
   }
 
   private getContext(): AudioContext | null {
     if (typeof window === 'undefined') return null;
+    this.ensureMuteLoaded();
     if (!this.ctx) {
       const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioCtx) {
@@ -29,13 +33,17 @@ class SoundEffects {
   }
 
   public isMuted(): boolean {
+    this.ensureMuteLoaded();
     return this.muted;
   }
 
   public toggleMute(): boolean {
+    this.ensureMuteLoaded();
     this.muted = !this.muted;
     if (typeof window !== 'undefined') {
-      localStorage.setItem('campus_arena_muted', String(this.muted));
+      try {
+        localStorage.setItem('campus_arena_muted', String(this.muted));
+      } catch {}
     }
     if (!this.muted) {
       this.playClick();
@@ -190,6 +198,89 @@ class SoundEffects {
         osc.start(startTime);
         osc.stop(endTime);
       });
+    } catch {}
+  }
+
+  // 6. Soundbite: Tactical Chime
+  public playTacticalChime() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      [587.33, 880.0, 1174.66].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.09);
+        const startTime = ctx.currentTime + i * 0.09;
+        const endTime = startTime + 0.45;
+        gain.gain.setValueAtTime(0, startTime);
+        gain.gain.linearRampToValueAtTime(0.12, startTime + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, endTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(startTime);
+        osc.stop(endTime);
+      });
+    } catch {}
+  }
+
+  // 7. Soundbite: Synthesizer Blip (8-bit cyber)
+  public playSynthesizerBlip() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(300, ctx.currentTime);
+      osc.frequency.linearRampToValueAtTime(880, ctx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.08, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.18);
+    } catch {}
+  }
+
+  // 8. Soundbite: Laser Charge
+  public playLaserCharge() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(120, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1400, ctx.currentTime + 0.22);
+      gain.gain.setValueAtTime(0.09, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.25);
+    } catch {}
+  }
+
+  // 9. Soundbite: Victory Bell
+  public playVictoryBell() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(1046.5, ctx.currentTime);
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.9);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.9);
     } catch {}
   }
 }

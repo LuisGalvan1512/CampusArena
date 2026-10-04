@@ -35,14 +35,40 @@ import {
   Award,
   Gamepad2,
   Building2,
-  Check
+  Check,
+  Volume2,
+  Palette,
+  Type
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
 import { HolographicCard } from '@/components/HolographicCard';
 import { sounds } from '@/lib/sound';
-import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { GAME_CATALOG, GAME_LIST, type GameCode } from '@/lib/games';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { 
+  getProfileCustomization, 
+  saveProfileCustomization, 
+  ProfileCustomizationState,
+  DEFAULT_CUSTOMIZATION,
+  CARD_MATERIALS,
+  AVATAR_FRAMES,
+  NAME_FONT_LIST,
+  NAME_COLOR_PRESETS,
+  SOUNDBITES,
+  PROFILE_WALLPAPERS,
+  playCustomSoundbite,
+  type CardMaterial,
+  type AvatarFrame,
+  type NameFontFamily,
+  type NameColorPreset,
+  type SoundbiteId,
+  type ProfileWallpaper,
+  type HonorPinId
+} from '@/lib/profile-customization';
+import { AvatarWithFrame } from '@/components/AvatarWithFrame';
+import { HonorPinboard } from '@/components/HonorPinboard';
+import { CompetitorName } from '@/components/CompetitorName';
 
 export const SYSTEM_AVATARS = [
   { id: 'fox', name: 'Tecsup Cyber Fox', url: 'https://api.dicebear.com/7.x/bottts/svg?seed=TecsupFox&backgroundColor=b6e3f4,c0aede,d1d4f9' },
@@ -178,9 +204,13 @@ export default function ProfilePage() {
   // UI Tabs on Main Profile: 'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC'
   const [activeTab, setActiveTab] = useState<'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC'>('TOURNAMENTS');
 
-  // Customization Modal State (Single, clean modal with live preview)
+  // Customization Modal State (Clean, step-by-step modal with live preview)
   const [showEditModal, setShowEditModal] = useState(false);
-  const [editTab, setEditTab] = useState<'IDENTITY' | 'APPEARANCE' | 'ACADEMIC'>('IDENTITY');
+  const [editTab, setEditTab] = useState<'WALLPAPER_CARD' | 'AVATAR_NAME' | 'GAMES' | 'INFO'>('WALLPAPER_CARD');
+
+  // Full Profile Customization (Materials, Frames, Calling Cards, Pins, War Cry, Soundbite, Wallpaper)
+  const [customization, setCustomization] = useState<ProfileCustomizationState>(DEFAULT_CUSTOMIZATION);
+  const [editCustomization, setEditCustomization] = useState<ProfileCustomizationState>(DEFAULT_CUSTOMIZATION);
 
   // Temporary edit buffer for live preview before saving
   const [editForm, setEditForm] = useState<ProfileData>({
@@ -217,7 +247,32 @@ export default function ProfilePage() {
       setFavGame(savedGame);
       setEditFavGame(savedGame);
     }
+
+    // Load full profile customization
+    const savedCustomization = getProfileCustomization(user?.id);
+    setCustomization(savedCustomization);
+    setEditCustomization(savedCustomization);
+
+    // Play Soundbite on profile entry if configured
+    if (savedCustomization.soundbite && savedCustomization.soundbite !== 'none') {
+      const timer = setTimeout(() => {
+        if (savedCustomization.soundbite === 'tactical_chime') sounds.playTacticalChime();
+        else if (savedCustomization.soundbite === 'synthesizer_blip') sounds.playSynthesizerBlip();
+        else if (savedCustomization.soundbite === 'laser_charge') sounds.playLaserCharge();
+        else if (savedCustomization.soundbite === 'victory_bell') sounds.playVictoryBell();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
   }, []);
+
+  // Sync customization when user authentication completes
+  useEffect(() => {
+    if (user?.id) {
+      const userCustomization = getProfileCustomization(user.id);
+      setCustomization(userCustomization);
+      setEditCustomization(userCustomization);
+    }
+  }, [user?.id]);
 
   // Redirect if not logged in
   useEffect(() => {
@@ -291,9 +346,18 @@ export default function ProfilePage() {
     setEditRole(academicRole);
     setEditBannerTheme(bannerTheme);
     setEditFavGame(favGame);
+    setEditCustomization({ ...customization });
     setCustomAvatarInput(profile.avatar_url?.startsWith('http') ? profile.avatar_url : '');
     setShowEditModal(true);
     sounds.playClick();
+  };
+
+  // Test soundbite audio in customizer
+  const testSoundbite = (s: SoundbiteId) => {
+    if (s === 'tactical_chime') sounds.playTacticalChime();
+    else if (s === 'synthesizer_blip') sounds.playSynthesizerBlip();
+    else if (s === 'laser_charge') sounds.playLaserCharge();
+    else if (s === 'victory_bell') sounds.playVictoryBell();
   };
 
   // Save all modifications from modal
@@ -316,6 +380,8 @@ export default function ProfilePage() {
       // Save local preferences
       localStorage.setItem('campus_arena_banner_theme', editBannerTheme);
       localStorage.setItem('campus_arena_fav_game', editFavGame);
+      saveProfileCustomization(editCustomization, user?.id);
+      setCustomization(editCustomization);
       setBannerTheme(editBannerTheme);
       setFavGame(editFavGame);
       setProfile({ ...editForm, cycle: cycleToSave });
@@ -327,7 +393,7 @@ export default function ProfilePage() {
 
       sounds.playSuccess();
       fireCelebration();
-      toast.success('¡Carnet competitivo actualizado con éxito!');
+      toast.success('¡Carnet competitivo y personalizaciones guardadas con éxito!');
       setShowEditModal(false);
     } else {
       toast.error(res.error?.message || 'Error al guardar los cambios.');
@@ -378,7 +444,57 @@ export default function ProfilePage() {
   }
 
   const activeThemeConfig = BANNER_THEMES.find(t => t.id === bannerTheme) || BANNER_THEMES[0];
-  const activeGameConfig = GAME_CATALOG[favGame] || GAME_CATALOG.CLASH_ROYALE;
+  const activeWallpaperConfig = PROFILE_WALLPAPERS.find(w => w.id === customization.wallpaper) || PROFILE_WALLPAPERS[0];
+  const activeMaterialConfig = CARD_MATERIALS.find(m => m.id === customization.material) || CARD_MATERIALS[0];
+  const activeTypographyConfig = NAME_FONT_LIST.find(t => t.id === customization.nameTypography) || NAME_FONT_LIST[0];
+
+  const previewWallpaperConfig = PROFILE_WALLPAPERS.find(w => w.id === editCustomization.wallpaper) || PROFILE_WALLPAPERS[0];
+  const previewMaterialConfig = CARD_MATERIALS.find(m => m.id === editCustomization.material) || CARD_MATERIALS[0];
+  const previewTypographyConfig = NAME_FONT_LIST.find(t => t.id === editCustomization.nameTypography) || NAME_FONT_LIST[0];
+
+  const handleToggleFavoriteGame = (gameCode: GameCode) => {
+    sounds.playClick();
+    const current = editCustomization.favoriteGames || [];
+    if (current.includes(gameCode)) {
+      if (current.length === 1) {
+        toast.info('Debes mantener al menos un juego favorito.');
+        return;
+      }
+      setEditCustomization({
+        ...editCustomization,
+        favoriteGames: current.filter((g) => g !== gameCode),
+      });
+    } else {
+      if (current.length >= 4) {
+        toast.info('Puedes seleccionar hasta 4 juegos favoritos.');
+        return;
+      }
+      setEditCustomization({
+        ...editCustomization,
+        favoriteGames: [...current, gameCode],
+      });
+    }
+  };
+
+  const handleTogglePin = (pinId: HonorPinId) => {
+    sounds.playClick();
+    const currentPins = editCustomization.pinnedPins || [];
+    if (currentPins.includes(pinId)) {
+      setEditCustomization({
+        ...editCustomization,
+        pinnedPins: currentPins.filter((id) => id !== pinId),
+      });
+    } else {
+      if (currentPins.length >= 3) {
+        toast.info('Solo puedes fijar hasta 3 pines en tu carnet. Desmarca uno para añadir este.');
+        return;
+      }
+      setEditCustomization({
+        ...editCustomization,
+        pinnedPins: [...currentPins, pinId],
+      });
+    }
+  };
 
   const getRegistrationBadge = (status: UserRegistration['status']) => {
     switch (status) {
@@ -412,7 +528,26 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-in fade-in duration-300">
+    <div 
+      className="min-h-screen transition-all duration-700 -mt-6 pt-6 pb-12 relative overflow-hidden"
+      style={activeWallpaperConfig.cssStyle}
+    >
+      {/* Video Background Layer if wallpaper has videoUrl (Steam Animated Profile) */}
+      {activeWallpaperConfig.videoUrl && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <video
+            src={activeWallpaperConfig.videoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D13]/50 via-transparent to-[#0B0D13]/30" />
+        </div>
+      )}
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
       
       {/* 1. TOP QUICK ACTION TOOLBAR */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
@@ -463,7 +598,8 @@ export default function ProfilePage() {
 
       {/* 2. THE GAMER PASSPORT / IDENTITY CARD (Steam Points Shop meets Riot Esports) */}
       <HolographicCard 
-        className={`p-6 sm:p-9 relative overflow-hidden transition-all duration-500 rounded-3xl border border-white/10 ${activeThemeConfig.bgClass}`} 
+        material={customization.material}
+        className={`p-6 sm:p-9 relative overflow-hidden transition-all duration-500 rounded-3xl border border-white/10 ${customization.material === 'steam_neon_shrine' ? '' : activeThemeConfig.bgClass}`} 
         glowColor={activeThemeConfig.glowColor}
       >
         {/* Subtle Watermark Logo on Background */}
@@ -477,27 +613,20 @@ export default function ProfilePage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             
             <div className="flex items-start sm:items-center gap-5">
-              {/* Avatar with Status Halo */}
-              <div className="relative group shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-2xl overflow-hidden ring-2 ring-white/10 group-hover:ring-[#E63946]/50 transition-all">
-                  {profile.avatar_url ? (
-                    <img
-                      src={profile.avatar_url}
-                      alt={profile.nickname || 'Avatar'}
-                      className="w-full h-full object-cover rounded-[14px] bg-[#0A0D14]"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#0A0D14] rounded-[14px] flex items-center justify-center text-3xl font-black text-white">
-                      {(profile.nickname || user.first_name || 'U')[0].toUpperCase()}
-                    </div>
-                  )}
-                </div>
+              {/* Avatar with Animated Frame */}
+              <div className="relative shrink-0">
+                <AvatarWithFrame
+                  avatarUrl={profile.avatar_url || ''}
+                  frame={customization.avatarFrame}
+                  size="xl"
+                  alt={profile.nickname || 'Avatar'}
+                />
                 
                 <button
                   type="button"
                   onClick={handleOpenEditModal}
-                  title="Cambiar avatar o fondo"
-                  className="absolute -bottom-1.5 -right-1.5 p-1.5 rounded-xl bg-[#E63946] hover:bg-[#ff4353] text-white shadow-lg border border-white/20 transition-all hover:scale-110 active:scale-95 cursor-pointer"
+                  title="Personalizar avatar y marco"
+                  className="absolute -bottom-1 -right-1 p-2 rounded-xl bg-[#E63946] hover:bg-[#ff4353] text-white shadow-lg border border-white/20 transition-all hover:scale-110 active:scale-95 cursor-pointer z-30"
                 >
                   <Camera className="w-3.5 h-3.5" />
                 </button>
@@ -506,9 +635,12 @@ export default function ProfilePage() {
               {/* Identity & Badges */}
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {profile.nickname || capitalizeWords(user.first_name)}
-                  </h2>
+                  <CompetitorName
+                    userId={user.id}
+                    name={profile.nickname || capitalizeWords(user.first_name)}
+                    customization={customization}
+                    className="text-2xl sm:text-3xl tracking-tight"
+                  />
 
                   {/* Academic Condition Pill */}
                   {academicRole === 'DOCENTE' ? (
@@ -551,32 +683,63 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Discipline Tag & Theme Indicator */}
-            <div className="flex md:flex-col items-center md:items-end justify-between gap-3 border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
-              <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/10 shadow-inner">
-                <span className="text-base">{activeGameConfig.statIcon || '🎮'}</span>
-                <div className="text-left md:text-right">
-                  <p className="text-[9px] uppercase font-mono tracking-wider text-[#8E92A4]">Disciplina Principal</p>
-                  <p className="text-xs font-black text-white">{activeGameConfig.name}</p>
-                </div>
-              </div>
-
-              <div className="text-[10px] font-mono text-[#8E92A4] flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Fondo: {activeThemeConfig.name}</span>
-              </div>
+            {/* Quick Audio Trigger (if enabled) */}
+            <div className="flex md:flex-col items-center md:items-end justify-between gap-3">
+              {customization.soundbite && customization.soundbite !== 'none' && (
+                <button
+                  type="button"
+                  onClick={() => playCustomSoundbite(customization.soundbite)}
+                  className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-cyan-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+                  title="Reproducir audio táctil"
+                >
+                  <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                  <span className="text-[11px] font-mono">Audio de Perfil</span>
+                </button>
+              )}
             </div>
 
           </div>
 
+          {/* Juegos Favoritos (Dedicated Section) */}
+          {customization.favoriteGames && customization.favoriteGames.length > 0 && (
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-4 h-4 text-[#E63946]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8E92A4]">
+                  Juegos Favoritos:
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {customization.favoriteGames.map((gCode) => {
+                  const g = GAME_CATALOG[gCode];
+                  if (!g) return null;
+                  return (
+                    <span
+                      key={gCode}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white border border-white/15 bg-black/40 shadow-sm"
+                      style={{ borderColor: `${g.color}55` }}
+                    >
+                      {g.logoUrl ? (
+                        <img src={g.logoUrl} alt="" className="w-3.5 h-3.5 object-contain shrink-0 filter drop-shadow" />
+                      ) : (
+                        <Gamepad2 className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+                      )}
+                      <span>{g.name}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Competitor Bio Statement */}
           {profile.biography ? (
-            <div className="p-3.5 rounded-2xl bg-black/35 backdrop-blur-sm border border-white/5 text-xs text-[#CBD5E1] leading-relaxed italic">
+            <div className="p-3.5 rounded-2xl bg-black/35 backdrop-blur-sm border border-white/5 text-xs text-[#CBD5E1] leading-relaxed">
               "{profile.biography}"
             </div>
           ) : (
             <div className="p-3 rounded-xl bg-white/5 border border-dashed border-white/10 text-xs text-[#8E92A4] flex items-center justify-between">
-              <span>¿Tienes un lema o estilo de juego? Añade tu biografía competitiva.</span>
+              <span>¿Tienes una historia o estilo de juego? Añade tu biografía competitiva.</span>
               <button
                 type="button"
                 onClick={handleOpenEditModal}
@@ -586,6 +749,9 @@ export default function ProfilePage() {
               </button>
             </div>
           )}
+
+          {/* Vitrina de Honor / Showcase Pinboard (Idea 5) */}
+          <HonorPinboard pinnedPins={customization.pinnedPins || []} />
 
           {/* MONOLITHIC CAREER STATS TICKER STRIP */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
@@ -990,7 +1156,7 @@ export default function ProfilePage() {
               <button
                 type="button"
                 onClick={() => {
-                  setEditTab('ACADEMIC');
+                  setEditTab('INFO');
                   handleOpenEditModal();
                 }}
                 className="btn-secondary px-3.5 py-1.5 text-xs font-bold flex items-center gap-1.5 self-start sm:self-auto cursor-pointer"
@@ -1042,23 +1208,23 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* 4. MODAL DE PERSONALIZACIÓN INTELIGENTE (PROFUNDA POR DENTRO, SENCILLA POR FUERA CON LIVE PREVIEW) */}
+      {/* 4. MODAL DE PERSONALIZACIÓN PASO A PASO (LIMPIO, SIN TEXTO INNECESARIO) */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-3xl bg-[#111520] border border-white/10 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
             
             {/* Modal Header */}
-            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#0A0D14]">
+            <div className="p-4 sm:p-5 border-b border-white/10 flex items-center justify-between shrink-0 bg-[#0A0D14]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-[#E63946]/15 text-[#E63946] flex items-center justify-center border border-[#E63946]/20">
                   <SlidersHorizontal className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-black text-white">
-                    Personalizar Carnet Competitivo
+                    Personalizar Perfil
                   </h3>
                   <p className="text-xs text-[#8E92A4]">
-                    Modifica tu apariencia, identidad de juego y datos académicos en un solo lugar
+                    Configura tu carnet, apariencia y juegos favoritos paso a paso
                   </p>
                 </div>
               </div>
@@ -1074,139 +1240,233 @@ export default function ProfilePage() {
             </div>
 
             {/* LIVE MINI PREVIEW OF THE CARNET */}
-            <div className="p-4 sm:p-5 bg-black/40 border-b border-white/5 shrink-0">
-              <p className="text-[10px] font-mono uppercase tracking-wider text-[#8E92A4] mb-2.5 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Vista Previa en Tiempo Real del Carnet</span>
-              </p>
+            <div 
+              className="p-4 sm:p-5 border-b border-white/10 shrink-0 transition-all duration-300"
+              style={previewWallpaperConfig.cssStyle}
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                  <span>Previsualización en Vivo de tu Carnet</span>
+                </p>
+                <span className="px-2 py-0.5 rounded-md bg-black/60 border border-white/10 text-white font-semibold text-[10px] font-mono">
+                  {previewMaterialConfig.name}
+                </span>
+              </div>
 
-              <div className={`p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden ${
-                BANNER_THEMES.find(t => t.id === editBannerTheme)?.bgClass || 'banner-cyberpunk'
-              }`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#E63946] to-[#1D3557] p-0.5 overflow-hidden shrink-0 shadow-lg">
-                    {editForm.avatar_url ? (
-                      <img src={editForm.avatar_url} alt="Avatar" className="w-full h-full object-cover rounded-[13px] bg-[#0A0D14]" />
-                    ) : (
-                      <div className="w-full h-full bg-[#0A0D14] rounded-[13px] flex items-center justify-center text-lg font-black text-white">
-                        {(editForm.nickname || user?.first_name || 'U')[0].toUpperCase()}
+              {/* The Mini Card */}
+              <div className={`p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden shadow-2xl ${previewMaterialConfig.cardClass} ${previewMaterialConfig.borderClass}`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <AvatarWithFrame
+                      avatarUrl={editForm.avatar_url || ''}
+                      frame={editCustomization.avatarFrame}
+                      size="md"
+                      alt="Avatar Preview"
+                    />
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <CompetitorName
+                          userId={user?.id}
+                          name={editForm.nickname || profile.nickname || capitalizeWords(user?.first_name || 'Competidor')}
+                          customization={editCustomization}
+                          className="text-base font-black truncate"
+                        />
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30">
+                          {editRole === 'ESTUDIANTE' ? `${editForm.cycle || 1}° Ciclo` : editRole}
+                        </span>
                       </div>
-                    )}
+                      <p className="text-[11px] text-[#CBD5E1] truncate">
+                        {capitalizeWords(`${user.first_name} ${user.last_name}`)} • Sede {editForm.campus || 'Lima'}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <p className="text-base font-black text-white truncate">
-                        {editForm.nickname || capitalizeWords(user?.first_name || 'Competidor')}
-                      </p>
-                      <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30">
-                        {editRole === 'ESTUDIANTE' ? `${editForm.cycle || 1}° Ciclo` : editRole}
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#CBD5E1] truncate">
-                      {capitalizeWords(`${user.first_name} ${user.last_name}`)} • Sede {editForm.campus || 'Lima'}
-                    </p>
-                    <p className="text-[10px] font-mono text-[#A8DADC] pt-0.5 flex items-center gap-1">
-                      <span>Juego: {GAME_CATALOG[editFavGame]?.name}</span>
-                    </p>
-                  </div>
+                  {editCustomization.soundbite && editCustomization.soundbite !== 'none' && (
+                    <button
+                      type="button"
+                      onClick={() => playCustomSoundbite(editCustomization.soundbite)}
+                      className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-cyan-500/20 text-cyan-300 text-[10px] font-mono flex items-center gap-1 shrink-0 cursor-pointer border border-white/10"
+                      title="Probar sonido rápido"
+                    >
+                      <Volume2 className="w-3 h-3" />
+                      <span>Probar</span>
+                    </button>
+                  )}
                 </div>
+
+                {/* Favorite Games Badges Preview */}
+                {editCustomization.favoriteGames && editCustomization.favoriteGames.length > 0 && (
+                  <div className="mt-3 pt-2.5 border-t border-white/10 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-mono text-[#8E92A4] mr-1">Juegos:</span>
+                    {editCustomization.favoriteGames.map((gCode) => {
+                      const g = GAME_CATALOG[gCode];
+                      if (!g) return null;
+                      return (
+                        <span
+                          key={gCode}
+                          className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold text-white bg-black/50 border border-white/15"
+                        >
+                          {g.logoUrl ? (
+                            <img src={g.logoUrl} alt="" className="w-3 h-3 object-contain shrink-0 filter drop-shadow" />
+                          ) : (
+                            <Gamepad2 className="w-3 h-3 text-[#38BDF8] shrink-0" />
+                          )}
+                          <span>{g.name}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Modal Navigation Tabs */}
-            <div className="grid grid-cols-3 border-b border-white/10 bg-[#0A0D14] shrink-0 text-center">
+            {/* Modal Step Navigation (Clean 4 Steps) */}
+            <div className="grid grid-cols-4 border-b border-white/10 bg-[#0A0D14] shrink-0 text-center">
               <button
                 type="button"
-                onClick={() => setEditTab('IDENTITY')}
-                className={`py-3 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  editTab === 'IDENTITY'
+                onClick={() => { sounds.playClick(); setEditTab('WALLPAPER_CARD'); }}
+                className={`py-3 text-[11px] sm:text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  editTab === 'WALLPAPER_CARD'
+                    ? 'border-[#38BDF8] text-white bg-white/5'
+                    : 'border-transparent text-[#8E92A4] hover:text-white'
+                }`}
+              >
+                <Palette className="w-3.5 h-3.5 text-[#38BDF8]" />
+                <span className="hidden sm:inline">1. Fondo & Tarjeta</span>
+                <span className="sm:hidden">1. Fondo</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { sounds.playClick(); setEditTab('AVATAR_NAME'); }}
+                className={`py-3 text-[11px] sm:text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  editTab === 'AVATAR_NAME'
+                    ? 'border-purple-400 text-white bg-white/5'
+                    : 'border-transparent text-[#8E92A4] hover:text-white'
+                }`}
+              >
+                <Type className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">2. Marco & Nombre</span>
+                <span className="sm:hidden">2. Marco</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => { sounds.playClick(); setEditTab('GAMES'); }}
+                className={`py-3 text-[11px] sm:text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  editTab === 'GAMES'
                     ? 'border-[#E63946] text-white bg-white/5'
                     : 'border-transparent text-[#8E92A4] hover:text-white'
                 }`}
               >
                 <Gamepad2 className="w-3.5 h-3.5 text-[#E63946]" />
-                <span>1. Identidad</span>
+                <span className="hidden sm:inline">3. Juegos Favoritos</span>
+                <span className="sm:hidden">3. Juegos</span>
               </button>
 
               <button
                 type="button"
-                onClick={() => setEditTab('APPEARANCE')}
-                className={`py-3 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  editTab === 'APPEARANCE'
-                    ? 'border-amber-400 text-white bg-white/5'
+                onClick={() => { sounds.playClick(); setEditTab('INFO'); }}
+                className={`py-3 text-[11px] sm:text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                  editTab === 'INFO'
+                    ? 'border-emerald-400 text-white bg-white/5'
                     : 'border-transparent text-[#8E92A4] hover:text-white'
                 }`}
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                <span>2. Fondo & Avatar</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setEditTab('ACADEMIC')}
-                className={`py-3 text-xs font-bold border-b-2 transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  editTab === 'ACADEMIC'
-                    ? 'border-[#457B9D] text-white bg-white/5'
-                    : 'border-transparent text-[#8E92A4] hover:text-white'
-                }`}
-              >
-                <GraduationCap className="w-3.5 h-3.5 text-cyan-400" />
-                <span>3. Académico</span>
+                <GraduationCap className="w-3.5 h-3.5 text-emerald-400" />
+                <span className="hidden sm:inline">4. Datos & Audio</span>
+                <span className="sm:hidden">4. Datos</span>
               </button>
             </div>
 
             {/* Modal Form Scrollable Area */}
             <form onSubmit={handleSaveModal} className="overflow-y-auto flex-1 p-5 sm:p-6 space-y-6">
               
-              {/* TAB 1: IDENTIDAD & DISCIPLINA */}
-              {editTab === 'IDENTITY' && (
-                <div className="space-y-5 animate-in fade-in">
+              {/* STEP 1: FONDO & TARJETA */}
+              {editTab === 'WALLPAPER_CARD' && (
+                <div className="space-y-6 animate-in fade-in">
                   
-                  {/* Nickname / Gamertag */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
-                      🎮 Gamertag / Apodo Competitivo
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.nickname || ''}
-                      onChange={(e) => setEditForm({ ...editForm, nickname: e.target.value })}
-                      placeholder="Ej. CyberViper, LuchoPro, Phantom..."
-                      maxLength={24}
-                      className="input-arena w-full font-bold text-white bg-[#0A0D14] border-white/10 focus:border-amber-400"
-                    />
-                    <p className="text-[11px] text-[#8E92A4]">
-                      Este será el nombre visible principal en torneos, llaves y rankings oficiales de Campus Arena.
-                    </p>
-                  </div>
+                  {/* 1. Fondo de la Página de Perfil */}
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                        <Palette className="w-3.5 h-3.5 text-cyan-400" />
+                        <span>Fondo de la Página de Perfil</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">5 Fondos</span>
+                    </div>
 
-                  {/* Primary Game Selector */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      🏆 Disciplina Esports Principal
-                    </label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
-                      {(Object.keys(GAME_CATALOG) as GameCode[]).map((gCode) => {
-                        const game = GAME_CATALOG[gCode];
-                        const isSelected = editFavGame === gCode;
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {PROFILE_WALLPAPERS.map((wp) => {
+                        const isSelected = editCustomization.wallpaper === wp.id;
                         return (
                           <button
-                            key={gCode}
+                            key={wp.id}
                             type="button"
-                            onClick={() => setEditFavGame(gCode)}
-                            className={`p-3 rounded-xl border text-left transition-all flex items-center gap-2.5 cursor-pointer ${
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditCustomization({ ...editCustomization, wallpaper: wp.id });
+                            }}
+                            className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden bg-[#0A0D14] ${
                               isSelected
-                                ? 'bg-[#E63946]/15 border-[#E63946] text-white shadow-sm'
-                                : 'bg-[#0A0D14] border-white/5 text-[#8E92A4] hover:border-white/20'
+                                ? 'ring-2 ring-cyan-400 border-cyan-400 shadow-lg shadow-cyan-400/20'
+                                : 'border-white/10 hover:border-white/30'
                             }`}
                           >
-                            <span className="text-xl shrink-0">{game.statIcon || '🎮'}</span>
-                            <div className="min-w-0">
-                              <p className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-[#CBD5E1]'}`}>
-                                {game.name}
-                              </p>
-                              <p className="text-[10px] text-[#8E92A4] truncate">{game.shortName}</p>
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-black text-white">{wp.name}</span>
+                              {isSelected && (
+                                <span className="w-4 h-4 rounded-full bg-cyan-400 text-black flex items-center justify-center text-[10px] font-bold">
+                                  ✓
+                                </span>
+                              )}
+                            </div>
+                            <div 
+                              className="h-8 rounded-lg border border-white/10 w-full"
+                              style={wp.cssStyle}
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2. Acabado de la Tarjeta */}
+                  <div className="space-y-3 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#38BDF8] flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#38BDF8]" />
+                        <span>Material de la Tarjeta</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">5 Acabados</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                      {CARD_MATERIALS.map((mat) => {
+                        const isSelected = editCustomization.material === mat.id;
+                        return (
+                          <button
+                            key={mat.id}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditCustomization({ ...editCustomization, material: mat.id });
+                            }}
+                            className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden ${mat.cardClass} ${
+                              isSelected
+                                ? 'ring-2 ring-[#38BDF8] border-[#38BDF8] shadow-lg shadow-[#38BDF8]/20 scale-[1.02]'
+                                : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-black text-white">{mat.name}</span>
+                              {isSelected && (
+                                <span className="w-4 h-4 rounded-full bg-[#38BDF8] text-black flex items-center justify-center text-[10px] font-bold">
+                                  ✓
+                                </span>
+                              )}
                             </div>
                           </button>
                         );
@@ -1214,42 +1474,12 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* Biography */}
-                  <div className="space-y-1.5">
+                  {/* 3. Textura Gamer */}
+                  <div className="space-y-3 pt-4 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      ✍️ Biografía Competitiva o Lema
+                      Textura Ambiental de la Tarjeta
                     </label>
-                    <textarea
-                      value={editForm.biography || ''}
-                      onChange={(e) => setEditForm({ ...editForm, biography: e.target.value })}
-                      rows={3}
-                      placeholder="Escribe tu rol favorito, estilo de juego o mensaje a tus rivales en la Arena..."
-                      className="input-arena w-full bg-[#0A0D14] border-white/10 resize-none text-xs"
-                      maxLength={180}
-                    />
-                    <div className="flex justify-between text-[10px] text-[#8E92A4]">
-                      <span>Máximo 180 caracteres</span>
-                      <span>{(editForm.biography || '').length}/180</span>
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              {/* TAB 2: FONDO STEAM & AVATAR */}
-              {editTab === 'APPEARANCE' && (
-                <div className="space-y-6 animate-in fade-in">
-                  
-                  {/* Procedural Banner Theme Selector */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
-                        ✨ Fondo de Perfil (Estilo Steam Points Shop)
-                      </label>
-                      <span className="text-[10px] text-[#8E92A4]">8 Estilos oficiales Tecsup</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {BANNER_THEMES.map((theme) => {
                         const isSelected = editBannerTheme === theme.id;
                         return (
@@ -1260,36 +1490,237 @@ export default function ProfilePage() {
                               sounds.playClick();
                               setEditBannerTheme(theme.id);
                             }}
-                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer relative overflow-hidden ${theme.bgClass} ${
-                              isSelected
-                                ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20'
-                                : 'border-white/10 hover:border-white/30'
+                            className={`p-2.5 rounded-xl border text-left text-xs font-bold transition-all cursor-pointer ${theme.bgClass} ${
+                              isSelected ? 'ring-2 ring-[#E63946] text-white border-[#E63946]' : 'border-white/10 text-[#CBD5E1]'
                             }`}
                           >
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-xs font-black text-white">{theme.name}</span>
-                              <div className="flex items-center gap-1.5">
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-white/10 text-white">
-                                  {theme.tag}
-                                </span>
-                                {isSelected && <Check className="w-3.5 h-3.5 text-[#E63946]" />}
-                              </div>
-                            </div>
-                            <p className="text-[11px] text-[#CBD5E1] line-clamp-1">{theme.desc}</p>
+                            {theme.name}
                           </button>
                         );
                       })}
                     </div>
                   </div>
 
-                  {/* System Avatars */}
-                  <div className="space-y-3 pt-3 border-t border-white/10">
+                </div>
+              )}
+
+              {/* STEP 2: MARCO & NOMBRE */}
+              {editTab === 'AVATAR_NAME' && (
+                <div className="space-y-6 animate-in fade-in">
+                  
+                  {/* 1. Marco del Avatar */}
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                        👾 Selecciona tu Avatar Oficial
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E63946] flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#E63946]" />
+                        <span>Marco de la Foto (Avatar)</span>
                       </label>
-                      <span className="text-[10px] text-[#8E92A4]">12 Avatares Gamer Tecsup</span>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">6 Marcos</span>
                     </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {AVATAR_FRAMES.map((frame) => {
+                        const isSelected = editCustomization.avatarFrame === frame.id;
+                        return (
+                          <button
+                            key={frame.id}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditCustomization({ ...editCustomization, avatarFrame: frame.id });
+                            }}
+                            className={`p-3 rounded-2xl border text-center transition-all cursor-pointer flex flex-col items-center gap-2 relative bg-[#0A0D14] ${
+                              isSelected
+                                ? 'ring-2 ring-[#E63946] border-[#E63946] shadow-lg shadow-[#E63946]/20 bg-[#E63946]/10'
+                                : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <AvatarWithFrame
+                              avatarUrl={editForm.avatar_url || ''}
+                              frame={frame.id}
+                              size="md"
+                              alt={frame.name}
+                            />
+                            <p className="text-xs font-black text-white truncate w-full">{frame.name}</p>
+                            {isSelected && (
+                              <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-[#E63946] text-white flex items-center justify-center text-[10px]">
+                                <Check className="w-3 h-3" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2. Tipo de Letra (Variedad de Fuentes) */}
+                  <div className="space-y-3 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-purple-400 flex items-center gap-1.5">
+                        <Type className="w-3.5 h-3.5 text-purple-400" />
+                        <span>Tipo de Letra del Nombre (Fuente)</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">8 Tipografías</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {NAME_FONT_LIST.map((font) => {
+                        const isSelected = editCustomization.nameTypography === font.id;
+                        return (
+                          <button
+                            key={font.id}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditCustomization({ ...editCustomization, nameTypography: font.id });
+                            }}
+                            className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 bg-[#0A0D14] ${
+                              isSelected
+                                ? 'ring-2 ring-purple-400 border-purple-400 bg-purple-500/10 shadow-md'
+                                : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="text-[10px] font-mono text-[#8E92A4] uppercase truncate">{font.name}</p>
+                              <p className={`text-base font-bold text-white truncate ${font.fontClass}`}>
+                                {editForm.nickname || user?.first_name || font.previewSample}
+                              </p>
+                              <p className="text-[10px] text-[#A8DADC]/70 truncate mt-0.5">{font.description}</p>
+                            </div>
+                            {isSelected && (
+                              <span className="w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold shrink-0">
+                                ✓
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 3. Color y Brillo del Nombre (Totalmente Independiente & Libre) */}
+                  <div className="space-y-3 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-[#E63946] flex items-center gap-1.5">
+                        <Palette className="w-3.5 h-3.5 text-[#E63946]" />
+                        <span>Color del Nombre (Cualquier Color que Quieras)</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">Presets + Hex Libre</span>
+                    </div>
+
+                    {/* Presets Gradients & Glows */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                      {NAME_COLOR_PRESETS.filter(c => c.id !== 'custom').map((colorConfig) => {
+                        const isSelected = editCustomization.nameColorPreset === colorConfig.id;
+                        return (
+                          <button
+                            key={colorConfig.id}
+                            type="button"
+                            onClick={() => {
+                              sounds.playClick();
+                              setEditCustomization({
+                                ...editCustomization,
+                                nameColorPreset: colorConfig.id,
+                                nameCustomColor: colorConfig.colorHex,
+                              });
+                            }}
+                            className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 bg-[#0A0D14] ${
+                              isSelected
+                                ? 'ring-2 ring-white border-white shadow-lg bg-white/10'
+                                : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <span 
+                              className="w-4 h-4 rounded-full shrink-0 shadow-sm"
+                              style={{ backgroundColor: colorConfig.colorHex }}
+                            />
+                            <span className="text-xs font-bold text-white truncate flex-1">
+                              {colorConfig.name}
+                            </span>
+                            {isSelected && (
+                              <span className="text-[10px] font-bold text-emerald-400">✓</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Selector de Color Hexadecimal Libre */}
+                    <div className={`p-3.5 rounded-2xl border transition-all bg-[#0A0D14] flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+                      editCustomization.nameColorPreset === 'custom'
+                        ? 'border-[#E63946] ring-2 ring-[#E63946]/50 bg-[#E63946]/5'
+                        : 'border-white/10'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="color"
+                          value={editCustomization.nameCustomColor || '#E63946'}
+                          onChange={(e) => {
+                            setEditCustomization({
+                              ...editCustomization,
+                              nameColorPreset: 'custom',
+                              nameCustomColor: e.target.value,
+                            });
+                          }}
+                          className="w-10 h-10 rounded-xl cursor-pointer border-2 border-white/20 bg-transparent p-0.5 shrink-0"
+                          title="Haz clic para escoger cualquier color de la paleta"
+                        />
+                        <div>
+                          <p className="text-xs font-black text-white flex items-center gap-1.5">
+                            <span>Selector de Color Libre (Hexadecimal)</span>
+                            {editCustomization.nameColorPreset === 'custom' && (
+                              <span className="px-2 py-0.2 rounded-full bg-[#E63946] text-white text-[9px] font-bold">
+                                Activo
+                              </span>
+                            )}
+                          </p>
+                          <p className="text-[11px] text-[#8E92A4]">
+                            Elige cualquier tono exacto. Se reflejará con brillo neón en tu perfil, podios y foros.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-[#8E92A4]">HEX:</span>
+                        <input
+                          type="text"
+                          value={editCustomization.nameCustomColor || '#E63946'}
+                          onChange={(e) => {
+                            setEditCustomization({
+                              ...editCustomization,
+                              nameColorPreset: 'custom',
+                              nameCustomColor: e.target.value,
+                            });
+                          }}
+                          placeholder="#E63946"
+                          className="input-arena text-xs font-mono uppercase w-28 bg-[#111520] border-white/10 text-white font-bold"
+                          maxLength={9}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            sounds.playClick();
+                            setEditCustomization({
+                              ...editCustomization,
+                              nameColorPreset: 'custom',
+                              nameCustomColor: editCustomization.nameCustomColor || '#E63946',
+                            });
+                          }}
+                          className={`btn-secondary px-3 py-2 text-xs font-bold ${
+                            editCustomization.nameColorPreset === 'custom' ? 'border-[#E63946] text-white' : ''
+                          }`}
+                        >
+                          Usar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 3. Selección de Avatar Oficial o URL */}
+                  <div className="space-y-3 pt-4 border-t border-white/10">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white">
+                      Avatar Oficial o Imagen
+                    </label>
 
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
                       {SYSTEM_AVATARS.map((av) => {
@@ -1308,29 +1739,23 @@ export default function ProfilePage() {
                                 : 'bg-[#0A0D14] border-white/10 hover:border-white/30'
                             }`}
                           >
-                            <div className="w-12 h-12 rounded-xl overflow-hidden bg-[#111520] flex items-center justify-center">
+                            <div className="w-11 h-11 rounded-xl overflow-hidden bg-[#111520] flex items-center justify-center">
                               <img src={av.url} alt={av.name} className="w-full h-full object-cover" />
                             </div>
-                            <span className="text-[9px] font-semibold text-[#CBD5E1] truncate max-w-[70px]">
+                            <span className="text-[9px] font-semibold text-[#CBD5E1] truncate max-w-[65px]">
                               {av.name}
                             </span>
                           </button>
                         );
                       })}
                     </div>
-                  </div>
 
-                  {/* Custom URL Option */}
-                  <div className="space-y-2 pt-2">
-                    <label className="block text-xs font-semibold text-[#8E92A4]">
-                      O pega una URL de avatar personalizada (Discord, Gravatar, Imgur):
-                    </label>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 pt-1">
                       <input
                         type="url"
                         value={customAvatarInput}
                         onChange={(e) => setCustomAvatarInput(e.target.value)}
-                        placeholder="https://ejemplo.com/mi-avatar.png"
+                        placeholder="O pega URL de avatar (Discord, Gravatar, Imgur)..."
                         className="input-arena flex-1 text-xs bg-[#0A0D14] border-white/10"
                       />
                       <button
@@ -1341,7 +1766,7 @@ export default function ProfilePage() {
                             toast.success('Avatar cargado en la vista previa.');
                           }
                         }}
-                        className="btn-secondary px-4 py-2 text-xs font-bold cursor-pointer"
+                        className="btn-secondary px-3.5 py-2 text-xs font-bold cursor-pointer"
                       >
                         Aplicar
                       </button>
@@ -1351,20 +1776,165 @@ export default function ProfilePage() {
                 </div>
               )}
 
-              {/* TAB 3: FICHA ACADÉMICA */}
-              {editTab === 'ACADEMIC' && (
+              {/* STEP 3: JUEGOS FAVORITOS */}
+              {editTab === 'GAMES' && (
+                <div className="space-y-4 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <Gamepad2 className="w-4 h-4 text-[#E63946]" />
+                        <span>Tus Juegos Favoritos</span>
+                      </h4>
+                      <p className="text-xs text-[#8E92A4]">
+                        Selecciona hasta 4 juegos que te gusten o compitas en Campus Arena
+                      </p>
+                    </div>
+                    <span className="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-xs font-mono font-bold text-white">
+                      {(editCustomization.favoriteGames || []).length} / 4
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+                    {GAME_LIST.map((game) => {
+                      const isSelected = (editCustomization.favoriteGames || []).includes(game.code);
+                      return (
+                        <button
+                          key={game.code}
+                          type="button"
+                          onClick={() => handleToggleFavoriteGame(game.code)}
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                            isSelected
+                              ? 'bg-[#E63946]/15 border-[#E63946] shadow-sm text-white'
+                              : 'bg-[#0A0D14] border-white/5 text-[#8E92A4] hover:border-white/20'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {game.logoUrl ? (
+                              <img src={game.logoUrl} alt={game.name} className="w-7 h-7 object-contain shrink-0 filter drop-shadow" />
+                            ) : (
+                              <div className="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                                <Gamepad2 className="w-4 h-4 text-[#38BDF8]" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <p className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-[#CBD5E1]'}`}>
+                                {game.name}
+                              </p>
+                              <p className="text-[10px] text-[#8E92A4]">{game.badge} • {game.shortName}</p>
+                            </div>
+                          </div>
+
+                          <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs shrink-0 border ${
+                            isSelected ? 'bg-[#E63946] border-[#E63946] text-white font-bold' : 'border-white/20 text-transparent'
+                          }`}>
+                            ✓
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 4: DATOS & AUDIO */}
+              {editTab === 'INFO' && (
                 <div className="space-y-5 animate-in fade-in">
                   
+                  {/* Gamertag / Apodo */}
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
+                      🎮 Gamertag / Apodo Competitivo
+                    </label>
+                    <input
+                      type="text"
+                      value={editForm.nickname || ''}
+                      onChange={(e) => setEditForm({ ...editForm, nickname: e.target.value })}
+                      placeholder="Ej. CyberViper, LuchoPro, Phantom..."
+                      maxLength={24}
+                      className="input-arena w-full font-bold text-white bg-[#0A0D14] border-white/10 focus:border-amber-400 text-sm"
+                    />
+                  </div>
+
+                  {/* Audio de Entrada Rápido */}
+                  <div className="space-y-3 pt-3 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <label className="block text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+                          <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Audio de Entrada Rápido (Soundbite)</span>
+                        </label>
+                        <p className="text-[11px] text-[#8E92A4]">
+                          Sonido sintetizado ultrarrápido al entrar o presionar el botón de tu perfil
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      {SOUNDBITES.map((snd) => {
+                        const isSelected = editCustomization.soundbite === snd.id;
+                        return (
+                          <div
+                            key={snd.id}
+                            className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-2.5 bg-[#0A0D14] ${
+                              isSelected
+                                ? 'ring-2 ring-cyan-400 border-cyan-400 bg-cyan-500/10'
+                                : 'border-white/10 hover:border-white/30'
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                sounds.playClick();
+                                setEditCustomization({ ...editCustomization, soundbite: snd.id });
+                                if (snd.id !== 'none') playCustomSoundbite(snd.id);
+                              }}
+                              className="text-left flex-1 cursor-pointer"
+                            >
+                              <p className="text-xs font-black text-white">{snd.name}</p>
+                            </button>
+
+                            {snd.id !== 'none' && (
+                              <button
+                                type="button"
+                                onClick={() => playCustomSoundbite(snd.id)}
+                                className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-cyan-300 text-xs font-mono flex items-center gap-1 shrink-0 border border-white/10 cursor-pointer"
+                                title="Reproducir sonido de prueba"
+                              >
+                                <Volume2 className="w-3 h-3" />
+                                <span>Probar</span>
+                              </button>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Biografía */}
+                  <div className="space-y-1.5 pt-3 border-t border-white/10">
+                    <label className="block text-xs font-bold uppercase tracking-wider text-white">
+                      ✍️ Biografía
+                    </label>
+                    <textarea
+                      value={editForm.biography || ''}
+                      onChange={(e) => setEditForm({ ...editForm, biography: e.target.value })}
+                      rows={2}
+                      placeholder="Escribe tu estilo de juego o trayectoria universitaria..."
+                      className="input-arena w-full bg-[#0A0D14] border-white/10 resize-none text-xs"
+                      maxLength={180}
+                    />
+                  </div>
+
                   {/* Sede Institucional */}
-                  <div className="space-y-2">
+                  <div className="space-y-2 pt-3 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
                       📍 Sede Institucional Tecsup
                     </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    <div className="grid grid-cols-3 gap-2">
                       {[
-                        { id: 'Lima', name: 'Sede Lima', desc: 'Campus Principal Santa Anita', flag: '🏛️' },
-                        { id: 'Arequipa', name: 'Sede Arequipa', desc: 'Campus Hunter / Bustamante', flag: '🌋' },
-                        { id: 'Trujillo', name: 'Sede Trujillo', desc: 'Campus Víctor Larco', flag: '🌊' },
+                        { id: 'Lima', name: 'Lima', flag: '🏛️' },
+                        { id: 'Arequipa', name: 'Arequipa', flag: '🌋' },
+                        { id: 'Trujillo', name: 'Trujillo', flag: '🌊' },
                       ].map((c) => {
                         const isSelected = (editForm.campus || 'Lima') === c.id;
                         return (
@@ -1372,19 +1942,14 @@ export default function ProfilePage() {
                             key={c.id}
                             type="button"
                             onClick={() => setEditForm({ ...editForm, campus: c.id })}
-                            className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 cursor-pointer ${
+                            className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
                               isSelected
-                                ? 'bg-[#E63946]/15 border-[#E63946] text-white shadow-sm'
-                                : 'bg-[#0A0D14] border-white/10 text-[#8E92A4] hover:border-white/20'
+                                ? 'bg-[#E63946]/15 border-[#E63946] text-white font-bold'
+                                : 'bg-[#0A0D14] border-white/5 text-[#8E92A4] hover:border-white/20'
                             }`}
                           >
-                            <span className="text-xl shrink-0">{c.flag}</span>
-                            <div>
-                              <p className={`text-xs font-bold ${isSelected ? 'text-[#E63946]' : 'text-white'}`}>
-                                {c.name}
-                              </p>
-                              <p className="text-[10px] text-[#8E92A4]">{c.desc}</p>
-                            </div>
+                            <span className="text-base mr-1">{c.flag}</span>
+                            <span className="text-xs">{c.name}</span>
                           </button>
                         );
                       })}
@@ -1392,68 +1957,60 @@ export default function ProfilePage() {
                   </div>
 
                   {/* Condición Académica */}
-                  <div className="space-y-2">
-                    <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      🎓 Condición en Tecsup
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditRole('ESTUDIANTE');
-                          if (!editForm.cycle || editForm.cycle < 1 || editForm.cycle > 6) {
-                            setEditForm({ ...editForm, cycle: 1 });
-                          }
-                        }}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                          editRole === 'ESTUDIANTE'
-                            ? 'bg-[#E63946]/15 border-[#E63946] text-white'
-                            : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-white">Estudiante Regular</p>
-                        <p className="text-[10px] text-[#8E92A4]">Ciclos 1° al 6°</p>
-                      </button>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditRole('ESTUDIANTE');
+                        if (!editForm.cycle || editForm.cycle < 1 || editForm.cycle > 6) {
+                          setEditForm({ ...editForm, cycle: 1 });
+                        }
+                      }}
+                      className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                        editRole === 'ESTUDIANTE'
+                          ? 'bg-[#E63946]/15 border-[#E63946] text-white font-bold'
+                          : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
+                      }`}
+                    >
+                      <span className="text-xs">Estudiante Regular</span>
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditRole('DOCENTE');
-                          setEditForm({ ...editForm, cycle: 0 });
-                        }}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                          editRole === 'DOCENTE'
-                            ? 'bg-indigo-500/15 border-indigo-500 text-white'
-                            : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-white">Docente Tecsup</p>
-                        <p className="text-[10px] text-[#8E92A4]">Plana Académica</p>
-                      </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditRole('DOCENTE');
+                        setEditForm({ ...editForm, cycle: 0 });
+                      }}
+                      className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                        editRole === 'DOCENTE'
+                          ? 'bg-indigo-500/15 border-indigo-500 text-white font-bold'
+                          : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
+                      }`}
+                    >
+                      <span className="text-xs">Docente Tecsup</span>
+                    </button>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setEditRole('EGRESADO');
-                          setEditForm({ ...editForm, cycle: 0 });
-                        }}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
-                          editRole === 'EGRESADO'
-                            ? 'bg-amber-500/15 border-amber-500 text-white'
-                            : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
-                        }`}
-                      >
-                        <p className="text-xs font-bold text-white">Egresado Tecsup</p>
-                        <p className="text-[10px] text-[#8E92A4]">Alumni Graduado</p>
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditRole('EGRESADO');
+                        setEditForm({ ...editForm, cycle: 0 });
+                      }}
+                      className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                        editRole === 'EGRESADO'
+                          ? 'bg-amber-500/15 border-amber-500 text-white font-bold'
+                          : 'bg-[#0A0D14] border-white/10 text-[#8E92A4]'
+                      }`}
+                    >
+                      <span className="text-xs">Egresado Tecsup</span>
+                    </button>
                   </div>
 
                   {/* Carrera y Ciclo */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className={editRole === 'ESTUDIANTE' ? 'sm:col-span-2 space-y-1.5' : 'sm:col-span-3 space-y-1.5'}>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                        {editRole === 'DOCENTE' ? 'Área Docente' : 'Carrera Profesional'}
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className={editRole === 'ESTUDIANTE' ? 'sm:col-span-2 space-y-1' : 'sm:col-span-3 space-y-1'}>
+                      <label className="block text-[11px] font-semibold text-[#8E92A4]">
+                        {editRole === 'DOCENTE' ? 'Área Docente' : 'Carrera'}
                       </label>
                       <input
                         type="text"
@@ -1466,9 +2023,9 @@ export default function ProfilePage() {
                     </div>
 
                     {editRole === 'ESTUDIANTE' && (
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                          Ciclo Actual
+                      <div className="space-y-1">
+                        <label className="block text-[11px] font-semibold text-[#8E92A4]">
+                          Ciclo
                         </label>
                         <select
                           value={editForm.cycle || 1}
@@ -1596,6 +2153,7 @@ export default function ProfilePage() {
         </div>
       )}
 
+      </div>
     </div>
   );
 }

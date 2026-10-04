@@ -20,7 +20,14 @@ import {
   ArrowRight,
   Eye,
   ChevronRight,
-  Sparkles
+  Sparkles,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Columns2,
+  Tv,
+  LayoutGrid,
+  Copy
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
@@ -61,9 +68,11 @@ interface BracketViewProps {
   tournamentId: string;
   initialBracket: BracketData | null;
   onUpdate: () => void;
+  isFullWidth?: boolean;
+  onToggleFullWidth?: () => void;
 }
 
-export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketViewProps) {
+export function BracketView({ tournamentId, initialBracket, onUpdate, isFullWidth, onToggleFullWidth }: BracketViewProps) {
   const { user, isAuthenticated, isAdmin, isOrganizer } = useAuth();
   const canManage = isAuthenticated && (isAdmin || isOrganizer || user?.role === 'ADMIN' || user?.role === 'ORGANIZER');
   
@@ -98,6 +107,79 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   
   // Stage / OBS Mode state
   const [isStageMode, setIsStageMode] = useState(false);
+
+  // Zoom controls for Tree and Stage Mode
+  const [treeZoom, setTreeZoom] = useState<number>(100);
+  const [stageZoom, setStageZoom] = useState<number>(100);
+
+  // Card Density: 'compact' (fits all on screen) | 'detailed' (expanded cards with tags)
+  const [cardDensity, setCardDensity] = useState<'compact' | 'detailed'>('compact');
+
+  // Auto-detect OBS Browser Source from URL query parameter (?obs=true)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('obs') === 'true' || params.get('stage') === 'true') {
+        setIsStageMode(true);
+      }
+    }
+  }, []);
+
+  const copyObsUrl = () => {
+    if (typeof window !== 'undefined') {
+      const url = `${window.location.origin}${window.location.pathname}?obs=true`;
+      navigator.clipboard.writeText(url);
+      toast.success('¡Enlace de OBS copiado! Pégalo como Browser Source en OBS Studio (1920x1080).');
+    }
+  };
+
+  const toggleNativeFullscreen = () => {
+    if (typeof document === 'undefined') return;
+    try {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    } catch (_) {}
+  };
+
+  const enterStageMode = () => {
+    setIsStageMode(true);
+    try {
+      if (typeof document !== 'undefined' && document.documentElement.requestFullscreen && !document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+    } catch (_) {}
+  };
+
+  const exitStageMode = () => {
+    setIsStageMode(false);
+    try {
+      if (typeof document !== 'undefined' && document.exitFullscreen && document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {});
+      }
+    } catch (_) {}
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isStageMode) {
+        exitStageMode();
+      }
+    };
+    const handleFsChange = () => {
+      if (typeof document !== 'undefined' && !document.fullscreenElement && isStageMode) {
+        setIsStageMode(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('fullscreenchange', handleFsChange);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('fullscreenchange', handleFsChange);
+    };
+  }, [isStageMode]);
 
   // Interactive SVG connector lines state
   const normalInnerRef = React.useRef<HTMLDivElement>(null);
@@ -161,7 +243,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     }
 
     setConnectorLines(newLines);
-  }, [initialBracket, isStageMode]);
+  }, [initialBracket, isStageMode, treeZoom, stageZoom, cardDensity]);
 
   useEffect(() => {
     if (viewMode === 'TREE' || isStageMode) {
@@ -177,7 +259,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
         window.removeEventListener('resize', handleResize);
       };
     }
-  }, [calculateBracketLines, viewMode, isStageMode]);
+  }, [calculateBracketLines, viewMode, isStageMode, treeZoom, stageZoom, cardDensity]);
 
   // ⚡ Supabase Realtime Channel Subscription
   useEffect(() => {
@@ -211,7 +293,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
     const interval = setInterval(() => {
       onUpdate();
-    }, 15000);
+    }, 30000);
 
     return () => {
       supabase.removeChannel(channel);
@@ -219,7 +301,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     };
   }, [tournamentId, onUpdate]);
 
-  const handleGenerateBrackets = async (seedingMethod: 'RANDOM' | 'BY_TROPHIES' = 'BY_TROPHIES') => {
+  const handleGenerateBrackets = async (seedingMethod: 'RANDOM' | 'BY_TROPHIES' = 'RANDOM') => {
     setIsGenerating(true);
     setGenError(null);
     try {
@@ -529,16 +611,300 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
   };
 
   // ==========================================
+  // STREAMLINED COMPACT MATCH CARD (ULTRA-LEGIBLE & BROADCAST FIT)
+  // ==========================================
+  const renderCompactCard = (m: MatchupItem, roundName: string, isStage: boolean) => {
+    const prefix = isStage ? 'stage-' : '';
+    const isCompleted = m.status === 'COMPLETED' || m.status === 'WALKOVER';
+    const isReady = m.status === 'READY';
+    const isFinal = !m.next_matchup_id;
+    const isCardHovered = hoveredMatchupId === m.id;
+    const hasBoth = Boolean(m.participant_a_tag && m.participant_b_tag);
+
+    const isWinnerA = isCompleted && m.winner_tag && m.winner_tag === m.participant_a_tag;
+    const isWinnerB = isCompleted && m.winner_tag && m.winner_tag === m.participant_b_tag;
+
+    return (
+      <div
+        key={m.id}
+        id={`${prefix}matchup-card-${m.id}`}
+        onClick={() => handleMatchupClick(m, roundName)}
+        onMouseEnter={() => {
+          setHoveredMatchupId(m.id);
+          sounds.playClick();
+        }}
+        onMouseLeave={() => setHoveredMatchupId(null)}
+        className={`group relative rounded-xl border transition-all duration-150 select-none cursor-pointer shadow-lg overflow-visible ${
+          isFinal
+            ? 'bg-gradient-to-r from-[#172554] via-[#0b1120] to-[#172554] border-amber-400/90 shadow-amber-500/25 ring-1 ring-amber-400/60 hover:border-amber-300'
+            : isCardHovered
+            ? 'bg-[#0f172a] border-cyan-400 shadow-cyan-500/30 ring-1 ring-cyan-400/60 scale-[1.02]'
+            : isCompleted
+            ? 'bg-[#0b1120] border-slate-700/80 hover:border-slate-500'
+            : isReady
+            ? 'bg-[#0f172a] border-[#E63946] shadow-sm shadow-[#E63946]/30 ring-1 ring-[#E63946]/50 hover:border-[#E63946]'
+            : 'bg-[#0b1120]/90 border-slate-800/80 opacity-80 hover:opacity-100'
+        }`}
+      >
+        {/* Left Accent Status Strip */}
+        <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-l-xl z-10 ${
+          isFinal && isCompleted
+            ? 'bg-amber-400 shadow-sm shadow-amber-400'
+            : isCompleted
+            ? 'bg-emerald-400'
+            : isReady
+            ? 'bg-[#E63946] animate-pulse'
+            : 'bg-slate-700'
+        }`} />
+
+        {/* Top-Right Floating Micro Badge (Match # and Status) */}
+        <div className="absolute -top-2 right-2.5 z-20 flex items-center gap-1 pointer-events-none">
+          {isFinal && isCompleted ? (
+            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-mono font-black uppercase tracking-wider bg-amber-500 text-black border border-amber-300 shadow-sm flex items-center gap-0.5">
+              <Trophy className="w-2 h-2" />
+              Gran Final
+            </span>
+          ) : isCompleted ? (
+            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-mono font-black uppercase tracking-wider bg-slate-900/95 text-emerald-400 border border-emerald-500/30 shadow-sm flex items-center gap-0.5">
+              <CheckCircle2 className="w-2 h-2" />
+              M#{m.position}
+            </span>
+          ) : isReady ? (
+            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-mono font-black uppercase tracking-wider bg-[#E63946] text-white border border-[#E63946] shadow-sm shadow-[#E63946]/50 flex items-center gap-1 animate-pulse">
+              <span className="w-1 h-1 rounded-full bg-white animate-ping" />
+              LIVE • M#{m.position}
+            </span>
+          ) : (
+            <span className="px-1.5 py-0.2 rounded-full text-[8px] font-mono font-bold uppercase tracking-wider bg-slate-900/90 text-slate-400 border border-white/10 shadow-sm">
+              M#{m.position}
+            </span>
+          )}
+        </div>
+
+        {/* Row 1: Participant A */}
+        <div className={`h-[22px] sm:h-[23px] px-2.5 pl-3 flex items-center justify-between transition-colors rounded-t-xl ${
+          isWinnerA ? 'bg-emerald-500/20 text-emerald-200' : isCompleted && m.winner_tag ? 'text-white/40' : 'text-white'
+        }`}>
+          <div className="flex items-center gap-1.5 min-w-0 pr-1.5">
+            <span className={`text-[9px] font-mono shrink-0 px-1 py-0.2 rounded ${
+              isWinnerA ? 'bg-emerald-400/30 text-emerald-300 font-black' : 'bg-white/5 text-white/40 font-bold'
+            }`}>
+              1
+            </span>
+            <span className={`text-xs truncate tracking-tight ${
+              isWinnerA ? 'font-black text-emerald-300 drop-shadow-sm' : isCompleted && m.winner_tag ? 'font-medium text-white/40' : 'font-bold text-white'
+            }`}>
+              {m.participant_a_name || 'Por definir'}
+            </span>
+            {isWinnerA && (
+              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0 inline-block drop-shadow" />
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <span className={`text-xs font-mono font-black w-6 sm:w-7 h-4.5 rounded flex items-center justify-center transition-all ${
+              isWinnerA
+                ? 'bg-emerald-400 text-slate-950 font-black shadow-sm'
+                : isCompleted
+                ? 'bg-white/5 text-white/40'
+                : isReady
+                ? 'bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/40'
+                : 'bg-white/5 text-white/20'
+            }`}>
+              {isCompleted ? m.score_a : isReady ? (m.score_a || 0) : '-'}
+            </span>
+          </div>
+        </div>
+
+        {/* Hairline Divider */}
+        <div className="border-t border-white/10" />
+
+        {/* Row 2: Participant B */}
+        <div className={`h-[22px] sm:h-[23px] px-2.5 pl-3 flex items-center justify-between transition-colors rounded-b-xl ${
+          isWinnerB ? 'bg-emerald-500/20 text-emerald-200' : isCompleted && m.winner_tag ? 'text-white/40' : 'text-white'
+        }`}>
+          <div className="flex items-center gap-1.5 min-w-0 pr-1.5">
+            <span className={`text-[9px] font-mono shrink-0 px-1 py-0.2 rounded ${
+              isWinnerB ? 'bg-emerald-400/30 text-emerald-300 font-black' : 'bg-white/5 text-white/40 font-bold'
+            }`}>
+              2
+            </span>
+            <span className={`text-xs truncate tracking-tight ${
+              isWinnerB ? 'font-black text-emerald-300 drop-shadow-sm' : isCompleted && m.winner_tag ? 'font-medium text-white/40' : 'font-bold text-white'
+            }`}>
+              {m.participant_b_name || 'Por definir'}
+            </span>
+            {isWinnerB && (
+              <Crown className="w-3.5 h-3.5 text-amber-400 fill-amber-400 shrink-0 inline-block drop-shadow" />
+            )}
+          </div>
+
+          <div className="flex items-center gap-1 shrink-0">
+            <span className={`text-xs font-mono font-black w-6 sm:w-7 h-4.5 rounded flex items-center justify-center transition-all ${
+              isWinnerB
+                ? 'bg-emerald-400 text-slate-950 font-black shadow-sm'
+                : isCompleted
+                ? 'bg-white/5 text-white/40'
+                : isReady
+                ? 'bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/40'
+                : 'bg-white/5 text-white/20'
+            }`}>
+              {isCompleted ? m.score_b : isReady ? (m.score_b || 0) : '-'}
+            </span>
+          </div>
+        </div>
+
+        {/* Admin referee quick trigger button on card hover */}
+        {canManage && hasBoth && !isCompleted && (
+          <button
+            type="button"
+            onClick={(e) => handleOpenReferee(e, m)}
+            className="absolute right-1 top-1/2 -translate-y-1/2 z-30 opacity-0 group-hover:opacity-100 transition-opacity px-1.5 py-0.5 rounded bg-[#E63946] text-white text-[9px] font-black uppercase shadow-md hover:bg-[#d62839]"
+            title="Abrir marcador arbitral"
+          >
+            Score
+          </button>
+        )}
+      </div>
+    );
+  };
+
+  // ==========================================
   // RENDER 2: CINEMATIC DESKTOP LASER TREE VIEW
   // ==========================================
   const renderBracketColumns = (isStage: boolean = false) => {
     const prefix = isStage ? 'stage-' : '';
     const innerRef = isStage ? stageInnerRef : normalInnerRef;
-    const minColWidth = 320;
-    const totalMinWidth = Math.max(initialBracket.rounds.length * minColWidth, 900);
+    const isCompact = isStage || cardDensity === 'compact';
+
+    // In Stage Mode, fit to 100% of the screen width and height
+    if (isStage) {
+      return (
+        <div className="w-full h-full flex flex-col justify-between overflow-hidden">
+          <div 
+            ref={innerRef}
+            className="relative w-full h-full flex flex-col justify-between"
+          >
+            {/* SVG BRACKET CONNECTOR LINES WITH LASER PULSE */}
+            <svg 
+              className="absolute inset-0 pointer-events-none w-full h-full overflow-visible z-0"
+              aria-hidden="true"
+            >
+              <defs>
+                <filter id="laser-glow-stage" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="3.5" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <linearGradient id="laser-active-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#E63946" />
+                  <stop offset="100%" stopColor="#06B6D4" />
+                </linearGradient>
+                <linearGradient id="laser-winner-stage" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10B981" />
+                  <stop offset="100%" stopColor="#06B6D4" />
+                </linearGradient>
+              </defs>
+
+              {connectorLines.map((line, idx) => {
+                const isHovered = hoveredMatchupId === line.fromId || hoveredMatchupId === line.toId;
+                const isWinnerPath = line.hasWinner;
+
+                return (
+                  <g key={`bracket-conn-${line.fromId}-${line.toId}-${idx}`}>
+                    {isHovered && (
+                      <path
+                        d={line.d}
+                        fill="none"
+                        stroke="url(#laser-active-stage)"
+                        strokeWidth="6"
+                        strokeOpacity="0.45"
+                        filter="url(#laser-glow-stage)"
+                      />
+                    )}
+                    <path
+                      d={line.d}
+                      fill="none"
+                      stroke={
+                        isHovered
+                          ? 'url(#laser-active-stage)'
+                          : isWinnerPath
+                          ? 'url(#laser-winner-stage)'
+                          : 'rgba(255, 255, 255, 0.12)'
+                      }
+                      strokeWidth={isHovered ? 2.5 : isWinnerPath ? 2 : 1.5}
+                      strokeOpacity={isHovered ? 1 : isWinnerPath ? 0.8 : 0.35}
+                    />
+                    {isHovered && (
+                      <circle r="4" fill="#06B6D4" filter="url(#laser-glow-stage)">
+                        <animateMotion dur="0.9s" repeatCount="indefinite" path={line.d} />
+                      </circle>
+                    )}
+                  </g>
+                );
+              })}
+            </svg>
+
+            {/* Dynamic Rounds Grid - Completely Fit to Screen with zero scroll */}
+            <div 
+              className="w-full h-full grid gap-3 md:gap-5 xl:gap-8 items-stretch relative z-10"
+              style={{ gridTemplateColumns: `repeat(${initialBracket.rounds.length}, minmax(0, 1fr))` }}
+            >
+              {initialBracket.rounds.map((round, rIdx) => {
+                const totalRounds = initialBracket.rounds.length;
+                const isFinalRound = rIdx === totalRounds - 1;
+
+                // Group matchups in pairs if there are 8 or more
+                const isOctavosOrLarger = round.matchups.length >= 8;
+                const pairs: MatchupItem[][] = [];
+                if (isOctavosOrLarger) {
+                  for (let i = 0; i < round.matchups.length; i += 2) {
+                    pairs.push(round.matchups.slice(i, i + 2));
+                  }
+                }
+
+                return (
+                  <div key={round.id} className="flex flex-col h-full min-h-0">
+                    {/* Round Title */}
+                    <div className="py-1 px-2 rounded-xl border border-cyan-500/40 bg-[#1D3557]/40 text-center shrink-0 mb-1.5 shadow-sm">
+                      <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-cyan-300">
+                        {round.name}
+                      </span>
+                    </div>
+
+                    {/* Matchups Container - Mathematically Balanced Vertically */}
+                    <div className={`flex-1 min-h-0 flex flex-col ${
+                      isFinalRound ? 'justify-center' : 'justify-around'
+                    } py-0.5`}>
+                      {isOctavosOrLarger ? (
+                        pairs.map((pair, pIdx) => (
+                          <div key={`pair-${round.id}-${pIdx}`} className="flex flex-col gap-1.5">
+                            {pair.map(m => renderCompactCard(m, round.name, true))}
+                          </div>
+                        ))
+                      ) : (
+                        round.matchups.map(m => renderCompactCard(m, round.name, true))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Normal View (Tree with density options)
+    const baseColWidth = isCompact ? 280 : 330;
+    const colWidth = Math.round(baseColWidth * (treeZoom / 100));
+    const gapWidth = Math.round((isCompact ? 36 : 44) * (treeZoom / 100));
+    const totalMinWidth = Math.max(initialBracket.rounds.length * (colWidth + gapWidth), 850);
 
     return (
-      <div className="overflow-x-auto pb-6">
+      <div className="overflow-x-auto pb-6 scrollbar-thin">
         <div 
           ref={innerRef}
           className="relative min-w-max py-2"
@@ -550,18 +916,18 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             aria-hidden="true"
           >
             <defs>
-              <filter id={`laser-glow-${prefix || 'normal'}`} x="-30%" y="-30%" width="160%" height="160%">
+              <filter id="laser-glow-normal" x="-30%" y="-30%" width="160%" height="160%">
                 <feGaussianBlur stdDeviation="3.5" result="blur" />
                 <feMerge>
                   <feMergeNode in="blur" />
                   <feMergeNode in="SourceGraphic" />
                 </feMerge>
               </filter>
-              <linearGradient id={`laser-active-${prefix || 'normal'}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="laser-active-normal" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#E63946" />
                 <stop offset="100%" stopColor="#06B6D4" />
               </linearGradient>
-              <linearGradient id={`laser-winner-${prefix || 'normal'}`} x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="laser-winner-normal" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stopColor="#10B981" />
                 <stop offset="100%" stopColor="#06B6D4" />
               </linearGradient>
@@ -577,10 +943,10 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     <path
                       d={line.d}
                       fill="none"
-                      stroke={`url(#laser-active-${prefix || 'normal'})`}
+                      stroke="url(#laser-active-normal)"
                       strokeWidth="6"
                       strokeOpacity="0.45"
-                      filter={`url(#laser-glow-${prefix || 'normal'})`}
+                      filter="url(#laser-glow-normal)"
                     />
                   )}
                   <path
@@ -588,16 +954,16 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     fill="none"
                     stroke={
                       isHovered
-                        ? `url(#laser-active-${prefix || 'normal'})`
+                        ? 'url(#laser-active-normal)'
                         : isWinnerPath
-                        ? `url(#laser-winner-${prefix || 'normal'})`
+                        ? 'url(#laser-winner-normal)'
                         : 'rgba(255, 255, 255, 0.1)'
                     }
                     strokeWidth={isHovered ? 2.5 : isWinnerPath ? 2 : 1.5}
                     strokeOpacity={isHovered ? 1 : isWinnerPath ? 0.8 : 0.35}
                   />
                   {isHovered && (
-                    <circle r="4" fill="#06B6D4" filter={`url(#laser-glow-${prefix || 'normal'})`}>
+                    <circle r="4" fill="#06B6D4" filter="url(#laser-glow-normal)">
                       <animateMotion dur="0.9s" repeatCount="indefinite" path={line.d} />
                     </circle>
                   )}
@@ -608,26 +974,29 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
           {/* Grid of Rounds */}
           <div 
-            className="min-w-full grid gap-8 sm:gap-14 items-stretch relative z-10"
-            style={{ gridTemplateColumns: `repeat(${initialBracket.rounds.length}, minmax(280px, 1fr))` }}
+            className="min-w-full grid items-stretch relative z-10"
+            style={{ 
+              gridTemplateColumns: `repeat(${initialBracket.rounds.length}, minmax(${colWidth}px, 1fr))`,
+              gap: `${gapWidth}px` 
+            }}
           >
             {initialBracket.rounds.map((round) => (
               <div key={round.id} className="space-y-4">
                 
                 {/* Round Title */}
-                <div className={`p-3 rounded-xl border text-center transition-all ${
-                  isStage 
-                    ? 'bg-[#1D3557]/20 border-cyan-500/40 shadow-lg shadow-cyan-500/10' 
-                    : 'bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm'
-                }`}>
+                <div className="p-3 rounded-2xl border text-center transition-all bg-[var(--bg-card)] border-[var(--border-card)] shadow-sm">
                   <span className="text-xs font-black uppercase tracking-wider text-[var(--text-primary)]">
                     {round.name}
                   </span>
                 </div>
 
                 {/* Matchups in this Round */}
-                <div className="space-y-6 flex flex-col justify-around min-h-[420px]">
+                <div className="space-y-4 flex flex-col justify-around min-h-[420px]">
                   {round.matchups.map((m) => {
+                    if (isCompact) {
+                      return renderCompactCard(m, round.name, false);
+                    }
+
                     const isCompleted = m.status === 'COMPLETED' || m.status === 'WALKOVER';
                     const isReady = m.status === 'READY';
                     const isFinal = !m.next_matchup_id;
@@ -637,28 +1006,28 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                     return (
                       <div
                         key={m.id}
-                        id={`${prefix}matchup-card-${m.id}`}
+                        id={`matchup-card-${m.id}`}
                         onClick={() => handleMatchupClick(m, round.name)}
                         onMouseEnter={() => {
                           setHoveredMatchupId(m.id);
                           sounds.playClick();
                         }}
                         onMouseLeave={() => setHoveredMatchupId(null)}
-                        className={`relative rounded-2xl p-4 border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
+                        className={`relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 select-none shadow-sm hover:scale-[1.02] cursor-pointer group ${
                           isFinal
-                            ? 'bg-gradient-to-b from-[#1D3557]/15 to-[var(--bg-card)] border-amber-400/60 shadow-xl shadow-amber-500/10 hover:border-amber-400'
+                            ? 'bg-gradient-to-b from-[#1D3557]/20 via-[var(--bg-card)] to-[var(--bg-card)] border-amber-400/70 shadow-2xl shadow-amber-500/15 hover:border-amber-400'
                             : isCardHovered
-                            ? 'bg-[var(--bg-card)] border-cyan-400/80 shadow-lg shadow-cyan-500/15 ring-1 ring-cyan-400/40'
+                            ? 'bg-[var(--bg-card)] border-cyan-400/90 shadow-xl shadow-cyan-500/20 ring-1 ring-cyan-400/50'
                             : isCompleted
                             ? 'bg-[var(--bg-card)] border-[var(--border-card)] hover:border-[#E63946]/50'
                             : isReady
-                            ? 'bg-[var(--bg-card)] border-[#E63946]/50 hover:border-[#E63946] shadow-lg shadow-[#E63946]/10 ring-1 ring-[#E63946]/20'
+                            ? 'bg-[var(--bg-card)] border-[#E63946]/60 hover:border-[#E63946] shadow-lg shadow-[#E63946]/15 ring-1 ring-[#E63946]/30'
                             : 'bg-[var(--bg-card)]/70 border-[var(--border-card)]/50 opacity-70 hover:opacity-100'
                         }`}
                       >
                         {/* Top status indicator */}
-                        <div className="flex items-center justify-between mb-2 text-[10px] font-mono">
-                          <span className="text-[var(--text-secondary)]">Match #{m.position}</span>
+                        <div className="flex items-center justify-between mb-2.5 font-mono text-[10px]">
+                          <span className="text-[var(--text-secondary)] font-bold">Match #{m.position}</span>
                           
                           {isCompleted ? (
                             <span className="text-emerald-500 dark:text-emerald-400 flex items-center gap-1 font-bold">
@@ -678,17 +1047,19 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                         {/* Participant A */}
                         <div className={`p-2.5 rounded-xl flex items-center justify-between transition-colors ${
                           m.winner_tag && m.winner_tag === m.participant_a_tag
-                            ? 'bg-emerald-500/15 border border-emerald-500/30'
+                            ? 'bg-emerald-500/15 border border-emerald-500/35'
                             : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
                           <div className="space-y-0.5 truncate pr-2">
-                            <p className={`text-xs font-bold truncate ${
+                            <p className={`truncate text-xs font-bold ${
                               m.winner_tag === m.participant_a_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                             }`}>
                               {m.participant_a_name || 'TBD (Por definir)'}
                             </p>
                             {m.participant_a_tag && (
-                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_a_tag}</p>
+                              <p className="text-[var(--text-muted)] font-mono text-[10px]">
+                                {m.participant_a_tag}
+                              </p>
                             )}
                           </div>
 
@@ -696,29 +1067,33 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                             {m.winner_tag && m.winner_tag === m.participant_a_tag && (
                               <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400" />
                             )}
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
+                            <span className="font-mono font-black rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs px-2 py-0.5">
                               {isCompleted ? m.score_a : '-'}
                             </span>
                           </div>
                         </div>
 
                         {/* VS divider */}
-                        <div className="text-center my-1 text-[9px] font-mono text-[var(--text-muted)] font-bold">VS</div>
+                        <div className="text-center font-mono text-[var(--text-muted)] font-bold my-1 text-[9px]">
+                          VS
+                        </div>
 
                         {/* Participant B */}
                         <div className={`p-2.5 rounded-xl flex items-center justify-between transition-colors ${
                           m.winner_tag && m.winner_tag === m.participant_b_tag
-                            ? 'bg-emerald-500/15 border border-emerald-500/30'
+                            ? 'bg-emerald-500/15 border border-emerald-500/35'
                             : 'bg-[var(--bg-arena)] border border-[var(--border-card)]'
                         }`}>
                           <div className="space-y-0.5 truncate pr-2">
-                            <p className={`text-xs font-bold truncate ${
+                            <p className={`truncate text-xs font-bold ${
                               m.winner_tag === m.participant_b_tag ? 'text-emerald-500 dark:text-emerald-300 font-black' : 'text-[var(--text-primary)]'
                             }`}>
                               {m.participant_b_name || 'TBD (Por definir)'}
                             </p>
                             {m.participant_b_tag && (
-                              <p className="text-[10px] text-[var(--text-muted)] font-mono">{m.participant_b_tag}</p>
+                              <p className="text-[var(--text-muted)] font-mono text-[10px]">
+                                {m.participant_b_tag}
+                              </p>
                             )}
                           </div>
 
@@ -726,7 +1101,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
                             {m.winner_tag && m.winner_tag === m.participant_b_tag && (
                               <Crown className="w-3.5 h-3.5 text-amber-500 dark:text-amber-400 fill-amber-400" />
                             )}
-                            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)]">
+                            <span className="font-mono font-black rounded bg-[var(--bg-card)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs px-2 py-0.5">
                               {isCompleted ? m.score_b : '-'}
                             </span>
                           </div>
@@ -772,7 +1147,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
     <div className="space-y-6 animate-in fade-in">
       
       {/* Header Info & View Switcher */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[var(--bg-card)] p-4 sm:p-5 rounded-3xl border border-[var(--border-card)] shadow-sm">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 bg-[var(--bg-card)] p-4 sm:p-5 rounded-3xl border border-[var(--border-card)] shadow-sm">
         
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-[#E63946]/15 text-[#E63946] flex items-center justify-center shrink-0 border border-[#E63946]/20">
@@ -784,7 +1159,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 w-full sm:w-auto justify-between sm:justify-end">
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-between lg:justify-end">
           
           {/* Mode Switcher: Rounds vs Tree */}
           <div className="bg-[var(--bg-arena)] p-1 rounded-2xl border border-[var(--border-card)] flex items-center">
@@ -823,23 +1198,89 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
             </button>
           </div>
 
+          {/* Density Switcher */}
+          {viewMode === 'TREE' && (
+            <button
+              type="button"
+              onClick={() => {
+                setCardDensity((d) => (d === 'compact' ? 'detailed' : 'compact'));
+                sounds.playClick();
+              }}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                cardDensity === 'compact'
+                  ? 'bg-cyan-500/15 text-cyan-300 border border-cyan-500/30'
+                  : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-transparent'
+              }`}
+              title="Alternar entre modo compacto y detallado"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{cardDensity === 'compact' ? 'Todo en Pantalla' : 'Detallado'}</span>
+            </button>
+          )}
+
+          {/* Zoom Controls for Tree Mode */}
+          {viewMode === 'TREE' && (
+            <div className="bg-[var(--bg-arena)] p-1 rounded-2xl border border-[var(--border-card)] flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setTreeZoom((z) => Math.max(z - 15, 75))}
+                disabled={treeZoom <= 75}
+                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 cursor-pointer"
+                title="Alejar (Zoom Out)"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setTreeZoom(100)}
+                className="px-2 py-0.5 rounded text-[11px] font-mono font-bold text-[var(--text-secondary)] hover:text-[var(--text-primary)] cursor-pointer"
+                title="Restablecer tamaño (100%)"
+              >
+                {treeZoom}%
+              </button>
+              <button
+                type="button"
+                onClick={() => setTreeZoom((z) => Math.min(z + 15, 135))}
+                disabled={treeZoom >= 135}
+                className="p-1.5 rounded-lg text-[var(--text-secondary)] hover:text-[var(--text-primary)] disabled:opacity-30 cursor-pointer"
+                title="Acercar (Zoom In)"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Fullwidth toggle */}
+          {onToggleFullWidth && (
+            <button
+              type="button"
+              onClick={onToggleFullWidth}
+              className="btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 cursor-pointer border-[var(--border-card)] hover:border-white/30 shrink-0"
+              title={isFullWidth ? "Cambiar a vista dividida" : "Expandir al 100% del ancho"}
+            >
+              <Columns2 className="w-3.5 h-3.5 text-indigo-400" />
+              <span className="hidden sm:inline">{isFullWidth ? "Vista Dividida" : "Ancho Completo"}</span>
+            </button>
+          )}
+
           {/* Fullscreen Stage OBS */}
           <button
-            onClick={() => setIsStageMode(true)}
-            className="btn-secondary px-3 py-2 text-xs flex items-center gap-1.5 cursor-pointer text-[#A8DADC] border-white/10 hover:border-white/30 shrink-0"
+            type="button"
+            onClick={enterStageMode}
+            className="btn-secondary px-3.5 py-2 text-xs flex items-center gap-1.5 cursor-pointer text-[#A8DADC] border-white/10 hover:border-white/30 shrink-0 bg-white/5 hover:bg-white/10"
             title="Pantalla completa para transmisión o proyector"
           >
-            <Maximize2 className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Modo Escenario / OBS</span>
+            <Tv className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Modo Escenario / OBS</span>
           </button>
 
           {/* Realtime Live Pulse */}
-          <span className="hidden lg:inline-flex px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 items-center gap-2 shrink-0">
+          <span className="hidden xl:inline-flex px-3 py-1.5 rounded-full text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 items-center gap-2 shrink-0">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span>Realtime Sincronizado</span>
+            <span>Realtime</span>
           </span>
 
         </div>
@@ -850,38 +1291,88 @@ export function BracketView({ tournamentId, initialBracket, onUpdate }: BracketV
 
       {/* FULLSCREEN STAGE / OBS MODE OVERLAY */}
       {isStageMode && (
-        <div className="fixed inset-0 z-50 bg-[#07080B] text-white p-6 sm:p-10 flex flex-col justify-between overflow-y-auto animate-in fade-in">
-          <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="fixed inset-0 z-50 bg-[#07080B] text-white flex flex-col h-screen max-h-screen overflow-hidden select-none animate-in fade-in">
+          {/* Ambient Esports Glows */}
+          <div className="fixed inset-0 pointer-events-none z-0">
+            <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#E63946]/10 rounded-full blur-3xl" />
+            <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#06B6D4]/10 rounded-full blur-3xl" />
+          </div>
+
+          {/* Minimal Top Bar (Height ~44px) */}
+          <div className="relative z-10 flex items-center justify-between px-4 sm:px-6 py-2 border-b border-white/10 shrink-0 bg-black/60 backdrop-blur-md">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#E63946] to-[#1D3557] flex items-center justify-center font-black">
-                <Swords className="w-5 h-5 text-white" />
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#E63946] to-[#1D3557] flex items-center justify-center font-black shadow-md shadow-[#E63946]/30">
+                <Swords className="w-3.5 h-3.5 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-black text-white">
-                  CAMPUS <span className="text-[#E63946]">ARENA</span> • LLAVES EN VIVO
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-black text-white tracking-tight">
+                  CAMPUS <span className="text-[#E63946]">ARENA</span>
                 </h1>
-                <p className="text-xs text-[#A8DADC]">
-                  Transmisión Oficial Tecsup Esports • Modalidad Presencial & Online
-                </p>
+                <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/40 uppercase font-mono font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#E63946] animate-ping" />
+                  OBS Live
+                </span>
+                <span className="text-xs text-[#A8DADC] hidden lg:inline font-bold">
+                  • Vista 100% en Pantalla Sin Scroll
+                </span>
               </div>
             </div>
 
-            <button
-              onClick={() => setIsStageMode(false)}
-              className="btn-secondary px-4 py-2 text-xs flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20"
-            >
-              <Minimize2 className="w-4 h-4" />
-              Salir de Pantalla Completa
-            </button>
+            {/* Stage Controls */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={copyObsUrl}
+                className="px-2.5 py-1 rounded-lg text-xs font-bold border border-cyan-500/30 bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 transition-colors flex items-center gap-1.5 cursor-pointer"
+                title="Copiar URL limpia para OBS Studio Browser Source"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Copiar URL OBS</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setCardDensity((d) => (d === 'compact' ? 'detailed' : 'compact'))}
+                className="px-2.5 py-1 rounded-lg text-xs font-bold border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 transition-colors"
+                title="Alternar entre modo compacto y detallado"
+              >
+                {cardDensity === 'compact' ? 'Modo Compacto' : 'Modo Detallado'}
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleNativeFullscreen}
+                className="p-1.5 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-white/80 transition-colors cursor-pointer"
+                title="Pantalla Completa"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={exitStageMode}
+                className="btn-secondary px-3 py-1 text-xs flex items-center gap-1.5 cursor-pointer bg-white/10 hover:bg-white/20 border-white/20 text-white font-bold"
+              >
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>Salir (Esc)</span>
+              </button>
+            </div>
           </div>
 
-          <div className="my-auto py-8">
+          {/* Main Full-Height Stage Bracket Canvas (100% Fit Screen) */}
+          <div className="relative z-10 flex-1 min-h-0 w-full p-2 sm:p-4 md:p-6 overflow-hidden flex flex-col justify-center">
             {renderBracketColumns(true)}
           </div>
 
-          <div className="flex items-center justify-between border-t border-white/10 pt-4 text-xs text-[#8E92A4]">
-            <span>🔴 En Vivo por Twitch & Kick</span>
-            <span>Tecsup Sede Lima • Esports Engine</span>
+          {/* Minimal Footer (Height ~26px) */}
+          <div className="relative z-10 flex items-center justify-between px-4 sm:px-6 py-1 border-t border-white/10 text-[10px] text-[#8E92A4] bg-black/60 backdrop-blur-md shrink-0">
+            <span className="flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span>Transmisión en Vivo • Todas las Llaves Visibles (Sin Scroll)</span>
+            </span>
+            <span className="hidden sm:inline">
+              Presiona <kbd className="px-1 py-0.2 rounded bg-white/10 text-white font-mono">Esc</kbd> para salir • Tecsup Esports Arena Engine
+            </span>
           </div>
         </div>
       )}

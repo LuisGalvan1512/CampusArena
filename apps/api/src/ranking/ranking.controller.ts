@@ -1,4 +1,4 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Header } from '@nestjs/common';
 import { RankingService } from './ranking.service.js';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard.js';
 
@@ -11,8 +11,9 @@ export class RankingController {
    * Public institutional leaderboard by game.
    */
   @Get('ranking')
-  async getLeaderboard(@Query('game_code') gameCode: 'CLASH_ROYALE' | 'BRAWL_STARS') {
-    return this.rankingService.getLeaderboard(gameCode || 'CLASH_ROYALE');
+  @Header('Cache-Control', 'public, max-age=30, stale-while-revalidate=90')
+  async getLeaderboard(@Query('game_code') gameCode?: string) {
+    return this.rankingService.getLeaderboard(gameCode);
   }
 
   /**

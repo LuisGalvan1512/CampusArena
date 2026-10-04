@@ -43,17 +43,7 @@ export class ProfileService implements OnModuleInit {
    * Returns the profile of the authenticated user with linked game accounts.
    */
   async getMyProfile(userId: string) {
-    let profile = await this.prisma.userProfile.findUnique({
-      where: { user_id: userId },
-    });
-
-    if (!profile) {
-      profile = await this.prisma.userProfile.create({
-        data: { user_id: userId },
-      });
-    }
-
-    const user = await this.prisma.user.findUnique({
+    let user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
@@ -62,13 +52,23 @@ export class ProfileService implements OnModuleInit {
         last_name: true,
         email_verified: true,
         created_at: true,
+        profile: true,
+        game_profiles: {
+          orderBy: { synced_at: 'desc' },
+        },
       },
     });
 
-    const gameProfiles = await this.prisma.gameProfile.findMany({
-      where: { user_id: userId },
-      orderBy: { synced_at: 'desc' },
-    });
+    if (!user) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    let userProfile = user.profile;
+    if (!userProfile) {
+      userProfile = await this.prisma.userProfile.create({
+        data: { user_id: userId },
+      });
+    }
 
     const medals = await this.calculateUserMedals(userId);
 
@@ -77,30 +77,22 @@ export class ProfileService implements OnModuleInit {
     const bronzeCount = medals.filter((m) => m.medal_type === 'BRONZE').length;
     const totalMedals = goldCount + silverCount + bronzeCount;
 
-    let userNickname: string | null = null;
-    let userCampus: string = 'Lima';
-    try {
-      const rows: any[] = await this.prisma.$queryRawUnsafe(
-        `SELECT nickname, campus FROM profile.user_profiles WHERE user_id = $1::uuid LIMIT 1`,
-        userId
-      );
-      if (rows.length > 0) {
-        if (rows[0].nickname) userNickname = rows[0].nickname;
-        if (rows[0].campus) userCampus = rows[0].campus;
-      }
-    } catch (err) {}
-
     return {
-      ...user,
+      id: user.id,
+      email: user.email,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      email_verified: user.email_verified,
+      created_at: user.created_at,
       profile: {
-        nickname: userNickname ?? (profile as any).nickname ?? null,
-        campus: userCampus ?? (profile as any).campus ?? 'Lima',
-        biography: profile.biography,
-        career: profile.career,
-        cycle: profile.cycle,
-        avatar_url: profile.avatar_url,
+        nickname: userProfile.nickname ?? null,
+        campus: userProfile.campus ?? 'Lima',
+        biography: userProfile.biography,
+        career: userProfile.career,
+        cycle: userProfile.cycle,
+        avatar_url: userProfile.avatar_url,
       },
-      game_profiles: gameProfiles.map((gp) => ({
+      game_profiles: user.game_profiles.map((gp) => ({
         id: gp.id,
         game_code: gp.game_code,
         game_name: this.getGameName(gp.game_code),
@@ -138,6 +130,8 @@ export class ProfileService implements OnModuleInit {
         created_at: true,
         profile: {
           select: {
+            nickname: true,
+            campus: true,
             biography: true,
             career: true,
             cycle: true,
@@ -151,35 +145,25 @@ export class ProfileService implements OnModuleInit {
       throw new NotFoundException('Usuario no encontrado.');
     }
 
-    let targetNickname: string | null = null;
-    let targetCampus: string = 'Lima';
-    try {
-      const rows: any[] = await this.prisma.$queryRawUnsafe(
-        `SELECT nickname, campus FROM profile.user_profiles WHERE user_id = $1::uuid LIMIT 1`,
-        targetUserId
-      );
-      if (rows.length > 0) {
-        if (rows[0].nickname) targetNickname = rows[0].nickname;
-        if (rows[0].campus) targetCampus = rows[0].campus;
-      }
-    } catch (err) {}
-
-    const activeRegistrations = await this.prisma.registration.findMany({
-      where: {
-        competitor_id: targetUserId,
-        status: { in: ['CONFIRMED', 'PENDING_PAYMENT', 'PAYMENT_UNDER_REVIEW'] },
-        tournament: {
-          status: { notIn: ['FINISHED', 'CANCELLED'] },
-          deleted_at: null,
+    const [activeRegistrations, medals] = await Promise.all([
+      this.prisma.registration.findMany({
+        where: {
+          competitor_id: targetUserId,
+          status: { in: ['CONFIRMED', 'PENDING_PAYMENT', 'PAYMENT_UNDER_REVIEW'] },
+          tournament: {
+            status: { notIn: ['FINISHED', 'CANCELLED'] },
+            deleted_at: null,
+          },
         },
-      },
-      include: {
-        tournament: true,
-      },
-      orderBy: {
-        tournament: { tournament_start_at: 'asc' },
-      },
-    });
+        include: {
+          tournament: true,
+        },
+        orderBy: {
+          tournament: { tournament_start_at: 'asc' },
+        },
+      }),
+      this.calculateUserMedals(targetUserId),
+    ]);
 
     const active_tournaments = activeRegistrations.map((reg) => ({
       id: reg.tournament.id,
@@ -194,8 +178,6 @@ export class ProfileService implements OnModuleInit {
       registration_status: reg.status,
     }));
 
-    const medals = await this.calculateUserMedals(targetUserId);
-
     const goldCount = medals.filter((m) => m.medal_type === 'GOLD').length;
     const silverCount = medals.filter((m) => m.medal_type === 'SILVER').length;
     const bronzeCount = medals.filter((m) => m.medal_type === 'BRONZE').length;
@@ -209,11 +191,11 @@ export class ProfileService implements OnModuleInit {
       created_at: user.created_at,
       profile: user.profile ? {
         ...user.profile,
-        nickname: targetNickname,
-        campus: targetCampus,
+        nickname: user.profile.nickname ?? null,
+        campus: user.profile.campus ?? 'Lima',
       } : {
-        nickname: targetNickname,
-        campus: targetCampus,
+        nickname: null,
+        campus: 'Lima',
         biography: '',
         career: 'Diseño y Desarrollo de Software',
         cycle: 1,
@@ -759,6 +741,16 @@ export class ProfileService implements OnModuleInit {
   async createSignature(profileUserId: string, authorId: string, content: string, imageUrl?: string) {
     if ((!content || !content.trim()) && (!imageUrl || !imageUrl.trim())) {
       throw new BadRequestException('La firma debe contener un mensaje o una imagen.');
+    }
+
+    if (imageUrl && imageUrl.trim()) {
+      const trimmed = imageUrl.trim();
+      const isHttps = trimmed.startsWith('https://');
+      const isHttp = trimmed.startsWith('http://');
+      const isDataImg = trimmed.startsWith('data:image/');
+      if (!isHttps && !isHttp && !isDataImg) {
+        throw new BadRequestException('El formato o protocolo del archivo adjunto no es seguro.');
+      }
     }
 
     const targetUser = await this.prisma.user.findUnique({ where: { id: profileUserId } });

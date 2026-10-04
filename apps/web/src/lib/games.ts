@@ -34,8 +34,6 @@ export interface GameDefinition {
   tagType: TagType;
   tagLabel: string;
   tagPlaceholder: string;
-  statLabel: string;
-  statIcon: string;
   description: string;
   badge: string;
   /** Extra fields to show in the manual linking form */
@@ -59,9 +57,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'supercell',
     tagLabel: 'Player Tag',
     tagPlaceholder: '#8YRP92VJ',
-    statLabel: 'Copas',
-    statIcon: 'Trophy',
-    description: 'Formato 1vs1 al mejor de 3 (BO3). Validación automática de Player Tags con la API oficial de Supercell.',
+    description: 'Torneo 1vs1 al mejor de 3 (BO3) en la arena de Tecsup. Clasificación por llaves de eliminación directa.',
     badge: '1 vs 1 Oficial',
   },
   BRAWL_STARS: {
@@ -80,9 +76,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'supercell',
     tagLabel: 'Player Tag',
     tagPlaceholder: '#2PP009Y9',
-    statLabel: 'Copas',
-    statIcon: 'Trophy',
-    description: 'Modalidades Atrapagemas, Balón Brawl y Duelos. Conexión directa con la API oficial de Supercell.',
+    description: 'Modalidades Atrapagemas, Balón Brawl y Duelos. Compite representando a tu carrera en la arena.',
     badge: '3 vs 3 y Duelos',
   },
   SMASH_ULTIMATE: {
@@ -101,9 +95,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'manual',
     tagLabel: 'Nombre de Jugador',
     tagPlaceholder: 'LuisSmash99',
-    statLabel: 'Personaje Main',
-    statIcon: 'Zap',
-    description: 'Torneos presenciales 1vs1 en formato doble eliminación. Nintendo Switch en modo local o LAN.',
+    description: 'Torneos presenciales 1vs1 en formato doble eliminación. Nintendo Switch en modo local en Tecsup.',
     badge: '1 vs 1 Presencial',
     extraFields: [
       { key: 'main_character', label: 'Personaje Main', placeholder: 'Ej: Mario, Link, Joker...', required: true },
@@ -125,9 +117,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'steam',
     tagLabel: 'Steam ID',
     tagPlaceholder: '76561198XXXXXXXXX',
-    statLabel: 'Horas Jugadas',
-    statIcon: 'Clock',
-    description: 'Cooperativo 4vs4 en modo Versus. Vinculación automática vía Steam Web API con verificación de perfil.',
+    description: 'Cooperativo 4vs4 en modo Versus en los laboratorios de cómputo de Tecsup.',
     badge: '4 vs 4 Versus',
   },
   EFOOTBALL: {
@@ -146,9 +136,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'manual',
     tagLabel: 'Konami ID / Usuario',
     tagPlaceholder: 'LuisFutbol_10',
-    statLabel: 'División',
-    statIcon: 'Award',
-    description: 'Partidos 1vs1 en formato liga y eliminación directa. Registro manual de equipo y división competitiva.',
+    description: 'Partidos 1vs1 en formato liga y eliminación directa presencial en Tecsup.',
     badge: '1 vs 1 Liga',
     extraFields: [
       { key: 'team_name', label: 'Equipo Principal', placeholder: 'Ej: FC Barcelona, Real Madrid...', required: true },
@@ -171,9 +159,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'manual',
     tagLabel: 'Steam ID / Nickname',
     tagPlaceholder: 'Ej: Arteezy / 76561197960287930',
-    statLabel: 'Horas / Rango',
-    statIcon: 'Trophy',
-    description: 'Torneos clásicos 5vs5 en modo Capitán. Únete con tu equipo y domina el mapa.',
+    description: 'Torneos clásicos 5vs5 en modo Capitán. Únete con tu equipo y representa a tu sede.',
     badge: '5 vs 5 Oficial',
   },
   FORTNITE: {
@@ -192,9 +178,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagType: 'manual',
     tagLabel: 'Epic Games ID',
     tagPlaceholder: 'Ej: Ninja_Tecsup',
-    statLabel: 'Plataforma / Rango',
-    statIcon: 'Zap',
-    description: 'Battle Royale en modalidades Individual (Solos), Dúos (2v2), Tríos (3v3) o Escuadras (4v4). Puntos por victoria y eliminaciones.',
+    description: 'Battle Royale en modalidades Individual (Solos), Dúos (2v2) y Escuadras con fases finales.',
     badge: 'Solos, Dúos y Escuadras',
   },
 };

@@ -29,6 +29,7 @@ import { CommunityPostSkeleton } from '@/components/Skeleton';
 import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
 import { toast } from 'sonner';
+import { CompetitorName } from '@/components/CompetitorName';
 
 type UserProfile = {
   nickname?: string;
@@ -708,7 +709,10 @@ export default function CommunityPage() {
                               className="text-sm font-black text-[var(--text-primary)] hover:text-[#E63946] transition-colors"
                               title="Ver perfil y medallero"
                             >
-                              {post.user.profile?.nickname || capitalizeWords(post.user.first_name)}
+                              <CompetitorName 
+                                userId={post.user_id || post.user?.id} 
+                                name={post.user.profile?.nickname || capitalizeWords(post.user.first_name)} 
+                              />
                             </Link>
                             {post.user.role === 'ADMIN' && (
                               <span className="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-500 dark:text-red-300 font-bold border border-red-500/30">
@@ -983,7 +987,10 @@ export default function CommunityPage() {
                                         className="font-bold text-[var(--text-primary)] hover:text-[#E63946] transition-colors text-xs"
                                         title="Ver perfil y medallero"
                                       >
-                                        {comment.user?.profile?.nickname || capitalizeWords(comment.user?.first_name)}
+                                        <CompetitorName 
+                                          userId={comment.user?.id} 
+                                          name={comment.user?.profile?.nickname || capitalizeWords(comment.user?.first_name)} 
+                                        />
                                       </Link>
                                       <span className="text-[10px] text-[#A8DADC] dark:text-[#A8DADC]/80 font-medium block">
                                         {capitalizeWords(`${comment.user?.first_name} ${comment.user?.last_name}`)}
@@ -1122,7 +1129,10 @@ export default function CommunityPage() {
                                                     className="font-bold text-[var(--text-primary)] hover:text-[#E63946] transition-colors text-[11px]"
                                                     title="Ver perfil y medallero"
                                                   >
-                                                    {reply.user?.profile?.nickname || capitalizeWords(reply.user?.first_name)}
+                                                    <CompetitorName 
+                                                      userId={reply.user?.id} 
+                                                      name={reply.user?.profile?.nickname || capitalizeWords(reply.user?.first_name)} 
+                                                    />
                                                   </Link>
                                                   <span className="text-[9px] text-[#A8DADC] dark:text-[#A8DADC]/80 font-medium block">
                                                     {capitalizeWords(`${reply.user?.first_name} ${reply.user?.last_name}`)}

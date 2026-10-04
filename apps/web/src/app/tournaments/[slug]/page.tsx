@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,11 +9,36 @@ import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { RegistrationWizardModal } from '@/components/RegistrationWizardModal';
-import { BracketView } from '@/components/BracketView';
-import { EditTournamentModal } from '@/components/EditTournamentModal';
-import { DeleteTournamentModal } from '@/components/DeleteTournamentModal';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+
+// Dynamic imports for code-splitting heavy modals and interactive bracket
+const BracketView = dynamic(
+  () => import('@/components/BracketView').then((m) => m.BracketView),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex items-center justify-center p-12 text-[var(--text-muted)] gap-3">
+        <div className="w-5 h-5 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm font-medium">Cargando llaves y bracket interactivo...</span>
+      </div>
+    ),
+  }
+);
+
+const RegistrationWizardModal = dynamic(
+  () => import('@/components/RegistrationWizardModal').then((m) => m.RegistrationWizardModal),
+  { ssr: false }
+);
+
+const EditTournamentModal = dynamic(
+  () => import('@/components/EditTournamentModal').then((m) => m.EditTournamentModal),
+  { ssr: false }
+);
+
+const DeleteTournamentModal = dynamic(
+  () => import('@/components/DeleteTournamentModal').then((m) => m.DeleteTournamentModal),
+  { ssr: false }
+);
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { ScrollParallaxImage } from '@/components/ScrollParallaxImage';
 import { 
@@ -219,10 +245,13 @@ export default function TournamentDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userRegistration, setUserRegistration] = useState<any>(null);
+  const [isBracketFullWidth, setIsBracketFullWidth] = useState(true);
 
-  const fetchTournament = async () => {
+  const fetchTournament = useCallback(async (isInitial = false) => {
     if (!slug) return;
-    setIsLoading(true);
+    if (isInitial) {
+      setIsLoading(true);
+    }
     const res = await api.get(`/tournaments/${slug}`);
     if (res.success && res.data) {
       setTournament(res.data);
@@ -239,8 +268,10 @@ export default function TournamentDetailPage() {
         setBracket(bracketRes.data);
       }
     }
-    setIsLoading(false);
-  };
+    if (isInitial) {
+      setIsLoading(false);
+    }
+  }, [slug]);
 
   const fetchUserRegistrationStatus = async (tournamentId: string) => {
     if (!isAuthenticated) return;
@@ -254,8 +285,8 @@ export default function TournamentDetailPage() {
   };
 
   useEffect(() => {
-    fetchTournament();
-  }, [slug]);
+    fetchTournament(true);
+  }, [fetchTournament]);
 
   useEffect(() => {
     if (tournament && isAuthenticated) {
@@ -512,10 +543,10 @@ export default function TournamentDetailPage() {
       </div>
 
       {/* 2. MAIN CONTENT GRID */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className={`grid grid-cols-1 ${activeTab === 'brackets' && isBracketFullWidth ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-8 items-start`}>
         
-        {/* LEFT COLUMN: TABS & DETAILS (8 Cols) */}
-        <div className="lg:col-span-8 space-y-6">
+        {/* LEFT COLUMN: TABS & DETAILS */}
+        <div className={`${activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-8'} space-y-6`}>
           
           {/* Modern Tabs header with Framer Motion spring indicator */}
           <div className="relative flex items-center gap-1 sm:gap-2 p-1.5 rounded-2xl arena-card overflow-x-auto scrollbar-hide border border-[var(--border-card)]">
@@ -567,7 +598,9 @@ export default function TournamentDetailPage() {
               <BracketView
                 tournamentId={tournament.id}
                 initialBracket={bracket}
-                onUpdate={fetchTournament}
+                onUpdate={() => fetchTournament(false)}
+                isFullWidth={isBracketFullWidth}
+                onToggleFullWidth={() => setIsBracketFullWidth(!isBracketFullWidth)}
               />
             </div>
           )}
@@ -802,8 +835,8 @@ export default function TournamentDetailPage() {
 
         </div>
 
-        {/* RIGHT COLUMN: TECHNICAL SHEET & INSCRIPTION (4 Cols) */}
-        <div className="lg:col-span-4 space-y-6">
+        {/* RIGHT COLUMN: TECHNICAL SHEET & INSCRIPTION */}
+        <div className={`${activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-4'} space-y-6`}>
           
           <div className="arena-card p-6 space-y-6 shadow-2xl sticky top-24 border border-[var(--border-card)]">
             

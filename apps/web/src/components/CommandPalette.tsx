@@ -97,7 +97,7 @@ export function CommandPalette() {
     {
       id: 'nav-ranking',
       title: 'Tabla de Posiciones (Ranking)',
-      subtitle: 'Líderes de copas y trofeos en Tecsup',
+      subtitle: 'Medallero y cuadro de honor de campeones en Tecsup',
       category: 'Navegación',
       icon: <Award className="w-4 h-4 text-emerald-500" />,
       action: () => router.push('/ranking'),
@@ -113,7 +113,7 @@ export function CommandPalette() {
     {
       id: 'nav-profile',
       title: 'Mi Perfil de Competidor',
-      subtitle: 'Ver estadísticas, insignias, copas y muro personal',
+      subtitle: 'Ver medallas oficiales, insignias y muro personal',
       category: 'Navegación',
       icon: <User className="w-4 h-4 text-indigo-500" />,
       action: () => router.push('/profile'),

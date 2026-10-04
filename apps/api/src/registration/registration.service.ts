@@ -98,6 +98,23 @@ export class RegistrationService {
     const isFree = Number(tournament.cost) === 0;
 
     return this.prisma.$transaction(async (tx) => {
+      // 0. Verify slot availability atomically inside transaction to prevent race conditions
+      if (isFree) {
+        const confirmedCount = await tx.registration.count({
+          where: {
+            tournament_id: tournamentId,
+            status: 'CONFIRMED',
+            deleted_at: null,
+          },
+        });
+
+        if (confirmedCount >= tournament.max_slots) {
+          throw new ConflictException(
+            `El torneo ya ha completado todos sus ${tournament.max_slots} cupos disponibles.`
+          );
+        }
+      }
+
       const registration = await tx.registration.create({
         data: {
           tournament_id: tournamentId,

@@ -6,61 +6,160 @@ export class RankingService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
-   * Returns institutional leaderboard by game.
+   * Returns institutional leaderboard ranked strictly by tournament trophies/medals:
+   * 1st Place (Gold / Champion), 2nd Place (Silver / Runner-up), 3rd Place (Bronze / 3rd).
    */
-  async getLeaderboard(gameCode: 'CLASH_ROYALE' | 'BRAWL_STARS' = 'CLASH_ROYALE') {
-    // 1. Get real profiles from DB
-    const realProfiles = await this.prisma.gameProfile.findMany({
-      where: { game_code: gameCode },
-      include: {
-        user: {
-          include: { profile: true },
+  async getLeaderboard(gameCode?: string) {
+    // 1. Fetch all active users with profile info
+    const users = await this.prisma.user.findMany({
+      where: { status: 'ACTIVE' },
+      select: {
+        id: true,
+        first_name: true,
+        last_name: true,
+        avatar_url: true,
+        profile: {
+          select: {
+            nickname: true,
+            career: true,
+            cycle: true,
+            campus: true,
+            avatar_url: true,
+          },
         },
       },
-      orderBy: { trophies: 'desc' },
     });
 
-    const userIds = realProfiles.map((gp) => gp.user.id);
-    const nicknamesMap: Record<string, string> = {};
-    if (userIds.length > 0) {
-      try {
-        const rows: any[] = await this.prisma.$queryRawUnsafe(
-          `SELECT user_id, nickname FROM profile.user_profiles WHERE user_id = ANY($1::uuid[]) AND nickname IS NOT NULL`,
-          userIds
-        );
-        for (const r of rows) {
-          if (r.nickname) nicknamesMap[r.user_id] = r.nickname;
-        }
-      } catch (err) {}
+    // 2. Fetch all confirmed registrations in finished tournaments
+    const tournamentFilter: any = {
+      status: 'FINISHED',
+      deleted_at: null,
+    };
+    if (gameCode && gameCode !== 'ALL') {
+      tournamentFilter.game_code = gameCode;
     }
 
-    const leaderboard = realProfiles.map((gp, idx) => ({
-      id: gp.id,
-      user_id: gp.user.id,
-      rank: idx + 1,
-      nickname: nicknamesMap[gp.user.id] || gp.in_game_name || gp.user.first_name,
-      player_name: `${gp.user.first_name} ${gp.user.last_name}`,
-      in_game_name: gp.in_game_name,
-      player_tag: gp.player_tag,
-      game_code: gp.game_code,
-      trophies: gp.trophies,
-      level: gp.level,
-      career: gp.user.profile?.career || 'Diseño y Desarrollo de Software',
-      cycle: gp.user.profile?.cycle || 4,
-      tournaments_won: 0,
-      winrate: Math.min(88, Math.max(52, 75 - idx * 3)),
-      is_online: idx < 3,
-    }));
+    const finishedRegistrations = await this.prisma.registration.findMany({
+      where: {
+        status: 'CONFIRMED',
+        tournament: tournamentFilter,
+      },
+      include: {
+        game_profile: true,
+        tournament: {
+          include: {
+            competition: {
+              include: {
+                rounds: {
+                  orderBy: { round_number: 'desc' },
+                  include: {
+                    matchups: {
+                      orderBy: { position: 'asc' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
 
-    // Sort by trophies
-    leaderboard.sort((a, b) => b.trophies - a.trophies);
+    // 3. Aggregate medal counts per user (1st place Gold, 2nd place Silver, 3rd place Bronze)
+    const userStats = new Map<string, { gold: number; silver: number; bronze: number; played: number }>();
+
+    for (const reg of finishedRegistrations) {
+      const uId = reg.competitor_id;
+      if (!userStats.has(uId)) {
+        userStats.set(uId, { gold: 0, silver: 0, bronze: 0, played: 0 });
+      }
+      const st = userStats.get(uId)!;
+      st.played += 1;
+
+      const comp = reg.tournament.competition;
+      const playerTag = reg.game_profile?.player_tag;
+      const teamName = reg.team_name;
+
+      if (!comp || !comp.rounds || comp.rounds.length === 0) continue;
+
+      const matchesPlayer = (tag?: string | null, name?: string | null) => {
+        if (!tag && !name) return false;
+        if (playerTag && tag && (tag === playerTag || tag.includes(playerTag))) return true;
+        if (teamName && name && (name === teamName || name.includes(teamName))) return true;
+        return false;
+      };
+
+      const finalRound = comp.rounds[0];
+      const semiRound = comp.rounds.length > 1 ? comp.rounds[1] : null;
+
+      let awarded = false;
+      if (finalRound && finalRound.matchups && finalRound.matchups.length > 0) {
+        const finalMatch = finalRound.matchups[0];
+        const isFinalWinner = matchesPlayer(finalMatch.winner_tag, finalMatch.winner_name);
+        const isInFinal = matchesPlayer(finalMatch.participant_a_tag, finalMatch.participant_a_name) ||
+                          matchesPlayer(finalMatch.participant_b_tag, finalMatch.participant_b_name);
+
+        if (isFinalWinner) {
+          st.gold += 1;
+          awarded = true;
+        } else if (isInFinal) {
+          st.silver += 1;
+          awarded = true;
+        }
+      }
+
+      if (!awarded && semiRound && semiRound.matchups) {
+        const playedInSemis = semiRound.matchups.some((m) =>
+          matchesPlayer(m.participant_a_tag, m.participant_a_name) ||
+          matchesPlayer(m.participant_b_tag, m.participant_b_name)
+        );
+        if (playedInSemis) {
+          st.bronze += 1;
+        }
+      }
+    }
+
+    // 4. Construct leaderboard
+    const leaderboard = users.map((u) => {
+      const stats = userStats.get(u.id) || { gold: 0, silver: 0, bronze: 0, played: 0 };
+      const totalMedals = stats.gold + stats.silver + stats.bronze;
+      const points = (stats.gold * 100) + (stats.silver * 50) + (stats.bronze * 25) + (stats.played * 5);
+
+      return {
+        id: u.id,
+        user_id: u.id,
+        rank: 0,
+        nickname: u.profile?.nickname || u.first_name,
+        player_name: `${u.first_name} ${u.last_name}`,
+        campus: u.profile?.campus || 'Lima',
+        career: u.profile?.career || 'Diseño y Desarrollo de Software',
+        cycle: u.profile?.cycle || 1,
+        avatar_url: u.profile?.avatar_url || u.avatar_url,
+        gold_medals: stats.gold,
+        silver_medals: stats.silver,
+        bronze_medals: stats.bronze,
+        total_medals: totalMedals,
+        tournaments_played: stats.played,
+        points,
+      };
+    });
+
+    // 5. Sort: Gold desc, Silver desc, Bronze desc, Played desc, Points desc, then alphabetically
+    leaderboard.sort((a, b) => {
+      if (b.gold_medals !== a.gold_medals) return b.gold_medals - a.gold_medals;
+      if (b.silver_medals !== a.silver_medals) return b.silver_medals - a.silver_medals;
+      if (b.bronze_medals !== a.bronze_medals) return b.bronze_medals - a.bronze_medals;
+      if (b.tournaments_played !== a.tournaments_played) return b.tournaments_played - a.tournaments_played;
+      return a.player_name.localeCompare(b.player_name);
+    });
+
     leaderboard.forEach((p, idx) => {
       p.rank = idx + 1;
     });
 
     return {
-      game_code: gameCode,
-      organization: 'Tecsup — Sede Lima',
+      game_code: gameCode || 'ALL',
+      organization: 'Tecsup',
       total_competitors: leaderboard.length,
       top_podium: leaderboard.slice(0, 3),
       leaderboard,

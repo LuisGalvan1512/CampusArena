@@ -54,7 +54,7 @@ export function ScrollParallaxImage({
         style={{
           scale: shouldReduceMotion ? 1 : scale,
           y: shouldReduceMotion ? 0 : y,
-          willChange: 'transform',
+          willChange: shouldReduceMotion ? 'auto' : 'transform',
         }}
         onError={(e) => {
           if (e.currentTarget.getAttribute('data-failed') !== 'true') {

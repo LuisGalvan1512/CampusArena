@@ -22,15 +22,31 @@ import {
   Mail,
   Building2,
   Calendar,
-  Share2
+  Share2,
+  Volume2,
+  Gamepad2,
+  Link2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { uploadSignatureMedia } from '@/lib/storage';
 import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
 import { HolographicCard } from '@/components/HolographicCard';
 import { Medal, LegacySummary, capitalizeWords, BANNER_THEMES, BannerTheme } from '../page';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
+import { AvatarWithFrame } from '@/components/AvatarWithFrame';
+import { HonorPinboard } from '@/components/HonorPinboard';
+import { 
+  getProfileCustomization, 
+  DEFAULT_CUSTOMIZATION, 
+  CARD_MATERIALS, 
+  PROFILE_WALLPAPERS,
+  NAME_FONT_LIST,
+  playCustomSoundbite,
+  type ProfileCustomizationState 
+} from '@/lib/profile-customization';
+import { CompetitorName } from '@/components/CompetitorName';
 
 export interface ProfileSignature {
   id: string;
@@ -97,14 +113,31 @@ export default function PublicProfilePage() {
   const [loadingSignatures, setLoadingSignatures] = useState(false);
   const [sigContent, setSigContent] = useState('');
   const [sigImage, setSigImage] = useState<string | null>(null);
+  const [sigFile, setSigFile] = useState<File | null>(null);
+  const [sigUrlInput, setSigUrlInput] = useState('');
+  const [showUrlField, setShowUrlField] = useState(false);
   const [isSubmittingSig, setIsSubmittingSig] = useState(false);
   const [sigFeedback, setSigFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [bannerTheme, setBannerTheme] = useState<BannerTheme>('cyberpunk');
+  const [customization, setCustomization] = useState<ProfileCustomizationState>(DEFAULT_CUSTOMIZATION);
 
   useEffect(() => {
     const saved = localStorage.getItem('campus_arena_banner_theme') as BannerTheme;
     if (saved && BANNER_THEMES.some(t => t.id === saved)) setBannerTheme(saved);
-  }, []);
+
+    const custom = getProfileCustomization(userId);
+    setCustomization(custom);
+
+    if (custom.soundbite && custom.soundbite !== 'none') {
+      const timer = setTimeout(() => {
+        if (custom.soundbite === 'tactical_chime') sounds.playTacticalChime();
+        else if (custom.soundbite === 'synthesizer_blip') sounds.playSynthesizerBlip();
+        else if (custom.soundbite === 'laser_charge') sounds.playLaserCharge();
+        else if (custom.soundbite === 'victory_bell') sounds.playVictoryBell();
+      }, 600);
+      return () => clearTimeout(timer);
+    }
+  }, [userId]);
 
   const fetchSignatures = async () => {
     try {
@@ -147,15 +180,17 @@ export default function PublicProfilePage() {
   const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 5 * 1024 * 1024) {
-      alert('La imagen seleccionada no debe superar los 5MB.');
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error('El archivo o GIF no debe superar los 8MB.');
       return;
     }
+    setSigFile(file);
     const reader = new FileReader();
     reader.onloadend = () => {
       setSigImage(reader.result as string);
     };
     reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleAddSignature = async (e: React.FormEvent) => {
@@ -169,9 +204,21 @@ export default function PublicProfilePage() {
     setIsSubmittingSig(true);
     setSigFeedback(null);
     try {
+      let finalImageUrl = sigImage;
+      if (sigFile && currentUser?.id) {
+        try {
+          const uploadRes = await uploadSignatureMedia(sigFile, currentUser.id);
+          if (uploadRes.url) {
+            finalImageUrl = uploadRes.url;
+          }
+        } catch (uploadErr) {
+          console.warn('Fallback a imagen local de firma:', uploadErr);
+        }
+      }
+
       const res = await api.post(`/profile/${userId}/signatures`, {
         content: sigContent.trim() || '✍️ Dejó una firma en tu carnet de honor',
-        image_url: sigImage || undefined,
+        image_url: finalImageUrl || undefined,
       });
 
       if (res.success) {
@@ -185,6 +232,9 @@ export default function PublicProfilePage() {
         }
         setSigContent('');
         setSigImage(null);
+        setSigFile(null);
+        setSigUrlInput('');
+        setShowUrlField(false);
         setSigFeedback({ type: 'success', message: '¡Firma publicada con éxito!' });
         setTimeout(() => setSigFeedback(null), 4000);
       } else {
@@ -269,9 +319,38 @@ export default function PublicProfilePage() {
   };
 
   const activeThemeConfig = BANNER_THEMES.find(t => t.id === bannerTheme) || BANNER_THEMES[0];
+  const activeWallpaperConfig = PROFILE_WALLPAPERS.find(w => w.id === customization.wallpaper) || PROFILE_WALLPAPERS[0];
+  const activeMaterialConfig = CARD_MATERIALS.find(m => m.id === customization.material) || CARD_MATERIALS[0];
+  const activeTypographyConfig = NAME_FONT_LIST.find(t => t.id === customization.nameTypography) || NAME_FONT_LIST[0];
+
+  const testSoundbite = (s: string) => {
+    if (s === 'tactical_chime') sounds.playTacticalChime();
+    else if (s === 'synthesizer_blip') sounds.playSynthesizerBlip();
+    else if (s === 'laser_charge') sounds.playLaserCharge();
+    else if (s === 'victory_bell') sounds.playVictoryBell();
+  };
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-8 animate-in fade-in duration-300">
+    <div 
+      className="min-h-screen transition-all duration-700 -mt-6 pt-6 pb-12 relative overflow-hidden"
+      style={activeWallpaperConfig.cssStyle}
+    >
+      {/* Video Background Layer if wallpaper has videoUrl (Steam Animated Profile) */}
+      {activeWallpaperConfig.videoUrl && (
+        <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+          <video
+            src={activeWallpaperConfig.videoUrl}
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0B0D13]/50 via-transparent to-[#0B0D13]/30" />
+        </div>
+      )}
+
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
       
       {/* VISTA DE VISITANTE BAR (Si el usuario está viendo su propio perfil en modo público) */}
       {isOwnProfile && (
@@ -325,7 +404,8 @@ export default function PublicProfilePage() {
 
       {/* 1. THE COMPETITOR PASSPORT / IDENTITY CARD */}
       <HolographicCard 
-        className={`p-6 sm:p-9 relative overflow-hidden transition-all duration-500 rounded-3xl border border-white/10 ${activeThemeConfig.bgClass}`} 
+        material={customization.material}
+        className={`p-6 sm:p-9 relative overflow-hidden transition-all duration-500 rounded-3xl border border-white/10 ${customization.material === 'steam_neon_shrine' ? '' : activeThemeConfig.bgClass}`} 
         glowColor={activeThemeConfig.glowColor}
       >
         <div className="absolute -right-8 -bottom-10 w-64 h-64 opacity-5 pointer-events-none select-none">
@@ -336,27 +416,24 @@ export default function PublicProfilePage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             
             <div className="flex items-start sm:items-center gap-5">
-              <div className="relative group shrink-0">
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-gradient-to-tr from-[#E63946] via-[#1D3557] to-[#457B9D] p-1 shadow-2xl overflow-hidden ring-2 ring-white/10">
-                  {competitor.profile?.avatar_url ? (
-                    <img
-                      src={competitor.profile.avatar_url}
-                      alt={competitor.profile?.nickname || 'Avatar'}
-                      className="w-full h-full object-cover rounded-[14px] bg-[#0A0D14]"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-[#0A0D14] rounded-[14px] flex items-center justify-center text-3xl font-black text-white">
-                      {(competitor.profile?.nickname || competitor.first_name || 'U')[0].toUpperCase()}
-                    </div>
-                  )}
-                </div>
+              {/* Avatar with Animated Frame */}
+              <div className="relative shrink-0">
+                <AvatarWithFrame
+                  avatarUrl={competitor.profile?.avatar_url || ''}
+                  frame={customization.avatarFrame}
+                  size="xl"
+                  alt={competitor.profile?.nickname || 'Avatar'}
+                />
               </div>
 
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2.5 flex-wrap">
-                  <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                    {competitor.profile?.nickname || capitalizeWords(competitor.first_name)}
-                  </h1>
+                  <CompetitorName
+                    userId={competitor.id}
+                    name={competitor.profile?.nickname || capitalizeWords(competitor.first_name)}
+                    customization={customization}
+                    className="text-2xl sm:text-3xl tracking-tight"
+                  />
 
                   {/* Academic Condition Pill */}
                   {competitor.profile?.career?.toLowerCase().includes('docente') || competitor.profile?.cycle === -1 ? (
@@ -398,12 +475,18 @@ export default function PublicProfilePage() {
             </div>
 
             <div className="flex md:flex-col items-center md:items-end justify-between gap-3 border-t md:border-t-0 border-white/10 pt-4 md:pt-0">
-              <div className="bg-black/40 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 text-left md:text-right">
-                <p className="text-[10px] uppercase font-mono tracking-wider text-[#8E92A4]">Representando a</p>
-                <p className="text-xs font-black text-white flex items-center justify-start md:justify-end gap-1.5 mt-0.5">
-                  <span>Tecsup Sede {competitor.profile?.campus || 'Lima'}</span>
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                </p>
+              <div className="flex items-center gap-2">
+                {customization.soundbite && customization.soundbite !== 'none' && (
+                  <button
+                    type="button"
+                    onClick={() => playCustomSoundbite(customization.soundbite)}
+                    className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-cyan-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-sm"
+                    title="Reproducir audio de perfil"
+                  >
+                    <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                    <span className="text-[11px] font-mono">Audio de Perfil</span>
+                  </button>
+                )}
               </div>
 
               {isOwnProfile && (
@@ -419,12 +502,47 @@ export default function PublicProfilePage() {
 
           </div>
 
+          {/* Dedicated Favorite Games Section */}
+          {customization.favoriteGames && customization.favoriteGames.length > 0 && (
+            <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Gamepad2 className="w-4 h-4 text-[#E63946]" />
+                <span className="text-xs font-bold uppercase tracking-wider text-[#8E92A4]">
+                  Juegos Favoritos:
+                </span>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                {customization.favoriteGames.map((gCode) => {
+                  const g = GAME_CATALOG[gCode];
+                  if (!g) return null;
+                  return (
+                    <span
+                      key={gCode}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-white border border-white/15 bg-black/40 shadow-sm"
+                      style={{ borderColor: `${g.color}55` }}
+                    >
+                      {g.logoUrl ? (
+                        <img src={g.logoUrl} alt="" className="w-3.5 h-3.5 object-contain shrink-0 filter drop-shadow" />
+                      ) : (
+                        <Gamepad2 className="w-3.5 h-3.5 text-[#38BDF8] shrink-0" />
+                      )}
+                      <span>{g.name}</span>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Bio Quote */}
           {competitor.profile?.biography && (
             <div className="p-3.5 rounded-2xl bg-black/35 backdrop-blur-sm border border-white/5 text-xs text-[#CBD5E1] leading-relaxed italic">
               &ldquo;{competitor.profile.biography}&rdquo;
             </div>
           )}
+
+          {/* Vitrina de Honor / Showcase Pinboard */}
+          <HonorPinboard pinnedPins={customization.pinnedPins || []} />
 
           {/* MONOLITHIC STATS STRIP */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
@@ -763,7 +881,10 @@ export default function PublicProfilePage() {
                     />
                     <button
                       type="button"
-                      onClick={() => setSigImage(null)}
+                      onClick={() => {
+                        setSigImage(null);
+                        setSigFile(null);
+                      }}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 hover:bg-red-600 text-white text-xs transition-colors"
                       title="Quitar imagen"
                     >
@@ -772,18 +893,82 @@ export default function PublicProfilePage() {
                   </div>
                 )}
 
+                {showUrlField && (
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#111520] border border-cyan-500/40">
+                    <input
+                      type="url"
+                      value={sigUrlInput}
+                      onChange={(e) => setSigUrlInput(e.target.value)}
+                      placeholder="Pega enlace directo de GIF o imagen (https://...gif)"
+                      className="bg-transparent border-none text-xs text-white placeholder-[#8E92A4] focus:outline-none flex-1 px-2"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const url = sigUrlInput.trim();
+                          if (url) {
+                            if (!url.startsWith('https://') && !url.startsWith('http://') && !url.startsWith('data:image/')) {
+                              toast.error('Solo se admiten enlaces seguros que comiencen por https://');
+                              return;
+                            }
+                            setSigImage(url);
+                            setShowUrlField(false);
+                          }
+                        }
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const url = sigUrlInput.trim();
+                        if (url) {
+                          if (!url.startsWith('https://') && !url.startsWith('http://') && !url.startsWith('data:image/')) {
+                            toast.error('Solo se admiten enlaces seguros que comiencen por https://');
+                            return;
+                          }
+                          setSigImage(url);
+                          setShowUrlField(false);
+                        }
+                      }}
+                      className="px-3 py-1 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold transition-colors cursor-pointer"
+                    >
+                      Cargar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowUrlField(false)}
+                      className="p-1 text-[#8E92A4] hover:text-white text-xs cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                )}
+
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <label className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#111520] hover:bg-white/10 border border-white/10 text-xs font-semibold text-[#CBD5E1] hover:text-white cursor-pointer transition-colors">
                       <ImageIcon className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>{sigImage ? 'Cambiar imagen' : 'Adjuntar sticker/imagen'}</span>
+                      <span>{sigImage ? 'Cambiar archivo' : 'Subir imagen/GIF'}</span>
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/*,.gif"
                         onChange={handleImageFileChange}
                         className="hidden"
                       />
                     </label>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowUrlField((prev) => !prev)}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-colors cursor-pointer ${
+                        showUrlField
+                          ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300'
+                          : 'bg-[#111520] hover:bg-white/10 border-white/10 text-[#CBD5E1] hover:text-white'
+                      }`}
+                    >
+                      <Link2 className="w-3.5 h-3.5 text-pink-400" />
+                      <span>Pegar link GIF/Web</span>
+                    </button>
+
                     <span className="text-[10px] text-[#8E92A4]">
                       {sigContent.length}/400 caracteres
                     </span>
@@ -931,12 +1116,13 @@ export default function PublicProfilePage() {
                         {sig.content}
                       </p>
 
-                      {sigImage && (
+                      {sig.image_url && (
                         <div className="pl-12 pt-1">
                           <img
-                            src={sig.image_url!}
+                            src={sig.image_url}
                             alt="Firma adjunta"
-                            className="max-h-40 rounded-xl border border-white/10 object-contain"
+                            className="max-h-56 max-w-sm rounded-xl border border-white/10 object-contain bg-black/20"
+                            loading="lazy"
                           />
                         </div>
                       )}
@@ -950,6 +1136,7 @@ export default function PublicProfilePage() {
 
       </div>
 
+      </div>
     </div>
   );
 }

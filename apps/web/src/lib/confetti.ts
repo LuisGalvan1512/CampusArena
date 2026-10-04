@@ -1,7 +1,8 @@
-import confetti from 'canvas-confetti';
-
-export function fireCelebration() {
+export async function fireCelebration() {
   if (typeof window === 'undefined') return;
+
+  const confettiModule = await import('canvas-confetti');
+  const confetti = confettiModule.default || confettiModule;
 
   // Multi-stage celebratory fireworks
   const count = 200;
@@ -10,7 +11,7 @@ export function fireCelebration() {
     zIndex: 9999,
   };
 
-  function fire(particleRatio: number, opts: confetti.Options) {
+  function fire(particleRatio: number, opts: any) {
     confetti({
       ...defaults,
       ...opts,

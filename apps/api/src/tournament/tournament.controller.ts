@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Header,
 } from '@nestjs/common';
 import { TournamentService } from './tournament.service.js';
 import { CreateTournamentDto } from './dto/create-tournament.dto.js';
@@ -27,6 +28,7 @@ export class TournamentController {
    * Returns a list of tournaments with optional filters.
    */
   @Get()
+  @Header('Cache-Control', 'public, max-age=15, stale-while-revalidate=45')
   async findAll(@Query() query: QueryTournamentDto) {
     return this.tournamentService.findAll(query);
   }
@@ -36,6 +38,7 @@ export class TournamentController {
    * Returns complete tournament information by unique slug.
    */
   @Get(':slug')
+  @Header('Cache-Control', 'public, max-age=10, stale-while-revalidate=30')
   async findBySlug(@Param('slug') slug: string) {
     return this.tournamentService.findBySlug(slug);
   }

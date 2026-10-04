@@ -21,6 +21,7 @@ import {
   PenTool,
   Clock,
   Award,
+  ShieldCheck,
 } from 'lucide-react';
 import { GAME_LIST, type GameCode, type GameDefinition } from '@/lib/games';
 
@@ -334,20 +335,20 @@ export function LinkGameModal({
 
               <div className="grid grid-cols-2 gap-3 pt-2 text-center text-xs">
                 <div className="p-2.5 bg-[var(--bg-card)] rounded-lg border border-[var(--border-card)]">
-                  <p className="text-base font-bold text-amber-500 flex items-center justify-center gap-1">
-                    <Trophy className="w-3.5 h-3.5" />
-                    {verifiedPlayer.trophies.toLocaleString()}
+                  <p className="text-base font-bold text-emerald-400 flex items-center justify-center gap-1 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    Registrado
                   </p>
-                  <p className="text-[10px] text-[var(--text-secondary)] uppercase mt-0.5">{currentGame.statLabel}</p>
+                  <p className="text-[10px] text-[var(--text-secondary)] uppercase mt-0.5">Identificador de Juego</p>
                 </div>
 
                 <div className="p-2.5 bg-[var(--bg-card)] rounded-lg border border-[var(--border-card)]">
                   <p className="text-base font-bold text-[var(--text-primary)] flex items-center justify-center gap-1">
                     <Flame className="w-3.5 h-3.5" style={{ color: currentGame.color }} />
-                    {verifiedPlayer.level > 0 ? `Nivel ${verifiedPlayer.level}` : currentGame.badge}
+                    {currentGame.badge}
                   </p>
                   <p className="text-[10px] text-[var(--text-secondary)] uppercase mt-0.5">
-                    {verifiedPlayer.level > 0 ? 'Nivel de Cuenta' : 'Modalidad'}
+                    Modalidad
                   </p>
                 </div>
               </div>

@@ -1,5 +1,16 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Fira+Code:wght@600;700&family=Montserrat:wght@800;900&family=Orbitron:wght@700;900&family=Permanent+Marker&family=Press+Start+2P&family=Russo+One&display=swap');
 @import "tailwindcss";
+
+/* Custom Competitor Name Fonts */
+.font-name-default { font-family: 'Outfit', var(--font-sans), sans-serif; }
+.font-name-gamer { font-family: 'Russo One', sans-serif; }
+.font-name-scifi { font-family: 'Orbitron', sans-serif; }
+.font-name-pixel { font-family: 'Press Start 2P', monospace; }
+.font-name-gothic { font-family: 'Cinzel Decorative', serif; }
+.font-name-graffiti { font-family: 'Permanent Marker', cursive; }
+.font-name-terminal { font-family: 'Fira Code', monospace; }
+.font-name-impact { font-family: 'Montserrat', sans-serif; font-weight: 900; }
+
 
 :root {
   /* Default to Dark theme tokens - Midnight Sapphire & Crimson High-Craft Palette */
@@ -133,10 +144,12 @@
 .light .bg-\[\#111520\] h3,
 .light .bg-\[\#111520\] p,
 .light .bg-\[\#111520\] span:not([class*="bg-"]):not(.btn-primary *),
+.light .bg-\[\#111520\] a:not(.btn-primary):not([class*="bg-"]),
 .light .bg-\[\#0A0D14\] h1,
 .light .bg-\[\#0A0D14\] h2,
 .light .bg-\[\#0A0D14\] h3,
 .light .bg-\[\#0A0D14\] p,
+.light .bg-\[\#0A0D14\] a:not(.btn-primary):not([class*="bg-"]),
 .light .bg-\[\#0A0D14\] span:not([class*="bg-"]):not(.btn-primary *) {
   color: var(--text-primary);
 }
@@ -584,4 +597,15 @@ body {
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px var(--bg-arena), 0 0 0 4px #E63946 !important;
+}
+
+/* Fluidity & GPU Acceleration Performance Utilities */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.content-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 1fr 140px;
 }

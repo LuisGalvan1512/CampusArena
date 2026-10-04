@@ -10,11 +10,12 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Estado-En%20Desarrollo-orange?style=flat-square" />
-  <img src="https://img.shields.io/badge/Frontend-Next.js%2016-black?style=flat-square&logo=next.js" />
+  <img src="https://img.shields.io/badge/Fase-1.0%20(v1.0.0%20--%20Production%20Ready)-brightgreen?style=flat-square&logo=git" />
+  <img src="https://img.shields.io/badge/Frontend-Next.js%2016%20(Turbopack)-black?style=flat-square&logo=next.js" />
   <img src="https://img.shields.io/badge/Backend-NestJS%2012-E0234E?style=flat-square&logo=nestjs" />
   <img src="https://img.shields.io/badge/BD-Supabase%20PostgreSQL-3ECF8E?style=flat-square&logo=supabase" />
-  <img src="https://img.shields.io/badge/ORM-Prisma%205-2D3748?style=flat-square&logo=prisma" />
+  <img src="https://img.shields.io/badge/ORM-Prisma%205.22-2D3748?style=flat-square&logo=prisma" />
+  <img src="https://img.shields.io/badge/Docker-Ready%20(Multi--stage)-2496ED?style=flat-square&logo=docker" />
   <img src="https://img.shields.io/badge/Monorepo-Turborepo-EF4444?style=flat-square&logo=turborepo" />
 </p>
 
@@ -23,18 +24,19 @@
 ## 📋 Tabla de Contenidos
 
 - [Descripción del Proyecto](#-descripción-del-proyecto)
+- [Galería Visual (Fase 1.0)](#-galería-visual-fase-10)
 - [Estado Actual del Desarrollo](#-estado-actual-del-desarrollo)
 - [Tech Stack](#-tech-stack)
 - [Arquitectura del Monorepo](#-arquitectura-del-monorepo)
 - [Requisitos Previos](#-requisitos-previos)
 - [Instalación y Configuración](#-instalación-y-configuración)
 - [Ejecución del Proyecto](#-ejecución-del-proyecto)
-- [Credenciales de Prueba](#-credenciales-de-prueba)
-- [Referencia de API](#-referencia-de-api)
+- [Guía de Despliegue a Producción (Opción A: Vercel + Render + Supabase)](#-guía-de-despliegue-a-producción-opción-a)
+- [Despliegue con Docker & Docker Compose](#-despliegue-con-docker--docker-compose)
+- [Referencia de API & Swagger](#-referencia-de-api)
 - [Esquema de Base de Datos](#-esquema-de-base-de-datos)
 - [Juegos Soportados](#-juegos-soportados)
 - [Funcionalidades Implementadas](#-funcionalidades-implementadas)
-- [Roadmap — Funcionalidades Pendientes](#-roadmap--funcionalidades-pendientes)
 - [Convenciones del Proyecto](#-convenciones-del-proyecto)
 - [¿Cómo Contribuir?](#-cómo-contribuir)
 - [Equipo](#-equipo)
@@ -43,38 +45,60 @@
 
 ## 🎮 Descripción del Proyecto
 
-**Campus Arena** es la plataforma web oficial (en desarrollo) para la gestión integral de torneos de eSports presenciales y online dentro de **Tecsup (Sede Lima)**. Permite a los estudiantes:
+**Campus Arena** es la plataforma web oficial para la gestión integral de torneos de eSports presenciales y online dentro de **Tecsup (Sede Lima)**. Permite a los estudiantes:
 
 - 🏆 **Inscribirse en torneos** de juegos como Clash Royale, Brawl Stars, Smash Bros, L4D2, eFootball y Dota 2.
-- 🎯 **Vincular cuentas de juego** con validación automática vía APIs oficiales (Supercell, Steam).
-- 📊 **Competir en brackets automáticos** de eliminación directa con generación de llaves.
-- 🥇 **Ranking institucional** por juego con estadísticas en tiempo real.
-- 💬 **Comunidad tipo foro** con publicaciones, reacciones y comentarios.
-- 🔐 **Autenticación institucional** exclusiva con correos `@tecsup.edu.pe`.
+- 🎯 **Vincular perfiles y tags de juego** con validación y confirmación automática.
+- 📊 **Competir en brackets automáticos** de eliminación directa con generación de llaves por sorteo o seed.
+- 📺 **Modo Escenario / OBS Studio**: Vista de llaves en pantalla completa con ajuste al 100% sin scroll, tarjetas compactas de alta visibilidad (~46px) y conectores láser interactivos.
+- 🥇 **Ranking institucional** por juego con estadísticas y podio de honor en tiempo real.
+- 💬 **Comunidad tipo foro** con publicaciones, reacciones, menciones y comentarios.
+- 🔐 **Autenticación institucional** con correos oficiales `@tecsup.edu.pe` protegida con Argon2id y JWT.
 
 ---
 
-## 📈 Estado Actual del Desarrollo
+## 📸 Galería Visual (Fase 1.0)
 
-> **Última actualización:** Septiembre 2026
+### 📺 1. Modo Escenario / OBS Studio (Árbol de Llaves 100% en Pantalla Sin Scroll)
+> *Diseñado para proyectores en auditorios y transmisiones en vivo vía OBS Studio Browser Source (1920x1080), con sincronización en tiempo real vía WebSockets sin recarga.*
+
+![Modo Escenario OBS](docs/assets/obs_bracket_stage.png)
+
+### 🏟️ 2. Ficha Técnica del Torneo, Marcador en Vivo & Registro
+> *Countdown dinámico, información del pozo de premios, reglamento oficial de competición y vista en vivo de llaves y participantes.*
+
+![Detalle del Torneo](docs/assets/tournament_detail.png)
+
+### 🎮 3. Explorador de Torneos Multidisciplinario
+> *Catálogo visual de competiciones activas, filtrado por juego, modalidad (Presencial, Híbrido, Online) y diseño con dual-theme.*
+
+![Explorador de Torneos](docs/assets/tournament_explorer.png)
+
+---
+
+## 📈 Estado Actual del Desarrollo — Fase 1.0 Completada
+
+> **Hito:** Fase 1.0 (v1.0.0 — Production Ready) • Octubre 2026
 
 | Módulo | Estado | Progreso |
 |---|---|---|
-| 🔐 Autenticación (Google Workspace / JWT) | ✅ Funcional | 100% |
+| 🔐 Autenticación (JWT + Cookies + Argon2id) | ✅ Funcional | 100% |
 | 👤 Perfiles Públicos, Vista de Visitante y Muro de Firmas | ✅ Funcional | 100% |
 | 🎨 Centro de Personalización de Perfil (Colores, Moods, Efectos) | ✅ Funcional | 100% |
 | ✨ Transiciones de Página Fluidas & Carrusel Interactivo | ✅ Funcional | 100% |
-| 🏆 CRUD de Torneos (Admin / Org) | ✅ Funcional | 100% |
+| 🏆 CRUD de Torneos (Admin / Organizador) | ✅ Funcional | 100% |
 | 📋 Inscripción a Torneos (Individual y Equipos con Roster) | ✅ Funcional | 100% |
-| 🗡️ Generación de Brackets (Sorteo Aleatorio Oficial) | ✅ Funcional | 95% |
-| 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 95% |
-| 💬 Comunidad / Foro | ✅ Funcional | 90% |
-| 📧 Correos Transaccionales (Brevo SMTP) | ✅ Funcional | 90% |
-| 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 95% |
+| 🗡️ Generación de Brackets (Sorteo Aleatorio Oficial & Arbitraje) | ✅ Funcional | 100% |
+| 📺 Modo Escenario / OBS Studio (Zero-Scroll & Compact Cards) | ✅ Funcional | 100% |
+| 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 100% |
+| 💬 Comunidad / Foro de Estudiantes | ✅ Funcional | 100% |
+| 📧 Correos Transaccionales (Brevo SMTP) | ✅ Funcional | 100% |
+| 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 100% |
 | 🎓 Onboarding de Nuevos Estudiantes | ✅ Funcional | 100% |
 | 📡 Centro de Notificaciones In-App (con Borrado y Vaciado) | ✅ Funcional | 100% |
 | 🎨 Sistema de Diseño, Dual Theme y Branding Oficial | ✅ Funcional | 100% |
-| 🌐 Deploy a Producción | 🔴 Pendiente | 0% |
+| 🐳 Dockerización & Docker Compose | ✅ Funcional | 100% |
+| 🌐 Deploy a Producción (Opción A / Docker VPS) | ✅ Listo para Despliegue | 100% |
 
 ---
 
@@ -309,6 +333,104 @@ Rol:      ADMIN (acceso total al panel de administración)
 5. **Perfil** → `http://localhost:3000/profile` → Vincular cuenta de juego
 6. **Ranking** → `http://localhost:3000/ranking`
 7. **Comunidad** → `http://localhost:3000/community`
+
+---
+
+## 🚀 Guía de Despliegue a Producción (Opción A: Vercel + Render + Supabase)
+
+La **Opción A** permite desplegar la plataforma completa a costo cero ($0) aprovechando la arquitectura desacoplada:
+
+```mermaid
+graph LR
+    User([Estudiantes & Casters]) -->|HTTPS| Vercel[Frontend: Vercel<br/>Next.js 16 Edge CDN]
+    OBS([OBS Studio]) -->|Browser Source| Vercel
+    Vercel -->|REST API /api/v1| Render[Backend: Render / Railway<br/>NestJS 12 Container]
+    Vercel -.->|WebSockets Realtime| Supabase[(Supabase Cloud<br/>PostgreSQL Multi-Schema)]
+    Render -->|Prisma ORM Pooling| Supabase
+```
+
+### Paso 1: Base de Datos & Supabase (PostgreSQL)
+1. En tu proyecto de Supabase, copia las Connection Strings (Settings -> Database):
+   - **Transaction Pooler (Puerto 6543):** Para `DATABASE_URL`.
+   - **Direct Session (Puerto 5432):** Para `DIRECT_URL`.
+2. Asegura que las migraciones de Prisma se hayan ejecutado:
+   ```bash
+   pnpm --filter api exec prisma migrate deploy
+   ```
+
+### Paso 2: Despliegue del Backend en Render (o Railway)
+1. Entra a [render.com](https://render.com) e inicia sesión con tu cuenta de GitHub.
+2. Haz clic en **New +** -> **Web Service** y conecta tu repositorio `CampusArena`.
+3. Configuración del servicio:
+   - **Name:** `campus-arena-api`
+   - **Region:** Selecciona la más cercana a Perú (ej. `Ohio (US East)` o `Sao Paulo`).
+   - **Language:** `Docker` (seleccionará automáticamente `apps/api/Dockerfile`) o `Node`.
+     - *Si usas Docker:*
+       - **Dockerfile Path:** `apps/api/Dockerfile`
+       - **Docker Context:** `.` (raíz del repositorio).
+     - *Si usas Node:*
+       - **Root Directory:** `apps/api`
+       - **Build Command:** `pnpm install && pnpm exec prisma generate && pnpm build`
+       - **Start Command:** `pnpm start:prod`
+4. **Environment Variables** en Render:
+   | Variable | Valor |
+   |---|---|
+   | `NODE_ENV` | `production` |
+   | `PORT` | `3001` |
+   | `DATABASE_URL` | Tu URL de Supabase (Pooler 6543) |
+   | `DIRECT_URL` | Tu URL directa de Supabase (5432) |
+   | `JWT_SECRET` | Clave secreta segura (ej. genera una con `openssl rand -base64 32`) |
+   | `JWT_EXPIRATION` | `900` (15 minutos) |
+   | `FRONTEND_URL` | `http://localhost:3000,https://campusarena.vercel.app` (actualizar tras el Paso 3) |
+   | `BREVO_API_KEY` | Tu API Key de Brevo SMTP |
+   | `SMTP_HOST` | `smtp-relay.brevo.com` |
+   | `SMTP_PORT` | `587` |
+   | `SMTP_USER` | Tu usuario de Brevo |
+   | `SMTP_PASS` | Tu contraseña de Brevo |
+   | `SMTP_FROM` | `luis.galvan@tecsup.edu.pe` |
+5. Haz clic en **Deploy Web Service**.
+6. Render te asignará una URL pública segura (ej. `https://campus-arena-api.onrender.com`).
+   - Puedes verificar su estado en: `https://campus-arena-api.onrender.com/api/v1/health`
+
+### Paso 3: Despliegue del Frontend en Vercel
+1. Entra a [vercel.com](https://vercel.com) e inicia sesión con GitHub.
+2. Haz clic en **Add New...** -> **Project** e importa el repositorio `CampusArena`.
+3. Configuración del proyecto:
+   - **Framework Preset:** `Next.js`
+   - **Root Directory:** Haz clic en *Edit* y selecciona `apps/web`.
+4. **Environment Variables** en Vercel:
+   | Variable | Valor |
+   |---|---|
+   | `NEXT_PUBLIC_API_URL` | `https://campus-arena-api.onrender.com/api/v1` *(la URL de Render del Paso 2)* |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://sxqwztaccmdnpotcfeev.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *Tu clave pública anon de Supabase* |
+5. Haz clic en **Deploy**.
+6. Vercel compilará tu aplicación en ~45 segundos y te entregará tu dominio de producción (ej. `https://campus-arena-web.vercel.app`).
+
+### Paso 4: Sincronización Final de CORS
+Regresa a Render (Paso 2) y en la variable `FRONTEND_URL`, asegúrate de incluir el dominio que te asignó Vercel:
+`https://campus-arena-web.vercel.app` (el backend ya soporta URLs separadas por coma y subdominios `*.vercel.app`).
+
+---
+
+## 🐳 Despliegue con Docker & Docker Compose
+
+Si deseas desplegar en un VPS propio (DigitalOcean, Hetzner, AWS EC2 o servidores de Tecsup):
+
+```bash
+# 1. Clonar el repositorio en el servidor
+git clone https://github.com/LuisGalvan1512/CampusArena.git
+cd CampusArena
+
+# 2. Configurar variables de entorno en .env en la raíz
+cp apps/api/.env.example .env
+
+# 3. Levantar con Docker Compose
+docker compose up -d --build
+
+# 4. Verificar salud del servicio
+curl http://localhost:3001/api/v1/health
+```
 
 ---
 

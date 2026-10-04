@@ -1,31 +1,31 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
 import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { 
-  Trophy, 
-  Swords, 
-  Gamepad2, 
-  Flame, 
-  ArrowRight, 
-  CheckCircle2, 
-  Zap, 
-  Crosshair, 
-  CircleDot, 
-  Wifi, 
-  Sparkles, 
-  MapPin, 
-  Building2, 
-  Users, 
-  Medal, 
-  Target, 
-  Shield, 
-  Rocket, 
-  Crown, 
-  ChevronRight, 
-  Volume2, 
-  Clock, 
+import {
+  Trophy,
+  Swords,
+  Gamepad2,
+  Flame,
+  ArrowRight,
+  CheckCircle2,
+  Zap,
+  Crosshair,
+  CircleDot,
+  Wifi,
+  Sparkles,
+  MapPin,
+  Building2,
+  Users,
+  Medal,
+  Target,
+  Shield,
+  Rocket,
+  Crown,
+  ChevronRight,
+  Volume2,
+  Clock,
   Loader2,
   ExternalLink,
   ShieldCheck,
@@ -87,95 +87,57 @@ export default function HomePage() {
     fetchTournaments();
   }, []);
 
-  const handleSelectDiscipline = (code: GameCode) => {
+  const handleSelectDiscipline = useCallback((code: GameCode) => {
     sounds.playClick();
     setSelectedDiscipline(code);
-  };
+  }, []);
 
   const activeGame = GAME_CATALOG[selectedDiscipline] || GAME_CATALOG.BRAWL_STARS;
 
-  const realTournamentCards: CarouselItem[] = allTournaments.map((t: any) => {
-    const gameInfo = GAME_CATALOG[t.game_code as GameCode];
-    return {
-      id: `real-${t.id}`,
-      title: t.name,
-      category: gameInfo?.name || t.game_code,
-      description: t.description_short || `Torneo oficial en Sede ${t.campus_name || 'Lima'}. Compite y gana reconocimiento institucional.`,
-      imageUrl: t.banner_url || gameInfo?.bannerUrl || '/games/clash_royale_banner.jpg',
-      accentColor: gameInfo?.color || '#E63946',
-      badge: `Sede ${t.campus_name || 'Lima'}`,
-      tag: t.format || (t.team_size && t.team_size > 1 ? `${t.team_size}v${t.team_size}` : '1v1'),
-      prize: t.prize_pool || 'Premio Oficial Tecsup',
-      linkHref: `/tournaments/${t.slug}`,
-      linkText: t.status === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
-    };
-  });
-
-  const remainingDisciplines: CarouselItem[] = GAME_LIST
-    .filter((g) => !allTournaments.some((t: any) => t.game_code === g.code))
-    .map((game) => ({
-      id: `official-${game.code}`,
-      title: `Copa Oficial ${game.name}`,
-      category: game.name,
-      description: game.description,
-      imageUrl: game.bannerUrl,
-      accentColor: game.color,
-      badge: game.badge,
-      tag: game.tagLabel,
-      prize: 'S/ 300 - 500 PEN',
-      linkHref: `/tournaments?game=${game.code}`,
-      linkText: 'Ver Disciplina',
-    }));
-
-  const carouselItems: CarouselItem[] = [...realTournamentCards, ...remainingDisciplines];
+  const carouselItems: CarouselItem[] = useMemo(() => {
+    return allTournaments.map((t: any) => {
+      const gameInfo = GAME_CATALOG[t.game_code as GameCode];
+      return {
+        id: `real-${t.id}`,
+        title: t.name,
+        category: gameInfo?.name || t.game_code,
+        description: t.description_short || `Torneo oficial en Sede ${t.campus_name || 'Lima'}. Compite y gana reconocimiento institucional.`,
+        imageUrl: t.banner_url || gameInfo?.bannerUrl || '/games/clash_royale_banner.jpg',
+        accentColor: gameInfo?.color || '#E63946',
+        badge: `Sede ${t.campus_name || 'Lima'}`,
+        tag: t.format || (t.team_size && t.team_size > 1 ? `${t.team_size}v${t.team_size}` : '1v1'),
+        prize: t.prize_pool || 'Premio Oficial Tecsup',
+        linkHref: `/tournaments/${t.slug}`,
+        linkText: t.status === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
+      };
+    });
+  }, [allTournaments]);
 
   return (
     <div className="flex flex-col gap-24 sm:gap-32 pb-28 overflow-x-hidden">
-      
+
       {/* ========================================================================= */}
       {/* 1. APPLE FLAGSHIP HERO GATE: MONUMENTAL TYPOGRAPHY & CINEMATIC KEYNOTE    */}
       {/* ========================================================================= */}
       <section className="relative pt-10 sm:pt-16 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* Left: Editorial Hero Narrative (7 cols) */}
           <div className="lg:col-span-7 space-y-6 text-left">
-            
-            {/* Status Pill & Audio Trigger */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-semibold text-[var(--text-secondary)] shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-[#E63946] animate-pulse" />
-                <span className="font-bold text-[var(--text-primary)]">TECSUP ESPORTS</span>
-                <span className="text-[var(--text-muted)]">•</span>
-                <span className="font-mono text-[11px]">TEMPORADA 2026</span>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  sounds.playNotification();
-                }}
-                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--bg-arena)] hover:bg-[var(--bg-card)] border border-[var(--border-card)] text-[11px] font-bold text-[var(--text-secondary)] transition-colors cursor-pointer"
-                title="Sonido táctil habilitado"
-              >
-                <Volume2 className="w-3.5 h-3.5 text-[#E63946]" />
-                <span>Audio Táctil Activo</span>
-              </button>
-            </div>
 
             {/* Monumental Headline (Apple Editorial Scale) */}
             <div className="space-y-2">
               <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight leading-[1.03] text-[var(--text-primary)]">
                 Campus Arena.
                 <span className="block text-transparent bg-clip-text bg-gradient-to-r from-[#E63946] via-[#FF5A67] to-amber-400">
-                  La alta competición universitaria.
+                  La alta competición.
                 </span>
               </h1>
             </div>
 
             {/* Crisp Subtitle */}
             <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl font-normal">
-              La plataforma oficial de esports de Tecsup. Brackets automatizados, clasificaciones sin trampas con tu cuenta institucional y una Gran Final presencial en los laboratorios de cómputo de Santa Anita.
+              La plataforma oficial de esports de Tecsup. Brackets automatizados, clasificaciones sin trampas con tu cuenta institucional y una Gran Final presencial en el campus de Tecsup.
             </p>
 
             {/* Apple-Style Pill CTA Buttons */}
@@ -238,7 +200,7 @@ export default function HomePage() {
               </div>
             ) : featuredTournament ? (
               /* REAL TOURNAMENT FLAGSHIP CARD */
-              <SpotlightCard 
+              <SpotlightCard
                 spotlightColor={`${GAME_CATALOG[featuredTournament.game_code as GameCode]?.color || '#E63946'}26`}
                 className="arena-card p-6 relative overflow-hidden border border-[var(--border-card)] hover:border-white/20 transition-all shadow-2xl bg-[var(--bg-card)] rounded-3xl group"
               >
@@ -259,8 +221,8 @@ export default function HomePage() {
                 <div className="relative h-48 rounded-2xl overflow-hidden my-4 bg-black/90">
                   <ScrollParallaxImage
                     src={
-                      featuredTournament.banner_url || 
-                      GAME_CATALOG[featuredTournament.game_code as GameCode]?.bannerUrl || 
+                      featuredTournament.banner_url ||
+                      GAME_CATALOG[featuredTournament.game_code as GameCode]?.bannerUrl ||
                       '/games/brawl_stars_banner.jpg'
                     }
                     alt={featuredTournament.name}
@@ -271,10 +233,10 @@ export default function HomePage() {
                     className="opacity-85 group-hover:opacity-95 transition-opacity duration-500"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-transparent to-black/30 pointer-events-none" />
-                  
+
                   {/* Floating Game Badge */}
                   <div className="absolute top-3 left-3">
-                    <span 
+                    <span
                       className="px-3 py-1 rounded-lg text-[10px] font-bold text-white flex items-center gap-1.5 shadow-lg backdrop-blur-md"
                       style={{ backgroundColor: GAME_CATALOG[featuredTournament.game_code as GameCode]?.color || '#E63946' }}
                     >
@@ -311,12 +273,12 @@ export default function HomePage() {
                         {featuredTournament.current_participants || 0} / {featuredTournament.max_slots || 16} {featuredTournament.team_size && featuredTournament.team_size > 1 ? 'Equipos' : 'Jugadores'}
                       </span>
                     </div>
-                    
+
                     <div className="w-full h-2 bg-[var(--bg-arena)] rounded-full overflow-hidden border border-[var(--border-card)]">
-                      <div 
-                        className="h-full bg-[#E63946] rounded-full transition-all duration-500" 
-                        style={{ 
-                          width: `${Math.max(6, ((featuredTournament.current_participants || 0) / (featuredTournament.max_slots || 16)) * 100)}%` 
+                      <div
+                        className="h-full bg-[#E63946] rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.max(6, ((featuredTournament.current_participants || 0) / (featuredTournament.max_slots || 16)) * 100)}%`
                         }}
                       />
                     </div>
@@ -387,13 +349,9 @@ export default function HomePage() {
       {/* 2. "DESCUBRE LA LÍNEA": APPLE-STYLE INTERACTIVE DISCIPLINE SHOWCASE       */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-8">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-mono font-bold uppercase tracking-wider text-[#E63946]">
-            <Zap className="w-3.5 h-3.5" />
-            <span>Alineación Oficial de Juegos</span>
-          </div>
           <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
             Descubre las 7 disciplinas.
           </h2>
@@ -413,14 +371,18 @@ export default function HomePage() {
                 onClick={() => handleSelectDiscipline(game.code)}
                 className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 flex items-center gap-2 border cursor-pointer ${
                   isSelected
-                    ? 'bg-[var(--text-primary)] text-[var(--bg-page)] border-[var(--text-primary)] shadow-lg scale-102'
+                    ? 'text-white shadow-lg scale-105 border-transparent'
                     : 'bg-[var(--bg-card)] text-[var(--text-secondary)] border-[var(--border-card)] hover:text-[var(--text-primary)] hover:border-white/20'
                 }`}
+                style={isSelected ? {
+                  backgroundColor: game.color || '#E63946',
+                  boxShadow: `0 4px 18px ${game.shadowColor || 'rgba(230,57,70,0.35)'}`,
+                } : {}}
               >
                 {game.logoUrl ? (
                   <img src={game.logoUrl} alt="" className="w-4 h-4 object-contain shrink-0" />
                 ) : (
-                  <span>{game.statIcon || '🎮'}</span>
+                  <Gamepad2 className="w-4 h-4 shrink-0 text-[#38BDF8]" />
                 )}
                 <span>{game.name}</span>
               </button>
@@ -431,28 +393,25 @@ export default function HomePage() {
         {/* Widescreen Cinematic Product Stage with Morphing Volumetric Light */}
         <div className="arena-card p-8 sm:p-12 rounded-3xl bg-[var(--bg-card)] border border-[var(--border-card)] relative overflow-hidden shadow-2xl">
           {/* Volumetric Aura reacting to selected game color */}
-          <div 
+          <div
             className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20 pointer-events-none transition-all duration-700 ease-out"
             style={{ backgroundColor: activeGame.color }}
           />
-          <div 
+          <div
             className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-15 pointer-events-none transition-all duration-700 ease-out"
             style={{ backgroundColor: activeGame.colorSecondary || '#1D3557' }}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
-            
+
             {/* Left: Detailed Specs & Storytelling (6 cols) */}
             <div className="lg:col-span-6 space-y-6">
               <div className="flex items-center gap-2.5">
-                <span 
+                <span
                   className="px-3 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white"
                   style={{ backgroundColor: activeGame.color }}
                 >
                   {activeGame.badge}
-                </span>
-                <span className="text-xs font-mono text-[var(--text-muted)]">
-                  Verificación: {activeGame.tagLabel}
                 </span>
               </div>
 
@@ -465,13 +424,13 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Technical Specifications Grid (Apple Style) */}
+              {/* Technical Specifications Grid */}
               <div className="grid grid-cols-2 gap-4 pt-2">
                 <div className="p-4 bg-[var(--bg-arena)] rounded-2xl border border-[var(--border-card)]">
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Métrica Oficial</p>
+                  <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Modalidad Tecsup</p>
                   <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 mt-1">
-                    <span>{activeGame.statIcon}</span>
-                    <span>{activeGame.statLabel}</span>
+                    <Gamepad2 className="w-3.5 h-3.5 text-[#38BDF8]" />
+                    <span>Torneo Universitario</span>
                   </p>
                 </div>
 
@@ -512,7 +471,7 @@ export default function HomePage() {
               </AnimatePresence>
 
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent pointer-events-none" />
-              
+
               <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs text-white">
                 <span className="font-bold flex items-center gap-2 bg-black/70 px-3 py-1.5 rounded-xl backdrop-blur-md border border-white/10">
                   {activeGame.logoUrl && (
@@ -533,26 +492,23 @@ export default function HomePage() {
       {/* ========================================================================= */}
       {/* 2.5 "GALERÍA DE LA ARENA": APPLE-STYLE MEDIA SNAP CAROUSEL WITH PARALLAX  */}
       {/* ========================================================================= */}
-      <section className="w-full">
-        <AppleMediaCarousel 
-          items={carouselItems}
-          tagline="GALERÍA DE LA ARENA"
-          headline="Descubre las copas activas."
-          subheadline="Desliza para explorar los torneos y escenarios oficiales de esta temporada."
-        />
-      </section>
+      {carouselItems.length > 0 && (
+        <section className="w-full">
+          <AppleMediaCarousel
+            items={carouselItems}
+            headline="Descubre los torneos activos."
+            subheadline="Desliza para explorar los torneos oficiales registrados en esta temporada."
+          />
+        </section>
+      )}
 
       {/* ========================================================================= */}
       {/* 3. "INGENIERÍA DE TORNEOS": APPLE "A FONDO" & ANTIGRAVITY SPATIAL BENTO   */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-10">
-        
+
         {/* Section Header */}
         <div className="space-y-3 text-left">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-mono font-bold uppercase tracking-wider text-[#38BDF8]">
-            <ShieldCheck className="w-3.5 h-3.5 text-[#E63946]" />
-            <span>Infraestructura & Confianza</span>
-          </div>
           <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
             Diseñado para competir al máximo nivel.
           </h2>
@@ -563,7 +519,7 @@ export default function HomePage() {
 
         {/* Asymmetrical 4-Card Bento Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
+
           {/* Bento Card 1: Identidad Institucional & Fair Play (7 cols) */}
           <div className="lg:col-span-7 arena-card p-8 sm:p-10 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-3xl flex flex-col justify-between space-y-6 shadow-sm relative overflow-hidden">
             <div className="space-y-4 relative z-10">
@@ -597,9 +553,9 @@ export default function HomePage() {
           {/* Bento Card 2: La Gran Final Presencial (5 cols) */}
           <div className="lg:col-span-5 arena-card p-8 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-3xl flex flex-col justify-between space-y-6 shadow-sm relative overflow-hidden group">
             <div className="relative h-44 rounded-2xl overflow-hidden border border-[var(--border-card)]">
-              <ScrollParallaxImage 
-                src="/brand/tecsup_sede_lima.jpg" 
-                alt="Campus Tecsup Lima" 
+              <ScrollParallaxImage
+                src="/brand/tecsup_sede_lima.jpg"
+                alt="Campus Tecsup Lima"
                 scaleRange={[1.0, 1.08]}
                 yRange={[-12, 12]}
                 containerClassName="w-full h-full"
@@ -614,10 +570,10 @@ export default function HomePage() {
 
             <div className="space-y-2">
               <h3 className="text-xl font-black text-[var(--text-primary)]">
-                Finales Presenciales de Alto Rendimiento
+                Grandes Finales Presenciales en Tecsup
               </h3>
               <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
-                Las etapas previas se juegan de forma remota y las grandes finales se disputan en vivo en los laboratorios de cómputo con pantallas de 144Hz y baja latencia.
+                Las etapas previas se juegan de forma remota y las grandes finales se disputan de manera presencial en el campus de Tecsup.
               </p>
             </div>
           </div>
@@ -684,13 +640,9 @@ export default function HomePage() {
       {/* 4. "LA SENDA DEL COMPETIDOR": CHRONOLOGICAL SEQUENTIAL TIMELINE           */}
       {/* ========================================================================= */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full space-y-10">
-        
+
         {/* Section Header */}
         <div className="text-left space-y-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] text-xs font-mono font-bold uppercase tracking-wider text-[#E63946]">
-            <Rocket className="w-3.5 h-3.5" />
-            <span>El Recorrido Oficial</span>
-          </div>
           <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight">
             De tu primera partida al podio.
           </h2>
@@ -737,7 +689,7 @@ export default function HomePage() {
             >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span 
+                  <span
                     className="font-mono text-2xl font-black"
                     style={{ color: item.color }}
                   >
@@ -767,11 +719,6 @@ export default function HomePage() {
       {/* ========================================================================= */}
       <section className="max-w-4xl mx-auto px-4 w-full text-center">
         <div className="arena-card p-10 sm:p-16 border border-[var(--border-card)] bg-[var(--bg-card)] rounded-3xl space-y-6 shadow-2xl relative overflow-hidden">
-          
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#E63946]/10 text-xs font-bold text-[#E63946] border border-[#E63946]/20 uppercase tracking-wider">
-            <Trophy className="w-3.5 h-3.5" />
-            <span>Circuito Oficial Tecsup</span>
-          </div>
 
           <h2 className="text-3xl sm:text-5xl font-black text-[var(--text-primary)] tracking-tight leading-tight">
             ¿Listo para inscribir tu nombre en la historia de Tecsup?

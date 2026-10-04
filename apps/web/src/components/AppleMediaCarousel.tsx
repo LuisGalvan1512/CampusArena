@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform, useReducedMotion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, ArrowRight, Trophy, Flame } from 'lucide-react';
 import { sounds } from '@/lib/sound';
 
@@ -150,8 +150,9 @@ export function AppleMediaCarousel({
   );
 }
 
-function CarouselCard({ item, index }: { item: CarouselItem; index: number }) {
+const CarouselCard = React.memo(function CarouselCard({ item, index }: { item: CarouselItem; index: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
+  const shouldReduceMotion = useReducedMotion();
   
   // Scroll-linked parallax effect for the image inside the card
   const { scrollYProgress } = useScroll({
@@ -159,8 +160,16 @@ function CarouselCard({ item, index }: { item: CarouselItem; index: number }) {
     offset: ['start end', 'end start']
   });
 
-  const imageScale = useTransform(scrollYProgress, [0, 0.5, 1], [1.02, 1.08, 1.02]);
-  const imageY = useTransform(scrollYProgress, [0, 1], [-12, 12]);
+  const imageScale = useTransform(
+    scrollYProgress,
+    [0, 0.5, 1],
+    shouldReduceMotion ? [1, 1, 1] : [1.02, 1.08, 1.02]
+  );
+  const imageY = useTransform(
+    scrollYProgress,
+    [0, 1],
+    shouldReduceMotion ? [0, 0] : [-12, 12]
+  );
 
   return (
     <div
@@ -172,7 +181,11 @@ function CarouselCard({ item, index }: { item: CarouselItem; index: number }) {
         <motion.img
           src={item.imageUrl}
           alt={item.title}
-          style={{ scale: imageScale, y: imageY }}
+          style={{
+            scale: shouldReduceMotion ? 1 : imageScale,
+            y: shouldReduceMotion ? 0 : imageY,
+            willChange: shouldReduceMotion ? 'auto' : 'transform',
+          }}
           className="w-full h-full object-cover object-center opacity-85 group-hover:opacity-95 transition-opacity duration-500"
           onError={(e) => {
             if (e.currentTarget.getAttribute('data-failed') !== 'true') {
@@ -238,4 +251,4 @@ function CarouselCard({ item, index }: { item: CarouselItem; index: number }) {
       </div>
     </div>
   );
-}
+});

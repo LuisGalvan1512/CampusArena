@@ -4,8 +4,8 @@ import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/components/Navbar';
 import { Footer } from '@/components/Footer';
-import { CommandPalette } from '@/components/CommandPalette';
 import { PageTransition } from '@/components/PageTransition';
+import { CommandPaletteLazy } from '@/components/CommandPaletteLazy';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
@@ -20,6 +20,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" suppressHydrationWarning>
+      <head>
+        {/* Preconnect hints for external avatar API, Steam media and Supabase */}
+        <link rel="preconnect" href="https://api.dicebear.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://api.dicebear.com" />
+        <link rel="preconnect" href="https://cdn.cloudflare.steamstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://cdn.cloudflare.steamstatic.com" />
+        <link rel="preconnect" href="https://sxqwztaccmdnpotcfeev.supabase.co" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://sxqwztaccmdnpotcfeev.supabase.co" />
+      </head>
       <body className="min-h-screen flex flex-col bg-[var(--bg-arena)] text-[var(--text-primary)] antialiased transition-colors duration-200">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
           <AuthProvider>
@@ -30,7 +39,7 @@ export default function RootLayout({
               Saltar al contenido principal
             </a>
             <Navbar />
-            <CommandPalette />
+            <CommandPaletteLazy />
             <main id="main-content" className="flex-1 pt-16">
               <PageTransition>
                 {children}
