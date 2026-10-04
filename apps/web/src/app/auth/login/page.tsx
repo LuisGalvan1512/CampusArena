@@ -115,8 +115,8 @@ export default function LoginPage() {
         
         {/* Header Hero */}
         <div className="text-center space-y-3">
-          <div className="inline-flex w-14 h-14 rounded-xl bg-[#111622] border border-white/10 p-2 shadow-sm mb-1">
-            <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
+          <div className="inline-flex w-14 h-14 rounded-xl bg-black border border-white/20 p-1.5 shadow-sm mb-1 overflow-hidden">
+            <img src="/brand/logo.jpg" alt="Campus Arena Logo" className="w-full h-full object-contain rounded-lg" />
           </div>
 
           <div className="space-y-1">

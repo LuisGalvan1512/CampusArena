@@ -11,8 +11,8 @@ export function Footer() {
           {/* Col 1: Brand Info */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#111622] border border-white/10 flex items-center justify-center p-1.5 shadow-sm">
-                <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
+              <div className="w-8 h-8 rounded-lg bg-black border border-white/20 flex items-center justify-center p-1 shadow-sm overflow-hidden">
+                <img src="/brand/logo.jpg" alt="Campus Arena Logo" className="w-full h-full object-contain rounded" />
               </div>
               <div className="flex flex-col leading-none">
                 <span className="text-base font-black tracking-wider text-[var(--text-primary)]">

@@ -76,8 +76,8 @@ export function Navbar() {
           
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#E63946] to-[#1D3557] flex items-center justify-center shadow-lg shadow-[#E63946]/20 group-hover:scale-105 transition-transform overflow-hidden p-1.5 border border-white/10">
-              <img src="/brand/tecsup_emblem.png" alt="Tecsup" className="w-full h-full object-contain" />
+            <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center shadow-lg shadow-white/5 group-hover:scale-105 transition-transform overflow-hidden p-1 border border-white/20">
+              <img src="/brand/logo.jpg" alt="Campus Arena Logo" className="w-full h-full object-contain rounded-lg" />
             </div>
             <div className="flex flex-col">
               <span className="text-base font-black tracking-wider text-[var(--text-primary)] flex items-center gap-1.5 leading-none">

@@ -11,6 +11,10 @@ import { Toaster } from 'sonner';
 export const metadata: Metadata = {
   title: 'Campus Arena — Plataforma de Esports Universitarios',
   description: 'Compite en torneos de videojuegos, representa a tu institución y construye tu legado competitivo oficial en Campus Arena.',
+  icons: {
+    icon: '/brand/logo.jpg',
+    apple: '/brand/logo.jpg',
+  },
 };
 
 export default function RootLayout({
