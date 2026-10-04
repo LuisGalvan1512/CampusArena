@@ -506,7 +506,7 @@ export const ADMIN_PROFILE_PRESET: ProfileCustomizationState = {
   favoriteGames: ['BRAWL_STARS', 'CLASH_ROYALE', 'SMASH_ULTIMATE'],
   soundbite: 'synthesizer_blip',
   callingCard: 'arena_championship',
-  pinnedPins: ['campus_lima', 'pioneer_2026', 'fair_play'],
+  pinnedPins: ['campus_lima', 'pioneer_2026'],
   warCry: 'Administrador Oficial Campus Arena',
 };
 
@@ -520,7 +520,7 @@ export const DEFAULT_CUSTOMIZATION: ProfileCustomizationState = {
   favoriteGames: ['CLASH_ROYALE', 'BRAWL_STARS'],
   soundbite: 'synthesizer_blip',
   callingCard: 'software_terminal',
-  pinnedPins: ['campus_lima', 'pioneer_2026', 'fair_play'],
+  pinnedPins: ['campus_lima', 'pioneer_2026'],
   warCry: '',
 };
 
@@ -547,7 +547,8 @@ export function getActiveSessionUserId(): string | null {
   return null;
 }
 
-const ADMIN_STORAGE_KEY = 'campus_arena_admin_preset_v4';
+const ADMIN_STORAGE_KEY = 'campus_arena_admin_preset_v5';
+const USER_STORAGE_KEY_V5 = 'campus_arena_profile_customization_v5';
 const USER_STORAGE_KEY_V4 = 'campus_arena_profile_customization_v4';
 const STORAGE_KEY = 'campus_arena_profile_customization_v3';
 const LEGACY_STORAGE_KEY_V2 = 'campus_arena_profile_customization_v2';
@@ -585,16 +586,19 @@ export function getProfileCustomization(userId?: string): ProfileCustomizationSt
       return {
         ...ADMIN_PROFILE_PRESET,
         ...parsed,
+        pinnedPins: (Array.isArray(parsed.pinnedPins) ? parsed.pinnedPins : ADMIN_PROFILE_PRESET.pinnedPins)
+          .filter((p: string) => p !== 'fair_play')
+          .slice(0, 3),
         avatarFrame: parsed.avatarFrame || 'admin_brush',
         material: parsed.material || 'steam_neon_shrine',
         wallpaper: parsed.wallpaper || 'steam_space_voyage',
       };
     }
 
-    const raw = localStorage.getItem(USER_STORAGE_KEY_V4) || localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY_V2) || localStorage.getItem(LEGACY_STORAGE_KEY_V1);
+    const raw = localStorage.getItem(USER_STORAGE_KEY_V5) || localStorage.getItem(USER_STORAGE_KEY_V4) || localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY_V2) || localStorage.getItem(LEGACY_STORAGE_KEY_V1);
     if (!raw) {
       if (preset) {
-        localStorage.setItem(USER_STORAGE_KEY_V4, JSON.stringify(baseDefault));
+        localStorage.setItem(USER_STORAGE_KEY_V5, JSON.stringify(baseDefault));
       }
       return baseDefault;
     }
@@ -614,7 +618,9 @@ export function getProfileCustomization(userId?: string): ProfileCustomizationSt
       favoriteGames: validGames,
       soundbite: SOUNDBITE_IDS.has(parsed.soundbite) ? parsed.soundbite : baseDefault.soundbite,
       callingCard: parsed.callingCard || baseDefault.callingCard,
-      pinnedPins: Array.isArray(parsed.pinnedPins) ? parsed.pinnedPins.slice(0, 3) : baseDefault.pinnedPins,
+      pinnedPins: (Array.isArray(parsed.pinnedPins) ? parsed.pinnedPins : baseDefault.pinnedPins)
+        .filter((p: string) => p !== 'fair_play')
+        .slice(0, 3),
       warCry: parsed.warCry || baseDefault.warCry,
     };
   } catch {
@@ -632,7 +638,7 @@ export function saveProfileCustomization(state: Partial<ProfileCustomizationStat
     if (isAdmin) {
       localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(updated));
     } else {
-      localStorage.setItem(USER_STORAGE_KEY_V4, JSON.stringify(updated));
+      localStorage.setItem(USER_STORAGE_KEY_V5, JSON.stringify(updated));
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     }
   } catch (err) {
