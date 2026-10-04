@@ -358,38 +358,42 @@ graph LR
    pnpm --filter api exec prisma migrate deploy
    ```
 
-### Paso 2: Despliegue del Backend en Render (o Railway)
+### Paso 2: Despliegue del Backend en Render (Web Service Gratuito)
 1. Entra a [render.com](https://render.com) e inicia sesión con tu cuenta de GitHub.
-2. Haz clic en **New +** -> **Web Service** y conecta tu repositorio `CampusArena`.
+2. Haz clic en el botón superior **New +** -> **Web Service** y conecta tu repositorio `CampusArena`.
 3. Configuración del servicio:
    - **Name:** `campus-arena-api`
-   - **Region:** Selecciona la más cercana a Perú (ej. `Ohio (US East)` o `Sao Paulo`).
-   - **Language:** `Docker` (seleccionará automáticamente `apps/api/Dockerfile`) o `Node`.
-     - *Si usas Docker:*
-       - **Dockerfile Path:** `apps/api/Dockerfile`
-       - **Docker Context:** `.` (raíz del repositorio).
-     - *Si usas Node:*
-       - **Root Directory:** `apps/api`
-       - **Build Command:** `pnpm install && pnpm exec prisma generate && pnpm build`
-       - **Start Command:** `pnpm start:prod`
+   - **Region:** Selecciona `Ohio (US East)` o la más cercana a Perú.
+   - **Branch:** `main` (o `semimain`)
+   - **Language:** Selecciona **`Docker`** (Render detectará automáticamente el archivo `apps/api/Dockerfile`).
+     - **Dockerfile Path:** `apps/api/Dockerfile`
+     - **Docker Context:** `.` (el punto representa la raíz del monorepo).
+   - **Instance Type:** `Free` ($0/mes).
 4. **Environment Variables** en Render:
-   | Variable | Valor |
-   |---|---|
-   | `NODE_ENV` | `production` |
-   | `PORT` | `3001` |
-   | `DATABASE_URL` | Tu URL de Supabase (Pooler 6543) |
-   | `DIRECT_URL` | Tu URL directa de Supabase (5432) |
-   | `JWT_SECRET` | Clave secreta segura (ej. genera una con `openssl rand -base64 32`) |
-   | `JWT_EXPIRATION` | `900` (15 minutos) |
-   | `FRONTEND_URL` | `http://localhost:3000,https://campusarena.vercel.app` (actualizar tras el Paso 3) |
-   | `BREVO_API_KEY` | Tu API Key de Brevo SMTP |
-   | `SMTP_HOST` | `smtp-relay.brevo.com` |
-   | `SMTP_PORT` | `587` |
-   | `SMTP_USER` | Tu usuario de Brevo |
-   | `SMTP_PASS` | Tu contraseña de Brevo |
-   | `SMTP_FROM` | `luis.galvan@tecsup.edu.pe` |
-5. Haz clic en **Deploy Web Service**.
-6. Render te asignará una URL pública segura (ej. `https://campus-arena-api.onrender.com`).
+   Haz clic en el botón **"Add from .env"** y pega este bloque completo:
+
+   ```env
+   NODE_ENV=production
+   PORT=3001
+   DATABASE_URL=postgresql://postgres.sxqwztaccmdnpotcfeev:[TU_PASSWORD]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
+   DIRECT_URL=postgresql://postgres.sxqwztaccmdnpotcfeev:[TU_PASSWORD]@aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+   JWT_SECRET=campus-arena-jwt-secret-change-in-production-2026
+   JWT_EXPIRATION=900
+   FRONTEND_URL=http://localhost:3000,https://campusarena.vercel.app
+   BREVO_API_KEY=tu-api-key-de-brevo
+   SMTP_HOST=smtp-relay.brevo.com
+   SMTP_PORT=587
+   SMTP_USER=tu-usuario-brevo@smtp-brevo.com
+   SMTP_PASS=tu-smtp-key-de-brevo
+   SMTP_FROM=lusen121502@gmail.com
+   SUPABASE_URL=https://sxqwztaccmdnpotcfeev.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cXd6dGFjY21kbnBvdGNmZWV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjg2MzUsImV4cCI6MjEwMzgwNDYzNX0.7msCflVq-FhHw9XrV52MCg3p8QDvwDX57leK5NsHifk
+   SUPABASE_JWT_SECRET=tu-supabase-jwt-secret
+   ```
+   > 💡 **Nota:** Para mayor comodidad, los valores de contraseñas y API keys ya los tienes configurados de forma privada en tu archivo local `apps/api/.env`. Solo cópialos de allí hacia Render.
+
+5. Haz clic en **Create Web Service**.
+6. Render compilará la imagen de Docker en ~3 minutos y te otorgará tu URL pública (ej. `https://campus-arena-api.onrender.com`).
    - Puedes verificar su estado en: `https://campus-arena-api.onrender.com/api/v1/health`
 
 ### Paso 3: Despliegue del Frontend en Vercel
@@ -397,19 +401,27 @@ graph LR
 2. Haz clic en **Add New...** -> **Project** e importa el repositorio `CampusArena`.
 3. Configuración del proyecto:
    - **Framework Preset:** `Next.js`
-   - **Root Directory:** Haz clic en *Edit* y selecciona `apps/web`.
+   - **Root Directory:** Haz clic en **Edit** y selecciona la carpeta **`apps/web`**.
+   - **Branch:** `main` (o `semimain`)
 4. **Environment Variables** en Vercel:
-   | Variable | Valor |
-   |---|---|
-   | `NEXT_PUBLIC_API_URL` | `https://campus-arena-api.onrender.com/api/v1` *(la URL de Render del Paso 2)* |
-   | `NEXT_PUBLIC_SUPABASE_URL` | `https://sxqwztaccmdnpotcfeev.supabase.co` |
-   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | *Tu clave pública anon de Supabase* |
-5. Haz clic en **Deploy**.
-6. Vercel compilará tu aplicación en ~45 segundos y te entregará tu dominio de producción (ej. `https://campus-arena-web.vercel.app`).
+   Copia y pega este bloque en la primera casilla de variables (Vercel las desglosa automáticamente):
 
-### Paso 4: Sincronización Final de CORS
-Regresa a Render (Paso 2) y en la variable `FRONTEND_URL`, asegúrate de incluir el dominio que te asignó Vercel:
-`https://campus-arena-web.vercel.app` (el backend ya soporta URLs separadas por coma y subdominios `*.vercel.app`).
+   ```env
+   NEXT_PUBLIC_API_URL=https://campus-arena-api.onrender.com/api/v1
+   NEXT_PUBLIC_SUPABASE_URL=https://sxqwztaccmdnpotcfeev.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cXd6dGFjY21kbnBvdGNmZWV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjg2MzUsImV4cCI6MjEwMzgwNDYzNX0.7msCflVq-FhHw9XrV52MCg3p8QDvwDX57leK5NsHifk
+   ```
+   *(Nota: si el nombre de tu servicio en Render es diferente de `campus-arena-api`, ajusta `NEXT_PUBLIC_API_URL` con tu URL real)*.
+
+5. Haz clic en **Deploy**.
+6. Vercel compilará la aplicación en ~40 segundos y te entregará tu dominio de producción (ej. `https://campus-arena-web.vercel.app`).
+
+### Paso 4: Sincronización Final de CORS (10 segundos)
+Regresa a tu servicio en Render (Paso 2), ve a la pestaña **Environment** y en la variable `FRONTEND_URL`, añade la URL que te asignó Vercel:
+```env
+FRONTEND_URL=https://campus-arena-web.vercel.app,http://localhost:3000
+```
+Haz clic en **Save Changes** (el backend se reiniciará automáticamente y ya permitirá peticiones desde Vercel y subdominios `*.vercel.app`).
 
 ---
 
