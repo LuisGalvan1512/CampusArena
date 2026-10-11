@@ -362,7 +362,7 @@ export default function OrganizerDashboardPage() {
                     </div>
 
                     <h3 className="text-base font-extrabold text-[var(--text-primary)]">
-                      {p.competitor_name} • <span className="text-[#A8DADC]">{p.in_game_name}</span> ({p.player_tag})
+                      {p.competitor_name}
                     </h3>
 
                     <p className="text-xs text-[var(--text-secondary)]">

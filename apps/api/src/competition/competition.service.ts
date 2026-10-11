@@ -73,8 +73,8 @@ export class CompetitionService {
       const isTeam = (tournament.team_size && tournament.team_size > 1) && !!r.team_name;
       return {
         name: isTeam ? r.team_name! : `${r.competitor.first_name} ${r.competitor.last_name}`,
-        tag: isTeam ? `[Cap: ${r.game_profile.player_tag}]` : r.game_profile.player_tag,
-        trophies: r.game_profile.trophies,
+        tag: isTeam ? (r.team_name || 'Equipo') : `${r.competitor.first_name} ${r.competitor.last_name}`,
+        trophies: r.game_profile?.trophies || 0,
       };
     });
 

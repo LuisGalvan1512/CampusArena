@@ -802,7 +802,7 @@ export default function TournamentDetailPage() {
                           )}
                         </div>
 
-                        {/* A la derecha: Nombre, abajo correo, y tag de juego */}
+                        {/* A la derecha: Nombre, abajo correo, y equipo */}
                         <div className="min-w-0 space-y-0.5">
                           <p className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[#E63946] transition-colors truncate">
                             {p.competitor_name}
@@ -810,9 +810,15 @@ export default function TournamentDetailPage() {
                           <p className="text-[11px] text-[var(--text-muted)] font-mono truncate">
                             {p.email || 'correo@tecsup.edu.pe'}
                           </p>
-                          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono">
-                            {p.in_game_name} ({p.player_tag})
-                          </p>
+                          {p.team_name ? (
+                            <p className="text-[10px] text-indigo-400 font-bold truncate">
+                              Equipo: {p.team_name}
+                            </p>
+                          ) : (
+                            <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium">
+                              Sede {p.campus || 'Tecsup'}
+                            </p>
+                          )}
                         </div>
                       </div>
 
@@ -1057,9 +1063,6 @@ export default function TournamentDetailPage() {
                       </span>
                     </div>
                     <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{selectedTeamRoster.email}</p>
-                    <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono">
-                      Tag: {selectedTeamRoster.player_tag} ({selectedTeamRoster.in_game_name})
-                    </p>
                   </div>
                 </div>
 
@@ -1095,9 +1098,6 @@ export default function TournamentDetailPage() {
                           </span>
                         </div>
                         <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{m.email || 'correo@tecsup.edu.pe'}</p>
-                        {m.player_tag && (
-                          <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-mono">Tag: {m.player_tag}</p>
-                        )}
                       </div>
                     </div>
                   </div>

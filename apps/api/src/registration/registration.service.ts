@@ -63,19 +63,39 @@ export class RegistrationService {
       throw new BadRequestException('El periodo de inscripción para este torneo ha finalizado o aún no comienza.');
     }
 
-    // 2. Verify Game Profile belongs to user and matches tournament game
-    const gameProfile = await this.prisma.gameProfile.findUnique({
-      where: { id: dto.game_profile_id },
-    });
-
-    if (!gameProfile || gameProfile.user_id !== userId) {
-      throw new BadRequestException('La cuenta de juego seleccionada no pertenece a tu perfil.');
+    // 2. Verify or auto-create Game Profile for user and tournament game (Zero tag requirement)
+    let gameProfile: any = null;
+    if (dto.game_profile_id) {
+      gameProfile = await this.prisma.gameProfile.findUnique({
+        where: { id: dto.game_profile_id },
+      });
     }
 
-    if (gameProfile.game_code !== tournament.game_code) {
-      throw new BadRequestException(
-        `Este torneo es de ${tournament.game_code}, pero seleccionaste una cuenta de otro juego.`
-      );
+    if (!gameProfile || gameProfile.user_id !== userId || gameProfile.game_code !== tournament.game_code) {
+      gameProfile = await this.prisma.gameProfile.findFirst({
+        where: { user_id: userId, game_code: tournament.game_code },
+      });
+
+      if (!gameProfile) {
+        const user = await this.prisma.user.findUnique({
+          where: { id: userId },
+          include: { profile: true },
+        });
+        const displayName =
+          user?.profile?.nickname ||
+          `${user?.first_name || ''} ${user?.last_name || ''}`.trim() ||
+          'Estudiante Tecsup';
+        const internalTag = `TECSUP-${userId.slice(0, 8)}`;
+
+        gameProfile = await this.prisma.gameProfile.create({
+          data: {
+            user_id: userId,
+            game_code: tournament.game_code,
+            player_tag: internalTag,
+            in_game_name: displayName,
+          },
+        });
+      }
     }
 
     // 3. Check for existing active registration (Rule: 1 active registration per competitor per tournament)
@@ -119,7 +139,7 @@ export class RegistrationService {
         data: {
           tournament_id: tournamentId,
           competitor_id: userId,
-          game_profile_id: dto.game_profile_id,
+          game_profile_id: gameProfile.id,
           team_name: dto.team_name || null,
           roster_members: dto.roster_members ? dto.roster_members : null,
           status: isFree ? 'CONFIRMED' : 'PENDING_PAYMENT',

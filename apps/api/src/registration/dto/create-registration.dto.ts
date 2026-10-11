@@ -7,9 +7,9 @@ export enum PaymentMethodDto {
 }
 
 export class CreateRegistrationDto {
+  @IsOptional()
   @IsUUID('4', { message: 'El game_profile_id debe ser un UUID válido.' })
-  @IsNotEmpty({ message: 'La cuenta de juego es obligatoria.' })
-  game_profile_id: string;
+  game_profile_id?: string;
 
   @IsEnum(PaymentMethodDto, {
     message: 'El método de pago debe ser YAPE, PLIN o TRANSFER.',

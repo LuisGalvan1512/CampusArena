@@ -69,8 +69,6 @@ export function RegistrationWizardModal({
   const [evidenceUrl, setEvidenceUrl] = useState('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploadingFile, setIsUploadingFile] = useState(false);
-  const [manualTag, setManualTag] = useState('');
-  const [isCreatingProfile, setIsCreatingProfile] = useState(false);
 
   // Dynamic Team / Squad registration state
   const teamSize = Number(tournament.team_size) || (tournament.game_code === 'DOTA_2' ? 5 : tournament.game_code === 'LEFT_4_DEAD_2' ? 4 : 1);
@@ -78,14 +76,13 @@ export function RegistrationWizardModal({
   const defaultTeammateCount = Math.max(1, teamSize - 1);
   const [teamName, setTeamName] = useState('');
   const [teamEmblem, setTeamEmblem] = useState('🐉');
-  const [rosterMembers, setRosterMembers] = useState<{ name: string; email: string; player_tag: string; role: string }[]>([]);
+  const [rosterMembers, setRosterMembers] = useState<{ name: string; email: string; role: string }[]>([]);
 
   useEffect(() => {
     if (isOpen && isTeamTournament) {
       const initial = Array.from({ length: defaultTeammateCount }, (_, i) => ({
         name: '',
         email: '',
-        player_tag: '',
         role: `Compañero ${i + 1}`,
       }));
       setRosterMembers(initial);
@@ -172,10 +169,13 @@ export function RegistrationWizardModal({
     setIsLoading(true);
 
     const payload: any = {
-      game_profile_id: selectedGameProfileId,
       payment_method: paymentMethod,
       rules_version: 'v1.0',
     };
+
+    if (selectedGameProfileId) {
+      payload.game_profile_id = selectedGameProfileId;
+    }
 
     if (isTeamTournament) {
       payload.team_name = teamName.trim();
@@ -184,7 +184,6 @@ export function RegistrationWizardModal({
         captain: {
           name: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Capitán',
           email: user?.email,
-          player_tag: matchingGameProfile?.player_tag || manualTag,
           avatar_url: user?.avatar_url || null,
           role: 'Capitán',
         },
@@ -247,10 +246,10 @@ export function RegistrationWizardModal({
     setEvidenceUrl('');
     setTeamName('');
     setRosterMembers([
-      { name: '', email: '', player_tag: '', role: 'Jugador 2' },
-      { name: '', email: '', player_tag: '', role: 'Jugador 3' },
-      { name: '', email: '', player_tag: '', role: 'Jugador 4' },
-      { name: '', email: '', player_tag: '', role: 'Jugador 5' },
+      { name: '', email: '', role: 'Jugador 2' },
+      { name: '', email: '', role: 'Jugador 3' },
+      { name: '', email: '', role: 'Jugador 4' },
+      { name: '', email: '', role: 'Jugador 5' },
     ]);
     onClose();
   };
@@ -301,240 +300,232 @@ export function RegistrationWizardModal({
           </div>
         )}
 
-        {/* STEP 1: VALIDATE GAME PROFILE */}
-        {step === 1 && (
+        {/* STEP 1: VALIDATE COMPETITOR (SOLO) OR SQUAD (TEAMS) */}
+        {step === 1 && !isTeamTournament && (
           <div className="space-y-5 animate-in fade-in">
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-[var(--text-primary)]">1. Confirmar Cuenta de Videojuego</h4>
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">1. Confirmar Datos del Competidor</h4>
               <p className="text-xs text-[var(--text-secondary)]">
-                Para competir en este torneo de {gameName}, utilizaremos tu cuenta o Tag oficial vinculado.
+                Competirás representando a tu sede institucional con tu cuenta verificada de Tecsup en {gameName}.
               </p>
             </div>
 
-            {matchingGameProfile ? (
-              <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-emerald-500/30 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#E63946]/20 text-[#E63946] overflow-hidden p-1.5 border border-white/10">
-                      {gameDef?.logoUrl ? (
-                        <img src={gameDef.logoUrl} alt={gameName} className="w-full h-full object-contain" />
-                      ) : (
-                        <Gamepad2 className="w-5 h-5" />
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-[var(--text-primary)]">{matchingGameProfile.in_game_name}</p>
-                      <p className="text-xs text-[var(--text-secondary)]">Tag / ID: <span className="text-[#E63946] font-mono font-bold">{matchingGameProfile.player_tag}</span></p>
-                    </div>
+            <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-emerald-500/30 space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
+                    {user?.avatar_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-base font-bold">{user?.first_name?.charAt(0) || 'U'}</span>
+                    )}
                   </div>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-500 dark:text-emerald-400 border border-emerald-500/20">
-                    Vinculado
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="p-5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-4">
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">
-                    Ingresa tu Nickname o Player Tag
-                  </label>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    Registraremos temporalmente tu ID para que puedas competir en el torneo de inmediato.
-                  </p>
-                </div>
-                <input
-                  type="text"
-                  value={manualTag}
-                  onChange={(e) => setManualTag(e.target.value)}
-                  placeholder="Ej. LuisDestroyer99"
-                  className="input-arena w-full"
-                />
-              </div>
-            )}
-
-            {/* TEAM SQUAD SETUP (Dynamic size: 2v2, 3v3, 4v4, 5v5) */}
-            {isTeamTournament && (
-              <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-indigo-500/30 space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-indigo-400" />
-                    <h5 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
-                      {teamSize === 2 ? 'Registro de Dúo (2v2)' : teamSize === 3 ? 'Registro de Trío (3v3)' : teamSize === 4 ? 'Registro de Escuadra (4v4)' : `Registro de Equipo (${teamSize}v${teamSize})`}
-                    </h5>
-                  </div>
-                  <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
-                    👑 Tú eres el Capitán
-                  </span>
-                </div>
-
-                {/* Auto-populated Captain Card */}
-                <div className="p-3 bg-white/[0.03] border border-white/10 rounded-xl space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-                      Capitán Oficial (Tus Datos de Perfil)
-                    </span>
-                    <span className="text-[10px] font-mono text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                      {matchingGameProfile?.player_tag || manualTag || 'Tag Vinculado'}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
-                      {user?.avatar_url ? (
-                        /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        <span>{user?.first_name?.charAt(0) || 'C'}</span>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-white truncate">
-                        {user?.first_name} {user?.last_name}
-                      </p>
-                      <p className="text-[11px] text-[#8E92A4] truncate font-mono">
-                        {user?.email}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Team Name and Emblem Selector */}
-                <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold text-[var(--text-secondary)]">
-                    Nombre del Equipo e Icono Representativo *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)] shrink-0">
-                      {['🐉', '⚡', '🐺', '🛡️', '👑', '🦅', '⚔️'].map((emb) => (
-                        <button
-                          key={emb}
-                          type="button"
-                          onClick={() => setTeamEmblem(emb)}
-                          className={`w-6 h-6 rounded-md text-xs flex items-center justify-center transition-all cursor-pointer ${
-                            teamEmblem === emb ? 'bg-indigo-500/30 border border-indigo-500 shadow-sm scale-110' : 'hover:bg-[var(--bg-card)] opacity-70 hover:opacity-100'
-                          }`}
-                        >
-                          {emb}
-                        </button>
-                      ))}
-                    </div>
-                    <input
-                      type="text"
-                      value={teamName}
-                      onChange={(e) => setTeamName(e.target.value)}
-                      placeholder="Ej. Tecsup Dragons"
-                      className="input-arena flex-1 text-xs"
-                      required
-                    />
-                  </div>
-                </div>
-
-                {/* Remaining Teammates inputs */}
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <p className="text-[11px] font-semibold text-[#8E92A4]">
-                      Compañeros restantes ({defaultTeammateCount} requeridos • Correos @tecsup.edu.pe)
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold text-[var(--text-primary)] truncate">
+                      {user?.first_name} {user?.last_name}
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setRosterMembers([
-                          ...rosterMembers,
-                          { name: '', email: '', player_tag: '', role: `Suplente ${rosterMembers.length - defaultTeammateCount + 1}` }
-                        ]);
-                      }}
-                      className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold cursor-pointer transition-colors"
-                    >
-                      + Añadir Suplente
-                    </button>
+                    <p className="text-xs text-[var(--text-secondary)] font-mono truncate">{user?.email}</p>
+                    <p className="text-[11px] text-emerald-400 font-semibold mt-0.5">
+                      Sede Lima • Competidor Oficial
+                    </p>
                   </div>
-                  {rosterMembers.map((member, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
-                        <input
-                          type="text"
-                          placeholder={`Nombre ${member.role || `Compañero ${idx + 1}`}`}
-                          value={member.name}
-                          onChange={(e) => {
-                            const updated = [...rosterMembers];
-                            updated[idx].name = e.target.value;
-                            setRosterMembers(updated);
-                          }}
-                          className="input-arena text-xs py-2"
-                        />
-                        <input
-                          type="email"
-                          placeholder={`correo${idx + 1}@tecsup.edu.pe`}
-                          value={member.email}
-                          onChange={(e) => {
-                            const updated = [...rosterMembers];
-                            updated[idx].email = e.target.value;
-                            setRosterMembers(updated);
-                          }}
-                          className="input-arena text-xs py-2"
-                        />
-                      </div>
-                      {idx >= defaultTeammateCount && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRosterMembers(rosterMembers.filter((_, i) => i !== idx));
-                          }}
-                          className="text-[#8E92A4] hover:text-red-400 p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
-                          title="Eliminar suplente"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      )}
-                    </div>
-                  ))}
                 </div>
+                <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 flex items-center gap-1 shrink-0">
+                  <CheckCircle2 className="w-3 h-3" /> Verificado
+                </span>
               </div>
-            )}
+            </div>
+
+            <div className="p-3 bg-white/[0.02] rounded-xl border border-white/5 text-xs text-[var(--text-secondary)] flex items-start gap-2.5">
+              <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                Tu cuenta institucional de Tecsup es tu identidad oficial en los cuadros de eliminación y partidas del torneo.
+              </span>
+            </div>
 
             <button
               type="button"
-              disabled={isCreatingProfile || (!matchingGameProfile && !manualTag.trim())}
-              onClick={async () => {
-                if (isTeamTournament) {
-                  if (!teamName.trim()) {
-                    setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
-                    return;
-                  }
-                  const invalid = rosterMembers.find(
-                    (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
-                  );
-                  if (invalid) {
-                    setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
-                    return;
-                  }
-                }
-
-                if (matchingGameProfile) {
-                  setStep(2);
-                } else {
-                  // Create dummy profile dynamically
-                  setIsCreatingProfile(true);
-                  setErrorMessage(null);
-                  const res = await api.post('/profile/games', {
-                    game_code: tournament.game_code,
-                    player_tag: manualTag.trim(),
-                  });
-                  if (res.success && res.data) {
-                    setSelectedGameProfileId(res.data.game_profile?.id || res.data.id);
-                    setStep(2);
-                  } else {
-                    setErrorMessage('Error al registrar tu nickname. Intenta de nuevo.');
-                  }
-                  setIsCreatingProfile(false);
-                }
+              onClick={() => {
+                setErrorMessage(null);
+                sounds.playClick();
+                setStep(2);
               }}
-              className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
             >
-              {isCreatingProfile ? (
-                <><Loader2 className="w-4 h-4 animate-spin" /> Registrando...</>
-              ) : (
-                <><CheckCircle2 className="w-4 h-4" /> Continuar al Reglamento <ArrowRight className="w-4 h-4" /></>
-              )}
+              <CheckCircle2 className="w-4 h-4" /> Continuar al Reglamento <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {step === 1 && isTeamTournament && (
+          <div className="space-y-5 animate-in fade-in">
+            <div className="space-y-1">
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">
+                1. {teamSize === 2 ? 'Registro de Dúo (2v2)' : teamSize === 3 ? 'Registro de Trío (3v3)' : teamSize === 4 ? 'Registro de Escuadra (4v4)' : `Registro de Equipo (${teamSize}v${teamSize})`}
+              </h4>
+              <p className="text-xs text-[var(--text-secondary)]">
+                Configura el nombre de tu escuadra y los correos institucionales de tus compañeros para {gameName}.
+              </p>
+            </div>
+
+            <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-indigo-500/30 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="w-4 h-4 text-indigo-400" />
+                  <h5 className="text-xs font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                    Capitán y Escuadra
+                  </h5>
+                </div>
+                <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-300 bg-indigo-500/10 px-2.5 py-0.5 rounded-full border border-indigo-500/30">
+                  👑 Tú eres el Capitán
+                </span>
+              </div>
+
+              {/* Captain Card */}
+              <div className="p-3 bg-white/[0.03] border border-white/10 rounded-xl space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
+                    Capitán Oficial
+                  </span>
+                  <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    Verificado
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-indigo-500/20 text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
+                    {user?.avatar_url ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{user?.first_name?.charAt(0) || 'C'}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold text-white truncate">
+                      {user?.first_name} {user?.last_name}
+                    </p>
+                    <p className="text-[11px] text-[#8E92A4] truncate font-mono">
+                      {user?.email}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Name and Emblem Selector */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-semibold text-[var(--text-secondary)]">
+                  Nombre del Equipo e Icono Representativo *
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1 bg-[var(--bg-arena)] p-1 rounded-xl border border-[var(--border-card)] shrink-0">
+                    {['🐉', '⚡', '🐺', '🛡️', '👑', '🦅', '⚔️'].map((emb) => (
+                      <button
+                        key={emb}
+                        type="button"
+                        onClick={() => setTeamEmblem(emb)}
+                        className={`w-6 h-6 rounded-md text-xs flex items-center justify-center transition-all cursor-pointer ${
+                          teamEmblem === emb ? 'bg-indigo-500/30 border border-indigo-500 shadow-sm scale-110' : 'hover:bg-[var(--bg-card)] opacity-70 hover:opacity-100'
+                        }`}
+                      >
+                        {emb}
+                      </button>
+                    ))}
+                  </div>
+                  <input
+                    type="text"
+                    value={teamName}
+                    onChange={(e) => setTeamName(e.target.value)}
+                    placeholder="Ej. Tecsup Dragons"
+                    className="input-arena flex-1 text-xs"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Remaining Teammates inputs */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] font-semibold text-[#8E92A4]">
+                    Compañeros restantes ({defaultTeammateCount} requeridos • Correos @tecsup.edu.pe)
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRosterMembers([
+                        ...rosterMembers,
+                        { name: '', email: '', role: `Suplente ${rosterMembers.length - defaultTeammateCount + 1}` }
+                      ]);
+                    }}
+                    className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold cursor-pointer transition-colors"
+                  >
+                    + Añadir Suplente
+                  </button>
+                </div>
+                {rosterMembers.map((member, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 flex-1">
+                      <input
+                        type="text"
+                        placeholder={`Nombre ${member.role || `Compañero ${idx + 1}`}`}
+                        value={member.name}
+                        onChange={(e) => {
+                          const updated = [...rosterMembers];
+                          updated[idx].name = e.target.value;
+                          setRosterMembers(updated);
+                        }}
+                        className="input-arena text-xs py-2"
+                      />
+                      <input
+                        type="email"
+                        placeholder={`correo${idx + 1}@tecsup.edu.pe`}
+                        value={member.email}
+                        onChange={(e) => {
+                          const updated = [...rosterMembers];
+                          updated[idx].email = e.target.value;
+                          setRosterMembers(updated);
+                        }}
+                        className="input-arena text-xs py-2 font-mono"
+                      />
+                    </div>
+                    {idx >= defaultTeammateCount && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRosterMembers(rosterMembers.filter((_, i) => i !== idx));
+                        }}
+                        className="text-[#8E92A4] hover:text-red-400 p-1.5 rounded-lg hover:bg-white/5 transition-colors cursor-pointer"
+                        title="Eliminar suplente"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (!teamName.trim()) {
+                  setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
+                  return;
+                }
+                const invalid = rosterMembers.find(
+                  (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
+                );
+                if (invalid) {
+                  setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
+                  return;
+                }
+                setErrorMessage(null);
+                sounds.playClick();
+                setStep(2);
+              }}
+              className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+            >
+              <CheckCircle2 className="w-4 h-4" /> Continuar al Reglamento <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
@@ -635,14 +626,22 @@ export function RegistrationWizardModal({
             <div className={`p-4 rounded-xl border flex flex-col sm:flex-row items-center gap-4 transition-colors ${
               paymentMethod === 'YAPE' ? 'bg-[#74008E]/10 border-[#74008E]/30' : 'bg-[#003883]/10 border-[#003883]/30'
             }`}>
-              <div className="w-32 h-32 rounded-lg bg-white overflow-hidden flex items-center justify-center shrink-0 shadow-lg border-2 border-white/20">
+              <a
+                href={paymentMethod === 'YAPE' ? '/yape-qr.png' : '/plin-qr.png'}
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Clic para ver QR en tamaño completo"
+                className={`w-32 h-32 rounded-lg overflow-hidden flex items-center justify-center shrink-0 shadow-lg border-2 border-white/20 transition-transform hover:scale-105 cursor-pointer ${
+                  paymentMethod === 'YAPE' ? 'bg-[#790898]' : 'bg-white'
+                }`}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
-                  src={paymentMethod === 'YAPE' ? '/yape-qr.jpg' : '/plin-qr.jpg'} 
+                  src={paymentMethod === 'YAPE' ? '/yape-qr.png' : '/plin-qr.png'} 
                   alt={`QR Oficial de ${paymentMethod}`}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain"
                 />
-              </div>
+              </a>
               <div className="space-y-1 text-xs text-center sm:text-left flex-1">
                 <p className="font-bold text-[#E63946] uppercase tracking-wider">
                   Escanea para pagar con {paymentMethod}
@@ -794,9 +793,15 @@ export function RegistrationWizardModal({
                 <span className="font-bold text-[var(--text-primary)]">{tournament.name}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[var(--text-muted)]">Jugador:</span>
-                <span className="font-bold text-[#E63946]">{matchingGameProfile?.in_game_name} ({matchingGameProfile?.player_tag})</span>
+                <span className="text-[var(--text-muted)]">{isTeamTournament ? 'Capitán:' : 'Competidor:'}</span>
+                <span className="font-bold text-[#E63946]">{user?.first_name} {user?.last_name}</span>
               </div>
+              {isTeamTournament && teamName && (
+                <div className="flex justify-between">
+                  <span className="text-[var(--text-muted)]">Equipo:</span>
+                  <span className="font-bold text-indigo-400">{teamName}</span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-[var(--text-muted)]">Estado:</span>
                 <span className="font-bold text-amber-500 dark:text-amber-400 uppercase">En Revisión</span>

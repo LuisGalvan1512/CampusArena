@@ -1011,12 +1011,8 @@ export default function ProfilePage() {
 
                         <div className="bg-[#0A0D14] p-3 rounded-xl border border-white/5 text-xs text-[#CBD5E1] space-y-1">
                           <div className="flex items-center justify-between">
-                            <span className="text-[#8E92A4]">Nombre de Juego:</span>
-                            <span className="font-bold text-white">{reg.in_game_name}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[#8E92A4]">Player Tag:</span>
-                            <span className="font-mono text-[11px] text-[#A8DADC]">{reg.player_tag}</span>
+                            <span className="text-[#8E92A4]">Competidor:</span>
+                            <span className="font-bold text-white">{user?.first_name} {user?.last_name}</span>
                           </div>
                           {reg.team_name && (
                             <div className="flex items-center justify-between">
