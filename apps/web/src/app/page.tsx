@@ -34,6 +34,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { GAME_LIST, GAME_CATALOG, type GameCode } from '@/lib/games';
+import { getEffectiveStatus } from '@/lib/registrationWindow';
 import { sounds } from '@/lib/sound';
 import { AnimatedCounter } from '@/components/AnimatedCounter';
 import { SpotlightCard } from '@/components/SpotlightCard';
@@ -65,7 +66,10 @@ export default function HomePage() {
         if (res.success && res.data?.items && res.data.items.length > 0) {
           setAllTournaments(res.data.items);
           const openTour = res.data.items.find(
-            (t: any) => t.status === 'REGISTRATION_OPEN' || t.status === 'IN_PROGRESS'
+            (t: any) => {
+              const effective = getEffectiveStatus(t);
+              return effective === 'REGISTRATION_OPEN' || effective === 'IN_PROGRESS';
+            }
           ) || res.data.items[0];
           setFeaturedTournament(openTour);
           if (openTour.game_code && GAME_CATALOG[openTour.game_code as GameCode]) {
@@ -108,7 +112,7 @@ export default function HomePage() {
         tag: t.format || (t.team_size && t.team_size > 1 ? `${t.team_size}v${t.team_size}` : '1v1'),
         prize: t.prize_pool || 'Premio Oficial Tecsup',
         linkHref: `/tournaments/${t.slug}`,
-        linkText: t.status === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
+        linkText: getEffectiveStatus(t) === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
       };
     });
   }, [allTournaments]);
@@ -218,7 +222,7 @@ export default function HomePage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                     <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500">
-                      {featuredTournament.status === 'REGISTRATION_OPEN' ? 'Inscripciones Abiertas' : 'Torneo Oficial Activo'}
+                      {getEffectiveStatus(featuredTournament) === 'REGISTRATION_OPEN' ? 'Inscripciones Abiertas' : 'Torneo Oficial Activo'}
                     </span>
                   </div>
                   <span className="text-[10px] font-mono font-bold text-[var(--text-muted)] uppercase">

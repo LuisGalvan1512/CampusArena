@@ -17,6 +17,7 @@ import {
   CircleDot,
 } from 'lucide-react';
 import { type GameCode, GAME_CATALOG } from '@/lib/games';
+import { getEffectiveStatus, useNowTick } from '@/lib/registrationWindow';
 
 export interface TournamentItem {
   id: string;
@@ -36,6 +37,7 @@ export interface TournamentItem {
   prize_pool: string;
   format: string;
   tournament_start_at: string;
+  registration_open_at?: string;
   registration_close_at: string;
 }
 
@@ -61,6 +63,10 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
     Math.round((tournament.current_participants / tournament.max_slots) * 100)
   );
 
+  // Effective status honours the registration window (dates), re-evaluated exactly at open/close
+  const nowMs = useNowTick([tournament.registration_open_at, tournament.registration_close_at]);
+  const effectiveStatus = getEffectiveStatus(tournament, nowMs);
+
   const getStatusBadge = (status: TournamentItem['status']) => {
     switch (status) {
       case 'REGISTRATION_OPEN':
@@ -81,6 +87,12 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
         return (
           <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#457B9D]/20 text-[#A8DADC] border border-[#457B9D]/30">
             Próximamente
+          </span>
+        );
+      case 'REGISTRATION_CLOSED':
+        return (
+          <span className="px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            Inscripciones Cerradas
           </span>
         );
       case 'FINISHED':
@@ -143,7 +155,7 @@ export function TournamentCard({ tournament }: { tournament: TournamentItem }) {
             <span className="truncate max-w-[120px]">{gameName}</span>
           </div>
 
-          {getStatusBadge(tournament.status)}
+          {getStatusBadge(effectiveStatus)}
         </div>
 
         {/* Prize Overlay */}

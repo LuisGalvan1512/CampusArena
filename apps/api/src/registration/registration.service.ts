@@ -12,6 +12,7 @@ import { ReviewPaymentDto, ReviewDecision } from './dto/review-payment.dto.js';
 
 import { NotificationsService } from '../notifications/notifications.service.js';
 import { MailService } from '../mail/mail.service.js';
+import { getEffectiveStatus, formatLimaDateTime } from '../tournament/registration-window.util.js';
 
 @Injectable()
 export class RegistrationService {
@@ -61,13 +62,21 @@ export class RegistrationService {
       console.warn('[RegistrationService] Error verificando sanciones de usuario:', sanctionErr);
     }
 
-    if (tournament.status !== 'REGISTRATION_OPEN') {
-      throw new BadRequestException('Las inscripciones para este torneo no se encuentran abiertas.');
-    }
-
+    // Registration window: dates take precedence over the manually stored status
     const now = new Date();
-    if (now < tournament.registration_open_at || now > tournament.registration_close_at) {
-      throw new BadRequestException('El periodo de inscripción para este torneo ha finalizado o aún no comienza.');
+    if (getEffectiveStatus(tournament, now) !== 'REGISTRATION_OPEN') {
+      const windowManaged = ['PUBLISHED', 'REGISTRATION_OPEN'].includes(tournament.status);
+      if (windowManaged && now < tournament.registration_open_at) {
+        throw new BadRequestException(
+          `Las inscripciones para este torneo abren el ${formatLimaDateTime(tournament.registration_open_at)} (hora de Lima).`
+        );
+      }
+      if (now > tournament.registration_close_at) {
+        throw new BadRequestException(
+          `Las inscripciones para este torneo cerraron el ${formatLimaDateTime(tournament.registration_close_at)} (hora de Lima).`
+        );
+      }
+      throw new BadRequestException('Las inscripciones para este torneo no se encuentran abiertas.');
     }
 
     // 2. Verify or auto-create Game Profile for user and tournament game (Zero tag requirement)
