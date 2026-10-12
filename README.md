@@ -375,8 +375,8 @@ graph LR
    ```env
    NODE_ENV=production
    PORT=3001
-   DATABASE_URL=postgresql://postgres.sxqwztaccmdnpotcfeev:[TU_PASSWORD]@aws-0-sa-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true
-   DIRECT_URL=postgresql://postgres.sxqwztaccmdnpotcfeev:[TU_PASSWORD]@aws-0-sa-east-1.pooler.supabase.com:5432/postgres
+   DATABASE_URL=postgresql://postgres.wksydtbuvlwtbfsifthb:[TU_PASSWORD]@aws-0-us-east-2.pooler.supabase.com:6543/postgres?pgbouncer=true
+   DIRECT_URL=postgresql://postgres.wksydtbuvlwtbfsifthb:[TU_PASSWORD]@aws-0-us-east-2.pooler.supabase.com:5432/postgres
    JWT_SECRET=campus-arena-jwt-secret-change-in-production-2026
    JWT_EXPIRATION=900
    FRONTEND_URL=http://localhost:3000,https://campusarena.vercel.app
@@ -386,8 +386,8 @@ graph LR
    SMTP_USER=tu-usuario-brevo@smtp-brevo.com
    SMTP_PASS=tu-smtp-key-de-brevo
    SMTP_FROM=lusen121502@gmail.com
-   SUPABASE_URL=https://sxqwztaccmdnpotcfeev.supabase.co
-   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cXd6dGFjY21kbnBvdGNmZWV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjg2MzUsImV4cCI6MjEwMzgwNDYzNX0.7msCflVq-FhHw9XrV52MCg3p8QDvwDX57leK5NsHifk
+   SUPABASE_URL=https://wksydtbuvlwtbfsifthb.supabase.co
+   SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indrc3lkdGJ1dmx3dGJmc2lmdGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MTk1OTAsImV4cCI6MjEwNzM5NTU5MH0.8vBo52SoEq8JUA3MM4lUE8aU1q7jawlT51ZC_N7kYFE
    SUPABASE_JWT_SECRET=tu-supabase-jwt-secret
    ```
    > 💡 **Nota:** Para mayor comodidad, los valores de contraseñas y API keys ya los tienes configurados de forma privada en tu archivo local `apps/api/.env`. Solo cópialos de allí hacia Render.
@@ -408,8 +408,8 @@ graph LR
 
    ```env
    NEXT_PUBLIC_API_URL=https://campus-arena-api.onrender.com/api/v1
-   NEXT_PUBLIC_SUPABASE_URL=https://sxqwztaccmdnpotcfeev.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN4cXd6dGFjY21kbnBvdGNmZWV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgyMjg2MzUsImV4cCI6MjEwMzgwNDYzNX0.7msCflVq-FhHw9XrV52MCg3p8QDvwDX57leK5NsHifk
+   NEXT_PUBLIC_SUPABASE_URL=https://wksydtbuvlwtbfsifthb.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indrc3lkdGJ1dmx3dGJmc2lmdGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MTk1OTAsImV4cCI6MjEwNzM5NTU5MH0.8vBo52SoEq8JUA3MM4lUE8aU1q7jawlT51ZC_N7kYFE
    ```
    *(Nota: si el nombre de tu servicio en Render es diferente de `campus-arena-api`, ajusta `NEXT_PUBLIC_API_URL` con tu URL real)*.
 

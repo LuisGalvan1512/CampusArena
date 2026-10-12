@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏟️ Campus Arena — Frontend (Next.js 16)
 
-## Getting Started
+Frontend oficial de **Campus Arena — Tecsup**, desarrollado con **Next.js 16 (App Router)**, Turbopack, TailwindCSS y Framer Motion.
 
-First, run the development server:
+---
+
+## 🚀 Inicio Rápido (Desarrollo Local)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+# Desde la raíz del monorepo
+pnpm --filter web dev
+
+# O dentro de apps/web
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔑 Variables de Entorno (`.env.local`)
 
-## Learn More
+Crea un archivo `.env.local` en `apps/web/` con los siguientes valores:
 
-To learn more about Next.js, take a look at the following resources:
+```env
+# URL de la API del Backend (NestJS)
+NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Supabase Auth & Storage (Ohio us-east-2)
+NEXT_PUBLIC_SUPABASE_URL=https://wksydtbuvlwtbfsifthb.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indrc3lkdGJ1dmx3dGJmc2lmdGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MTk1OTAsImV4cCI6MjEwNzM5NTU5MH0.8vBo52SoEq8JUA3MM4lUE8aU1q7jawlT51ZC_N7kYFE
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📦 Despliegue en Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Framework Preset:** Next.js
+2. **Root Directory:** `apps/web`
+3. **Variables en Vercel:**
+   * `NEXT_PUBLIC_API_URL`: Tu URL de Render (ej. `https://campus-arena-api.onrender.com/api/v1`)
+   * `NEXT_PUBLIC_SUPABASE_URL`: `https://wksydtbuvlwtbfsifthb.supabase.co`
+   * `NEXT_PUBLIC_SUPABASE_ANON_KEY`: La clave anon pública (guardada como tipo **Config**)
