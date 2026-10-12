@@ -34,7 +34,9 @@ export class RegistrationController {
     @Body() dto: CreateRegistrationDto,
     @Req() req: express.Request
   ) {
-    const ip = (req.ip || req.headers['x-forwarded-for'] || '0.0.0.0') as string;
+    const rawIp = req.headers['x-forwarded-for'] || req.ip || '0.0.0.0';
+    const ipStr = Array.isArray(rawIp) ? rawIp[0] : (typeof rawIp === 'string' ? rawIp.split(',')[0].trim() : '0.0.0.0');
+    const ip = ipStr.slice(0, 45);
     return this.registrationService.createRegistration(userId, tournamentId, dto, ip);
   }
 

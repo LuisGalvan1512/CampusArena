@@ -214,17 +214,24 @@ export class CommunityService implements OnModuleInit {
   }
 
   private async checkUserSanction(userId: string) {
-    const sanctions: any[] = await this.prisma.$queryRawUnsafe(
-      `SELECT type, reason, ends_at FROM identity.user_sanctions 
-       WHERE user_id = $1::uuid AND status = 'ACTIVE' AND (ends_at IS NULL OR ends_at > NOW()) LIMIT 1`,
-      userId
-    );
-    if (sanctions && sanctions.length > 0) {
-      const s = sanctions[0];
-      const endStr = s.ends_at ? ` hasta el ${new Date(s.ends_at).toLocaleDateString()}` : ' de forma permanente';
-      throw new ForbiddenException(
-        `Tu cuenta se encuentra bajo sanción disciplinaria (${s.type})${endStr}. Motivo: "${s.reason}". Si consideras que es un error, puedes enviar una apelación desde tu perfil.`
+    try {
+      const sanctions: any[] = await this.prisma.$queryRawUnsafe(
+        `SELECT type, reason, ends_at FROM identity.user_sanctions 
+         WHERE user_id = $1::uuid AND status = 'ACTIVE' AND (ends_at IS NULL OR ends_at > NOW()) LIMIT 1`,
+        userId
       );
+      if (sanctions && sanctions.length > 0) {
+        const s = sanctions[0];
+        const endStr = s.ends_at ? ` hasta el ${new Date(s.ends_at).toLocaleDateString()}` : ' de forma permanente';
+        throw new ForbiddenException(
+          `Tu cuenta se encuentra bajo sanción disciplinaria (${s.type})${endStr}. Motivo: "${s.reason}". Si consideras que es un error, puedes enviar una apelación desde tu perfil.`
+        );
+      }
+    } catch (err) {
+      if (err instanceof ForbiddenException) {
+        throw err;
+      }
+      console.warn('[CommunityService] Error verificando sanciones de usuario:', err);
     }
   }
 

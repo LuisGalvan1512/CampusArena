@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  OnModuleInit,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { UserRole } from '@prisma/client';
@@ -9,8 +10,56 @@ import { CreateSanctionDto, RevokeSanctionDto } from './dto/create-sanction.dto.
 import { ReviewAppealDto } from './dto/review-appeal.dto.js';
 
 @Injectable()
-export class AdminUsersService {
+export class AdminUsersService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
+
+  async onModuleInit() {
+    try {
+      await this.prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS identity.user_sanctions (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          user_id UUID NOT NULL REFERENCES identity.users(id) ON DELETE CASCADE,
+          admin_id UUID REFERENCES identity.users(id) ON DELETE SET NULL,
+          type VARCHAR(50) NOT NULL,
+          reason TEXT NOT NULL,
+          status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+          starts_at TIMESTAMP(6) NOT NULL DEFAULT now(),
+          ends_at TIMESTAMP(6),
+          revoked_at TIMESTAMP(6),
+          revoked_by UUID REFERENCES identity.users(id) ON DELETE SET NULL,
+          revoke_reason TEXT,
+          created_at TIMESTAMP(6) DEFAULT now()
+        );
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE INDEX IF NOT EXISTS idx_user_sanctions_user_id ON identity.user_sanctions(user_id);
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE INDEX IF NOT EXISTS idx_user_sanctions_status ON identity.user_sanctions(status);
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE TABLE IF NOT EXISTS identity.sanction_appeals (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          sanction_id UUID NOT NULL REFERENCES identity.user_sanctions(id) ON DELETE CASCADE,
+          user_id UUID NOT NULL REFERENCES identity.users(id) ON DELETE CASCADE,
+          appeal_text TEXT NOT NULL,
+          status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+          admin_response TEXT,
+          reviewed_by UUID REFERENCES identity.users(id) ON DELETE SET NULL,
+          reviewed_at TIMESTAMP(6),
+          created_at TIMESTAMP(6) DEFAULT now()
+        );
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE INDEX IF NOT EXISTS idx_sanction_appeals_sanction_id ON identity.sanction_appeals(sanction_id);
+      `);
+      await this.prisma.$executeRawUnsafe(`
+        CREATE INDEX IF NOT EXISTS idx_sanction_appeals_user_id ON identity.sanction_appeals(user_id);
+      `);
+    } catch (err) {
+      console.error('[AdminUsersService onModuleInit sanctions error]:', err);
+    }
+  }
 
   /**
    * GET /admin/users

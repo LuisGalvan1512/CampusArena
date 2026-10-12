@@ -622,27 +622,34 @@ export class ProfileService implements OnModuleInit {
    * Returns active sanctions on the competitor and their appeal statuses.
    */
   async getMySanctions(userId: string) {
-    const [sanctions, appeals] = await Promise.all([
-      this.prisma.$queryRawUnsafe<any[]>(
-        `SELECT id, type, reason, starts_at, ends_at, status, created_at
-         FROM identity.user_sanctions
-         WHERE user_id = $1::uuid AND status = 'ACTIVE' AND (ends_at IS NULL OR ends_at > NOW())
-         ORDER BY created_at DESC`,
-        userId
-      ),
-      this.prisma.$queryRawUnsafe<any[]>(
-        `SELECT id, sanction_id, appeal_text, status, admin_response, reviewed_at, created_at
-         FROM identity.sanction_appeals
-         WHERE user_id = $1::uuid
-         ORDER BY created_at DESC`,
-        userId
-      ),
-    ]);
+    try {
+      const [sanctions, appeals] = await Promise.all([
+        this.prisma.$queryRawUnsafe<any[]>(
+          `SELECT id, type, reason, starts_at, ends_at, status, created_at
+           FROM identity.user_sanctions
+           WHERE user_id = $1::uuid AND status = 'ACTIVE' AND (ends_at IS NULL OR ends_at > NOW())
+           ORDER BY created_at DESC`,
+          userId
+        ),
+        this.prisma.$queryRawUnsafe<any[]>(
+          `SELECT id, sanction_id, appeal_text, status, admin_response, reviewed_at, created_at
+           FROM identity.sanction_appeals
+           WHERE user_id = $1::uuid
+           ORDER BY created_at DESC`,
+          userId
+        ),
+      ]);
 
-    return {
-      active_sanctions: sanctions,
-      appeals,
-    };
+      return {
+        active_sanctions: sanctions || [],
+        appeals: appeals || [],
+      };
+    } catch (err) {
+      return {
+        active_sanctions: [],
+        appeals: [],
+      };
+    }
   }
 
   /**

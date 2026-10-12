@@ -41,17 +41,24 @@ export class RegistrationService {
     }
 
     // Verify user is not suspended or banned
-    const userBan: any[] = await this.prisma.$queryRawUnsafe(
-      `SELECT type, reason, ends_at FROM identity.user_sanctions 
-       WHERE user_id = $1::uuid AND status = 'ACTIVE' AND type IN ('BAN_TEMPORARY', 'BAN_PERMANENT') AND (ends_at IS NULL OR ends_at > NOW()) LIMIT 1`,
-      userId
-    );
-    if (userBan && userBan.length > 0) {
-      const b = userBan[0];
-      const endStr = b.ends_at ? ` hasta el ${new Date(b.ends_at).toLocaleDateString()}` : ' de forma permanente';
-      throw new ForbiddenException(
-        `Tu cuenta se encuentra suspendida de torneos${endStr}. Motivo: "${b.reason}". Puedes enviar una apelación desde tu perfil.`
+    try {
+      const userBan: any[] = await this.prisma.$queryRawUnsafe(
+        `SELECT type, reason, ends_at FROM identity.user_sanctions 
+         WHERE user_id = $1::uuid AND status = 'ACTIVE' AND type IN ('BAN_TEMPORARY', 'BAN_PERMANENT') AND (ends_at IS NULL OR ends_at > NOW()) LIMIT 1`,
+        userId
       );
+      if (userBan && userBan.length > 0) {
+        const b = userBan[0];
+        const endStr = b.ends_at ? ` hasta el ${new Date(b.ends_at).toLocaleDateString()}` : ' de forma permanente';
+        throw new ForbiddenException(
+          `Tu cuenta se encuentra suspendida de torneos${endStr}. Motivo: "${b.reason}". Puedes enviar una apelación desde tu perfil.`
+        );
+      }
+    } catch (sanctionErr) {
+      if (sanctionErr instanceof ForbiddenException) {
+        throw sanctionErr;
+      }
+      console.warn('[RegistrationService] Error verificando sanciones de usuario:', sanctionErr);
     }
 
     if (tournament.status !== 'REGISTRATION_OPEN') {
