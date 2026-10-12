@@ -878,7 +878,9 @@ export default function TournamentDetailPage() {
                     ? `S/ ${Number(tournament.cost).toFixed(2)} ${tournament.currency || 'PEN'}`
                     : 'Gratis'}
                 </span>
-                <span className="text-xs text-[var(--text-secondary)]">/ por competidor</span>
+                <span className="text-xs text-[var(--text-secondary)]">
+                  / {(tournament.team_size && Number(tournament.team_size) > 1) || (tournament.format && (tournament.format.toLowerCase().includes('equipo') || tournament.format.toLowerCase().includes('escuadra') || /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.format))) || (tournament.name && /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.name)) ? 'por equipo' : 'por competidor'}
+                </span>
               </div>
             </div>
 
@@ -1056,6 +1058,7 @@ export default function TournamentDetailPage() {
           prize_pool: tournament.prize_pool,
           rules_text: tournament.rules_text,
           team_size: tournament.team_size || 1,
+          format: tournament.format,
         }}
         onSuccess={() => {
           fireCelebration();

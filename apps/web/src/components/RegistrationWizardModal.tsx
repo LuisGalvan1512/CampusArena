@@ -50,6 +50,7 @@ interface RegistrationWizardModalProps {
     prize_pool: string;
     rules_text: string;
     team_size?: number;
+    format?: string;
   };
   onSuccess: () => void;
 }
@@ -694,6 +695,9 @@ export function RegistrationWizardModal({
               <h4 className="text-sm font-bold text-[var(--text-primary)]">3. Pago y Comprobante</h4>
               <p className="text-xs text-[var(--text-secondary)]">
                 Monto a pagar: <strong className="text-[var(--text-primary)]">S/ {tournament.cost !== undefined && tournament.cost !== null ? Number(tournament.cost).toFixed(2) : '0.00'} {tournament.currency || 'PEN'}</strong>
+                <span className="ml-1 text-[var(--text-secondary)]">
+                  ({(tournament.team_size && Number(tournament.team_size) > 1) || (tournament.format && (tournament.format.toLowerCase().includes('equipo') || tournament.format.toLowerCase().includes('escuadra') || /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.format))) || (tournament.name && /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.name)) ? 'por equipo' : 'por competidor'})
+                </span>
               </p>
             </div>
 
