@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateTournamentDto } from './dto/create-tournament.dto.js';
 import { QueryTournamentDto, TournamentStatusFilter } from './dto/query-tournament.dto.js';
+import { getEffectiveStatus } from './registration-window.util.js';
 
 @Injectable()
 export class TournamentService implements OnModuleInit {
@@ -51,8 +52,43 @@ export class TournamentService implements OnModuleInit {
       where.game_code = game_code;
     }
 
+    // Status filters honour the registration window (dates) so the catalog never
+    // lists an expired tournament as "open" nor an unopened one as "open".
     if (status && status !== TournamentStatusFilter.ALL) {
-      where.status = status;
+      const now = new Date();
+      const windowManaged = ['PUBLISHED', 'REGISTRATION_OPEN'];
+
+      switch (status) {
+        case TournamentStatusFilter.REGISTRATION_OPEN:
+          where.AND = [
+            {
+              status: { in: windowManaged },
+              registration_open_at: { lte: now },
+              registration_close_at: { gte: now },
+            },
+          ];
+          break;
+        case TournamentStatusFilter.PUBLISHED:
+          where.AND = [
+            {
+              status: { in: windowManaged },
+              registration_open_at: { gt: now },
+            },
+          ];
+          break;
+        case TournamentStatusFilter.REGISTRATION_CLOSED:
+          where.AND = [
+            {
+              OR: [
+                { status: 'REGISTRATION_CLOSED' },
+                { status: { in: windowManaged }, registration_close_at: { lt: now } },
+              ],
+            },
+          ];
+          break;
+        default:
+          where.status = status;
+      }
     }
 
     if (search && search.trim() !== '') {
@@ -97,8 +133,14 @@ export class TournamentService implements OnModuleInit {
       }),
     ]);
 
+    const nowDate = new Date();
+    const itemsWithEffectiveStatus = items.map((t) => ({
+      ...t,
+      effective_status: getEffectiveStatus(t, nowDate),
+    }));
+
     return {
-      items,
+      items: itemsWithEffectiveStatus,
       total,
       page,
       limit,
@@ -133,6 +175,7 @@ export class TournamentService implements OnModuleInit {
 
     return {
       ...tournament,
+      effective_status: getEffectiveStatus(tournament),
       event_modality: extra.event_modality || (tournament.is_online ? 'ONLINE' : 'PRESENTIAL'),
       prize_distribution: extra.prize_distribution || null,
     };

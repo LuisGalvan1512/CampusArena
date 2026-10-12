@@ -10,6 +10,7 @@ import { fireCelebration } from '@/lib/confetti';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
+import { getEffectiveStatus, formatCountdown, useNowTick } from '@/lib/registrationWindow';
 
 // Dynamic imports for code-splitting heavy modals and interactive bracket
 const BracketView = dynamic(
@@ -247,6 +248,12 @@ export default function TournamentDetailPage() {
   const [userRegistration, setUserRegistration] = useState<any>(null);
   const [isBracketFullWidth, setIsBracketFullWidth] = useState(true);
 
+  // Ticks every second near open/close so the registration button flips on time
+  const nowMs = useNowTick(
+    [tournament?.registration_open_at, tournament?.registration_close_at],
+    { fine: true }
+  );
+
   const fetchTournament = useCallback(async (isInitial = false) => {
     if (!slug) return;
     if (isInitial) {
@@ -357,7 +364,30 @@ export default function TournamentDetailPage() {
     minute: '2-digit',
   });
 
+  const openDate = new Date(tournament.registration_open_at).toLocaleDateString('es-PE', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+
+  // Registration window: dates take precedence over the manually stored status
+  const effectiveStatus = getEffectiveStatus(tournament, nowMs);
+  const registrationOpenMs = new Date(tournament.registration_open_at).getTime();
+  const registrationCloseMs = new Date(tournament.registration_close_at).getTime();
+  const isFull = tournament.current_participants >= tournament.max_slots;
+  const isFreeTournament = Number(tournament.cost) === 0;
+
   const handleRegisterClick = () => {
+    if (effectiveStatus !== 'REGISTRATION_OPEN') {
+      toast.info(
+        effectiveStatus === 'PUBLISHED'
+          ? `Las inscripciones abren el ${openDate}.`
+          : 'Las inscripciones de este torneo ya están cerradas.'
+      );
+      return;
+    }
     if (!isAuthenticated) {
       router.push('/auth/login');
       return;
@@ -366,7 +396,7 @@ export default function TournamentDetailPage() {
   };
 
   const getStatusBadge = () => {
-    switch (tournament.status) {
+    switch (effectiveStatus) {
       case 'REGISTRATION_OPEN':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
@@ -387,6 +417,12 @@ export default function TournamentDetailPage() {
             Próximamente
           </span>
         );
+      case 'REGISTRATION_CLOSED':
+        return (
+          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
+            Inscripciones Cerradas
+          </span>
+        );
       case 'FINISHED':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
@@ -397,7 +433,7 @@ export default function TournamentDetailPage() {
       default:
         return (
           <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-[#8E92A4]">
-            {tournament.status}
+            {effectiveStatus}
           </span>
         );
     }
@@ -966,20 +1002,63 @@ export default function TournamentDetailPage() {
                   </div>
                 </div>
               </div>
-            ) : tournament.status === 'REGISTRATION_OPEN' ? (
-              <button
-                onClick={handleRegisterClick}
-                className="btn-primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/30"
-              >
-                <Swords className="w-4 h-4" />
-                Inscribirme al Torneo
-              </button>
+            ) : effectiveStatus === 'REGISTRATION_OPEN' ? (
+              <div className="space-y-2">
+                {isFull && isFreeTournament ? (
+                  <button
+                    type="button"
+                    disabled
+                    className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
+                  >
+                    <Users className="w-4 h-4" aria-hidden="true" />
+                    Cupos llenos
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleRegisterClick}
+                    className="btn-primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/30"
+                  >
+                    <Swords className="w-4 h-4" aria-hidden="true" />
+                    {isFull ? 'Cupos llenos • Unirme a lista de espera' : 'Inscribirme al Torneo'}
+                  </button>
+                )}
+                {registrationCloseMs - nowMs <= 72 * 60 * 60 * 1000 && (
+                  <p
+                    role="timer"
+                    className="text-center text-[11px] font-mono font-semibold text-amber-400 flex items-center justify-center gap-1.5"
+                  >
+                    <Clock className="w-3 h-3" aria-hidden="true" />
+                    Las inscripciones cierran en {formatCountdown(registrationCloseMs - nowMs)}
+                  </p>
+                )}
+              </div>
+            ) : effectiveStatus === 'PUBLISHED' ? (
+              <div className="space-y-2">
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 opacity-70 cursor-not-allowed"
+                >
+                  <Clock className="w-4 h-4 text-[#38BDF8]" aria-hidden="true" />
+                  Inscripciones aún no abren
+                </button>
+                <p className="text-center text-[11px] text-[var(--text-secondary)] capitalize">
+                  Abren el {openDate}
+                </p>
+                <p
+                  role="timer"
+                  className="text-center text-[11px] font-mono font-bold text-[#38BDF8]"
+                >
+                  Faltan {formatCountdown(registrationOpenMs - nowMs)}
+                </p>
+              </div>
             ) : (
               <button
                 onClick={() => setActiveTab('brackets')}
                 className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
               >
-                <GitBranch className="w-4 h-4 text-[#E63946]" />
+                <GitBranch className="w-4 h-4 text-[#E63946]" aria-hidden="true" />
                 Inscripciones Cerradas • Ver Brackets
               </button>
             )}
