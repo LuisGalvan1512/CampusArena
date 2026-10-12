@@ -18,11 +18,11 @@ export class JwtAuthGuard implements CanActivate {
   ) {
     const supabaseUrl =
       this.config.get<string>('SUPABASE_URL') ||
-      'https://sxqwztaccmdnpotcfeev.supabase.co';
+      'https://wksydtbuvlwtbfsifthb.supabase.co';
     const supabaseKey =
-      this.config.get<string>('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
       this.config.get<string>('SUPABASE_ANON_KEY') ||
-      '';
+      this.config.get<string>('NEXT_PUBLIC_SUPABASE_ANON_KEY') ||
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indrc3lkdGJ1dmx3dGJmc2lmdGhiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4MTk1OTAsImV4cCI6MjEwNzM5NTU5MH0.8vBo52SoEq8JUA3MM4lUE8aU1q7jawlT51ZC_N7kYFE';
 
     this.supabase = createClient(supabaseUrl, supabaseKey);
   }
@@ -55,14 +55,20 @@ export class JwtAuthGuard implements CanActivate {
       throw new UnauthorizedException('Sesión de Supabase inválida o expirada.');
     }
 
-    // Find user in identity.users
-    let user = await this.prisma.user.findUnique({
-      where: { id: supabaseUser.id },
+    const emailNormalized = supabaseUser.email?.toLowerCase().trim();
+
+    // Find user in identity.users by id or email (robust against project migrations)
+    let user = await this.prisma.user.findFirst({
+      where: {
+        OR: [
+          { id: supabaseUser.id },
+          ...(emailNormalized ? [{ email: emailNormalized }] : []),
+        ],
+      },
     });
 
     // Fallback sync if trigger hasn't finished yet
-    if (!user && supabaseUser.email) {
-      const emailNormalized = supabaseUser.email.toLowerCase().trim();
+    if (!user && emailNormalized) {
       const isSuperAdmin = emailNormalized === 'luis.galvan@tecsup.edu.pe';
       const meta = supabaseUser.user_metadata || {};
       const parts = emailNormalized.split('@')[0].split('.');
