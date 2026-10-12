@@ -242,6 +242,59 @@ export class RegistrationService {
   }
 
   /**
+   * POST /registrations/:id/cancel
+   * Cancels an incomplete/unpaid registration (PENDING_PAYMENT only).
+   */
+  async cancelRegistration(userId: string, registrationId: string) {
+    const registration = await this.prisma.registration.findUnique({
+      where: { id: registrationId },
+      include: { payment: true },
+    });
+
+    if (!registration || registration.deleted_at) {
+      throw new NotFoundException('Inscripción no encontrada.');
+    }
+
+    if (registration.competitor_id !== userId) {
+      throw new ForbiddenException('No tienes permisos para cancelar esta inscripción.');
+    }
+
+    // STRICT GUARD: Only uncompleted PENDING_PAYMENT registrations can be cancelled by user.
+    // Confirmed, under review, or approved registrations CANNOT be cancelled here.
+    if (registration.status !== 'PENDING_PAYMENT') {
+      throw new BadRequestException(
+        `Solo se pueden cancelar solicitudes de inscripción no completadas (pendientes de pago). El estado actual es "${registration.status}".`
+      );
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      // 1. Cancel payment if it exists and is still PENDING
+      if (registration.payment && registration.payment.status === 'PENDING') {
+        await tx.payment.update({
+          where: { id: registration.payment.id },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+      }
+
+      // 2. Mark registration as CANCELLED
+      const updatedRegistration = await tx.registration.update({
+        where: { id: registrationId },
+        data: {
+          status: 'CANCELLED',
+        },
+      });
+
+      return {
+        message: 'Inscripción cancelada exitosamente.',
+        registration_id: updatedRegistration.id,
+        status: updatedRegistration.status,
+      };
+    });
+  }
+
+  /**
    * GET /registrations/me
    * Returns all registrations for the authenticated user.
    */
@@ -249,6 +302,7 @@ export class RegistrationService {
     const registrations = await this.prisma.registration.findMany({
       where: {
         competitor_id: userId,
+        status: { notIn: ['CANCELLED', 'REJECTED'] },
         deleted_at: null,
       },
       include: {

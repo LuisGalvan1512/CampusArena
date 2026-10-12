@@ -38,13 +38,22 @@ class ApiClient {
     this.cache.clear();
   }
 
+  public getCached<T = any>(endpoint: string): ApiResponse<T> | null {
+    const entry = this.cache.get(endpoint);
+    return entry ? entry.data : null;
+  }
+
+  public hasCache(endpoint: string): boolean {
+    return this.cache.has(endpoint);
+  }
+
   async request<T = any>(
     endpoint: string,
     options: ApiRequestOptions = {}
   ): Promise<ApiResponse<T>> {
     const isGet = !options.method || options.method.toUpperCase() === 'GET';
     const cacheKey = `${endpoint}`;
-    const ttl = options.cacheTtlMs ?? 15000; // 15 seconds default
+    const ttl = options.cacheTtlMs ?? 60000; // 60 seconds default
 
     // 1. Read from In-Memory Cache for GET requests (0ms instant response)
     if (isGet && !options.skipCache) {

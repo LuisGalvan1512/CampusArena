@@ -38,7 +38,8 @@ import {
   Check,
   Volume2,
   Palette,
-  Type
+  Type,
+  MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fireCelebration } from '@/lib/confetti';
@@ -173,6 +174,22 @@ interface UserRegistration {
   } | null;
 }
 
+export interface ProfileSignature {
+  id: string;
+  content: string;
+  image_url?: string | null;
+  created_at: string;
+  author: {
+    id: string;
+    first_name: string;
+    last_name: string;
+    nickname?: string | null;
+    email: string;
+    avatar_url?: string | null;
+    campus: string;
+  };
+}
+
 export default function ProfilePage() {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const router = useRouter();
@@ -201,8 +218,10 @@ export default function ProfilePage() {
   const [academicRole, setAcademicRole] = useState<'ESTUDIANTE' | 'DOCENTE' | 'EGRESADO'>('ESTUDIANTE');
   const [favGame, setFavGame] = useState<GameCode>('CLASH_ROYALE');
 
-  // UI Tabs on Main Profile: 'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC'
-  const [activeTab, setActiveTab] = useState<'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC'>('TOURNAMENTS');
+  // UI Tabs on Main Profile: 'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC' | 'SIGNATURES'
+  const [activeTab, setActiveTab] = useState<'TOURNAMENTS' | 'MEDALS' | 'ACADEMIC' | 'SIGNATURES'>('TOURNAMENTS');
+  const [signatures, setSignatures] = useState<ProfileSignature[]>([]);
+  const [loadingSignatures, setLoadingSignatures] = useState(false);
 
   // Customization Modal State (Clean, step-by-step modal with live preview)
   const [showEditModal, setShowEditModal] = useState(false);
@@ -281,9 +300,17 @@ export default function ProfilePage() {
     }
   }, [authLoading, isAuthenticated, router]);
 
-  // Load profile data and registrations
+  // Load profile data, registrations, sanctions and signatures concurrently (Zero waterfall)
   const loadFullProfile = async () => {
-    const res = await api.get('/profile/me');
+    const [res, regRes, sancRes, sigRes] = await Promise.all([
+      api.get('/profile/me'),
+      api.get('/registrations/me', { skipCache: true }),
+      api.get<{ active_sanctions: any[]; appeals: any[] }>('/profile/me/sanctions'),
+      user?.id
+        ? api.get<ProfileSignature[]>(`/profile/${user.id}/signatures`, { skipCache: true })
+        : Promise.resolve({ success: false, data: [] } as any)
+    ]);
+
     if (res.success && res.data) {
       if (res.data.profile) {
         const rawCycle = res.data.profile.cycle;
@@ -320,17 +347,52 @@ export default function ProfilePage() {
       }
     }
 
-    // Load registrations
-    const regRes = await api.get('/registrations/me');
+    // Load registrations (exclude cancelled or rejected participations)
     if (regRes.success && Array.isArray(regRes.data)) {
-      setRegistrations(regRes.data);
+      const activeOrConfirmed = regRes.data.filter(
+        (r: any) => !['CANCELLED', 'REJECTED'].includes(r.status)
+      );
+      setRegistrations(activeOrConfirmed);
     }
 
     // Load sanctions and appeals
-    const sancRes = await api.get<{ active_sanctions: any[]; appeals: any[] }>('/profile/me/sanctions');
     if (sancRes.success && sancRes.data) {
       setUserSanctions(sancRes.data.active_sanctions || []);
       setUserAppeals(sancRes.data.appeals || []);
+    }
+
+    // Load wall signatures
+    if (sigRes.success && Array.isArray(sigRes.data)) {
+      setSignatures(sigRes.data);
+    }
+  };
+
+  const loadSignatures = async (userId: string) => {
+    setLoadingSignatures(true);
+    try {
+      const res = await api.get<ProfileSignature[]>(`/profile/${userId}/signatures`, { skipCache: true });
+      if (res.success && Array.isArray(res.data)) {
+        setSignatures(res.data);
+      }
+    } catch (e) {
+      console.error('Error fetching wall signatures:', e);
+    } finally {
+      setLoadingSignatures(false);
+    }
+  };
+
+  const handleDeleteSignature = async (sigId: string) => {
+    if (!confirm('¿Deseas eliminar esta dedicatoria de tu muro?')) return;
+    try {
+      const res = await api.delete(`/profile/signatures/${sigId}`);
+      if (res.success) {
+        setSignatures((prev) => prev.filter((s) => s.id !== sigId));
+        toast.success('Firma eliminada de tu muro.');
+      } else {
+        toast.error(res.error?.message || 'Error al eliminar firma.');
+      }
+    } catch (e) {
+      toast.error('Error al eliminar firma.');
     }
   };
 
@@ -339,6 +401,12 @@ export default function ProfilePage() {
       loadFullProfile();
     }
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (user?.id) {
+      loadSignatures(user.id);
+    }
+  }, [user?.id]);
 
   // Open edit modal syncs state
   const handleOpenEditModal = () => {
@@ -507,9 +575,37 @@ export default function ProfilePage() {
         );
       case 'PAYMENT_UNDER_REVIEW':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1">
             <Clock className="w-3 h-3" />
             Pago en Revisión
+          </span>
+        );
+      case 'PENDING_PAYMENT':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1">
+            <Clock className="w-3 h-3" />
+            Pendiente de Pago
+          </span>
+        );
+      case 'CORRECTION_REQUIRED':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1">
+            <AlertCircle className="w-3 h-3" />
+            Corrección Requerida
+          </span>
+        );
+      case 'REJECTED':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
+            <X className="w-3 h-3" />
+            Inscripción Rechazada
+          </span>
+        );
+      case 'CANCELLED':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/20 text-slate-400 border border-slate-500/30 flex items-center gap-1">
+            <X className="w-3 h-3" />
+            Cancelada
           </span>
         );
       case 'WAITLISTED':
@@ -935,6 +1031,28 @@ export default function ProfilePage() {
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#457B9D] rounded-full" />
               )}
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                sounds.playClick();
+                setActiveTab('SIGNATURES');
+              }}
+              className={`pb-2.5 px-3 text-xs sm:text-sm font-bold transition-all relative flex items-center gap-2 cursor-pointer ${
+                activeTab === 'SIGNATURES'
+                  ? 'text-white'
+                  : 'text-[#8E92A4] hover:text-white'
+              }`}
+            >
+              <MessageSquare className="w-4 h-4 text-pink-400" />
+              <span>Muro de Firmas</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-pink-500/20 text-pink-300">
+                {signatures.length}
+              </span>
+              {activeTab === 'SIGNATURES' && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-pink-500 rounded-full" />
+              )}
+            </button>
           </div>
 
           <Link
@@ -1200,6 +1318,177 @@ export default function ProfilePage() {
                 </p>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 4: MURO DE FIRMAS Y DEDICATORIAS */}
+        {activeTab === 'SIGNATURES' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-[#0A0D14] border border-white/5">
+              <div className="space-y-1">
+                <h3 className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-pink-400" />
+                  Muro de Firmas y Dedicatorias
+                </h3>
+                <p className="text-xs text-[#8E92A4]">
+                  Visualiza los mensajes de honor dejados por tus compañeros y rivales en tu perfil público.
+                </p>
+              </div>
+
+              {user?.id && (
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const shareUrl = `${window.location.origin}/profile/${user.id}`;
+                      navigator.clipboard.writeText(shareUrl);
+                      sounds.playSynthesizerBlip();
+                      toast.success('¡Enlace de tu carnet público copiado al portapapeles!');
+                    }}
+                    className="btn-secondary px-3.5 py-2 text-xs flex items-center gap-1.5 cursor-pointer hover:border-pink-500/40"
+                    title="Copiar enlace para compartir tu muro con amigos"
+                  >
+                    <Share2 className="w-3.5 h-3.5 text-pink-400" />
+                    <span>Compartir Muro</span>
+                  </button>
+                  <Link
+                    href={`/profile/${user.id}`}
+                    className="btn-primary px-3.5 py-2 text-xs flex items-center gap-1.5"
+                    title="Ver tu carnet tal como lo ven los visitantes"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>Vista Pública</span>
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {loadingSignatures ? (
+              <div className="py-12 flex flex-col items-center justify-center space-y-2 text-[#8E92A4]">
+                <Loader2 className="w-6 h-6 animate-spin text-[#E63946]" />
+                <p className="text-xs">Cargando firmas de tu muro...</p>
+              </div>
+            ) : signatures.length === 0 ? (
+              <div className="p-10 text-center bg-[#111520] rounded-3xl border border-white/10 space-y-4">
+                <div className="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center mx-auto text-3xl shadow-inner">
+                  ✍️
+                </div>
+                <div className="space-y-1.5 max-w-md mx-auto">
+                  <h3 className="text-base font-black text-white">
+                    Tu muro aún no tiene dedicatorias
+                  </h3>
+                  <p className="text-xs text-[#8E92A4] leading-relaxed">
+                    Comparte tu carnet con tus compañeros de clase o compañeros de escuadra para que firmen tu muro y te dejen mensajes de honor.
+                  </p>
+                </div>
+                {user?.id && (
+                  <div className="pt-2 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const shareUrl = `${window.location.origin}/profile/${user.id}`;
+                        navigator.clipboard.writeText(shareUrl);
+                        sounds.playSynthesizerBlip();
+                        toast.success('¡Enlace de tu perfil copiado!');
+                      }}
+                      className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-xs font-bold shadow-lg shadow-[#E63946]/20 cursor-pointer"
+                    >
+                      <Share2 className="w-3.5 h-3.5" />
+                      Copiar Enlace de Mi Carnet
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {signatures.map((sig) => {
+                  const author = sig.author || {
+                    id: '',
+                    first_name: 'Usuario',
+                    last_name: '',
+                    nickname: null,
+                    email: '',
+                    avatar_url: null,
+                    campus: 'Lima',
+                  };
+
+                  return (
+                    <div
+                      key={sig.id}
+                      className="p-4 rounded-2xl bg-[#0A0D14] border border-white/5 hover:border-white/20 transition-all space-y-2.5 group"
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={author.id ? `/profile/${author.id}` : '#'}
+                            className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#E63946] to-[#1D3557] p-0.5 shrink-0 overflow-hidden"
+                          >
+                            {author.avatar_url ? (
+                              <img
+                                src={author.avatar_url}
+                                alt={author.nickname || author.first_name}
+                                className="w-full h-full object-cover rounded-[10px]"
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-[#111520] rounded-[10px] flex items-center justify-center font-bold text-white text-xs">
+                                {(author.nickname || author.first_name || 'U')[0].toUpperCase()}
+                              </div>
+                            )}
+                          </Link>
+
+                          <div>
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Link
+                                href={author.id ? `/profile/${author.id}` : '#'}
+                                className="text-xs font-bold text-white hover:text-[#E63946] transition-colors"
+                              >
+                                {author.nickname || `${author.first_name} ${author.last_name}`.trim()}
+                              </Link>
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[#8E92A4]">
+                                Sede {author.campus || 'Lima'}
+                              </span>
+                            </div>
+                            <p className="text-[10px] text-[#8E92A4]">
+                              {new Date(sig.created_at).toLocaleDateString('es-PE', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSignature(sig.id)}
+                          className="p-1.5 rounded-lg text-[#8E92A4] hover:text-red-400 hover:bg-red-500/10 transition-colors cursor-pointer"
+                          title="Eliminar esta firma de mi muro"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <p className="text-xs text-[#CBD5E1] leading-relaxed pl-12 whitespace-pre-wrap">
+                        {sig.content}
+                      </p>
+
+                      {sig.image_url && (
+                        <div className="pl-12 pt-1">
+                          <img
+                            src={sig.image_url}
+                            alt="Firma adjunta"
+                            className="max-h-56 max-w-sm rounded-xl border border-white/10 object-contain bg-black/20"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -273,15 +273,39 @@ export default function TournamentDetailPage() {
     }
   }, [slug]);
 
+  const [isCancellingPending, setIsCancellingPending] = useState(false);
+
   const fetchUserRegistrationStatus = async (tournamentId: string) => {
     if (!isAuthenticated) return;
-    const res = await api.get('/registrations/me');
+    const res = await api.get('/registrations/me', { skipCache: true });
     if (res.success && Array.isArray(res.data)) {
-      const reg = res.data.find((r: any) => r.tournament_id === tournamentId);
-      if (reg) {
-        setUserRegistration(reg);
-      }
+      const activeReg = res.data.find(
+        (r: any) =>
+          r.tournament_id === tournamentId &&
+          !['CANCELLED', 'REJECTED'].includes(r.status)
+      );
+      setUserRegistration(activeReg || null);
+    } else {
+      setUserRegistration(null);
     }
+  };
+
+  const handleCancelPendingRegistration = async (registrationId: string) => {
+    if (!confirm('¿Deseas cancelar esta solicitud de inscripción pendiente? Tu cuenta quedará libre para iniciar una nueva inscripción cuando gustes.')) {
+      return;
+    }
+    setIsCancellingPending(true);
+    const res = await api.post(`/registrations/${registrationId}/cancel`);
+    if (res.success) {
+      toast.info('Solicitud cancelada exitosamente.');
+      setUserRegistration(null);
+      if (tournament) {
+        fetchUserRegistrationStatus(tournament.id);
+      }
+    } else {
+      toast.error(res.error?.message || 'Error al cancelar la solicitud.');
+    }
+    setIsCancellingPending(false);
   };
 
   useEffect(() => {
@@ -850,7 +874,9 @@ export default function TournamentDetailPage() {
               <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Inscripción</span>
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl font-black text-[var(--text-primary)]">
-                  {Number(tournament.cost) === 0 ? 'Gratis' : `S/ ${tournament.cost}`}
+                  {tournament.cost !== undefined && tournament.cost !== null && Number(tournament.cost) > 0
+                    ? `S/ ${Number(tournament.cost).toFixed(2)} ${tournament.currency || 'PEN'}`
+                    : 'Gratis'}
                 </span>
                 <span className="text-xs text-[var(--text-secondary)]">/ por competidor</span>
               </div>
@@ -865,26 +891,77 @@ export default function TournamentDetailPage() {
             {/* Inscription Status Alert if Already Registered */}
             {userRegistration ? (
               <div className="space-y-3">
-                <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-2">
-                  <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>
-                      {userRegistration.status === 'CONFIRMED'
-                        ? '¡Inscripción Confirmada!'
-                        : 'Solicitud en Revisión'}
-                    </span>
+                <div className={`p-4 rounded-xl border space-y-2.5 ${
+                  userRegistration.status === 'CONFIRMED'
+                    ? 'bg-emerald-500/10 border-emerald-500/30'
+                    : userRegistration.status === 'PENDING_PAYMENT'
+                    ? 'bg-amber-500/10 border-amber-500/30'
+                    : userRegistration.status === 'CORRECTION_REQUIRED'
+                    ? 'bg-rose-500/10 border-rose-500/30'
+                    : 'bg-indigo-500/10 border-indigo-500/30'
+                }`}>
+                  <div className="flex items-center gap-2 font-bold text-xs">
+                    {userRegistration.status === 'CONFIRMED' ? (
+                      <div className="flex items-center gap-2 text-emerald-400">
+                        <CheckCircle2 className="w-4 h-4" />
+                        <span>¡Inscripción Confirmada!</span>
+                      </div>
+                    ) : userRegistration.status === 'PENDING_PAYMENT' ? (
+                      <div className="flex items-center gap-2 text-amber-400">
+                        <Clock className="w-4 h-4" />
+                        <span>Pago Pendiente de Comprobante</span>
+                      </div>
+                    ) : userRegistration.status === 'CORRECTION_REQUIRED' ? (
+                      <div className="flex items-center gap-2 text-rose-400">
+                        <AlertCircle className="w-4 h-4" />
+                        <span>Corrección de Comprobante Requerida</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 text-indigo-400">
+                        <Clock className="w-4 h-4" />
+                        <span>Comprobante en Revisión</span>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-[11px] text-emerald-300/80 leading-relaxed">
+
+                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
                     {userRegistration.status === 'CONFIRMED'
                       ? 'Tu cupo oficial en el bracket está asegurado.'
+                      : userRegistration.status === 'PENDING_PAYMENT'
+                      ? 'Iniciaste el proceso de inscripción. Sube tu comprobante de pago o cancela la solicitud si prefieres recomenzar.'
+                      : userRegistration.status === 'CORRECTION_REQUIRED'
+                      ? 'El organizador solicitó corregir tu comprobante. Revisa tus notificaciones o actualiza tu voucher.'
                       : 'Tu comprobante de pago está siendo verificado por el organizador.'}
                   </p>
-                  <Link
-                    href="/profile"
-                    className="text-[11px] font-bold text-emerald-400 hover:underline inline-block pt-1"
-                  >
-                    Ver en Mi Perfil &rarr;
-                  </Link>
+
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <Link
+                      href="/profile"
+                      className="text-[11px] font-bold text-[#E63946] hover:underline inline-block"
+                    >
+                      Ver en Mi Perfil &rarr;
+                    </Link>
+
+                    {userRegistration.status === 'PENDING_PAYMENT' && (
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          disabled={isCancellingPending}
+                          onClick={() => handleCancelPendingRegistration(userRegistration.id)}
+                          className="text-[11px] font-semibold text-[#8E92A4] hover:text-red-400 transition-colors cursor-pointer"
+                        >
+                          {isCancellingPending ? 'Cancelando...' : 'Cancelar Solicitud'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsWizardOpen(true)}
+                          className="btn-primary py-1 px-3 text-[11px] font-bold cursor-pointer"
+                        >
+                          Completar Pago
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ) : tournament.status === 'REGISTRATION_OPEN' ? (

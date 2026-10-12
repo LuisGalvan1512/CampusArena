@@ -297,7 +297,9 @@ export default function HomePage() {
                   <div className="pt-2 flex items-center justify-between">
                     <span className="text-xs font-bold text-[var(--text-secondary)] flex items-center gap-1">
                       <Flame className="w-3.5 h-3.5 text-[#E63946]" />
-                      {Number(featuredTournament.cost) === 0 ? 'Inscripción Gratuita' : `S/ ${featuredTournament.cost} PEN`}
+                      {featuredTournament.cost !== undefined && featuredTournament.cost !== null && Number(featuredTournament.cost) > 0
+                        ? `S/ ${Number(featuredTournament.cost).toFixed(2)} ${featuredTournament.currency || 'PEN'}`
+                        : 'Inscripción Gratuita'}
                     </span>
                     <Link
                       href={`/tournaments/${featuredTournament.slug}`}

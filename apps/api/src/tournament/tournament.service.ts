@@ -85,6 +85,8 @@ export class TournamentService implements OnModuleInit {
           banner_url: true,
           description_short: true,
           prize_pool: true,
+          cost: true,
+          currency: true,
           tournament_start_at: true,
           registration_open_at: true,
           registration_close_at: true,

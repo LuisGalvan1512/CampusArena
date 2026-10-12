@@ -28,8 +28,11 @@ const GAME_ICON_MAP: Record<string, React.ReactNode> = {
 };
 
 export default function TournamentsPage() {
-  const [tournaments, setTournaments] = useState<TournamentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [tournaments, setTournaments] = useState<TournamentItem[]>(() => {
+    const cached = api.getCached<{ items: TournamentItem[] }>('/tournaments');
+    return cached?.data?.items || [];
+  });
+  const [isLoading, setIsLoading] = useState(() => !api.hasCache('/tournaments'));
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGame, setSelectedGame] = useState<'ALL' | GameCode>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
@@ -45,8 +48,10 @@ export default function TournamentsPage() {
     }
   }, []);
 
-  const fetchTournaments = async () => {
-    setIsLoading(true);
+  const fetchTournaments = async (showLoadingSkeleton = false) => {
+    if (showLoadingSkeleton) {
+      setIsLoading(true);
+    }
     const params = new URLSearchParams();
     
     if (selectedGame !== 'ALL') {
@@ -69,7 +74,10 @@ export default function TournamentsPage() {
   };
 
   useEffect(() => {
-    fetchTournaments();
+    // If filters change from defaults, show loading skeleton; otherwise revalidate smoothly
+    const hasFilters = selectedGame !== 'ALL' || selectedStatus !== 'ALL' || searchQuery.trim() !== '';
+    const cached = api.getCached(`/tournaments${selectedGame !== 'ALL' ? `?game_code=${selectedGame}` : ''}`);
+    fetchTournaments(!cached && hasFilters);
   }, [selectedGame, selectedStatus]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {

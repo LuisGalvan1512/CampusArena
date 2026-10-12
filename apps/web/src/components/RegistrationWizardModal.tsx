@@ -19,8 +19,10 @@ import {
   FileCheck,
   Trophy,
   ExternalLink,
-  Users
+  Users,
+  AlertTriangle,
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { uploadPaymentVoucher } from '@/lib/storage';
 import { GAME_CATALOG, GameCode } from '@/lib/games';
@@ -92,6 +94,8 @@ export function RegistrationWizardModal({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [registrationResult, setRegistrationResult] = useState<any>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Load user's linked game profiles
   useEffect(() => {
@@ -244,7 +248,10 @@ export function RegistrationWizardModal({
     setAcceptedRules(false);
     setOperationReference('');
     setEvidenceUrl('');
+    setPreviewUrl(null);
     setTeamName('');
+    setShowCancelConfirm(false);
+    setIsCancelling(false);
     setRosterMembers([
       { name: '', email: '', role: 'Jugador 2' },
       { name: '', email: '', role: 'Jugador 3' },
@@ -254,14 +261,90 @@ export function RegistrationWizardModal({
     onClose();
   };
 
+  const handleRequestClose = () => {
+    if (step === 4) {
+      handleClose();
+    } else {
+      setShowCancelConfirm(true);
+    }
+  };
+
+  const handleConfirmAbandon = async () => {
+    // If user reached step 3 and a backend provisional registration was created, cancel it!
+    if (step === 3 && registrationResult?.registration_id) {
+      setIsCancelling(true);
+      try {
+        await api.post(`/registrations/${registrationResult.registration_id}/cancel`);
+        toast.info('Inscripción cancelada. Tu cuenta no ha sido bloqueada.');
+      } catch (err) {
+        console.error('Error al cancelar inscripción provisional:', err);
+      } finally {
+        setIsCancelling(false);
+      }
+    }
+    setShowCancelConfirm(false);
+    handleClose();
+  };
+
+  const handleDeclineAbandon = () => {
+    setShowCancelConfirm(false);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
       <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         
+        {/* Abandonment Confirmation Overlay */}
+        {showCancelConfirm && (
+          <div className="absolute inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-6 rounded-3xl animate-in fade-in duration-150">
+            <div className="bg-[#111520] border border-white/10 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl text-center">
+              <div className="w-12 h-12 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto">
+                <AlertTriangle className="w-6 h-6" />
+              </div>
+              <div className="space-y-1.5">
+                <h4 className="text-base font-black text-white">
+                  ¿Deseas cancelar el proceso?
+                </h4>
+                <p className="text-xs text-[#8E92A4] leading-relaxed">
+                  {step === 3
+                    ? 'Tu solicitud pendiente de pago será cancelada inmediatamente para que tu cuenta quede libre y puedas volver a inscribirte cuando lo desees.'
+                    : 'Si sales ahora, los datos introducidos en este paso no se guardarán.'}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-3 pt-2">
+                <button
+                  type="button"
+                  disabled={isCancelling}
+                  onClick={handleDeclineAbandon}
+                  className="btn-secondary py-2.5 text-xs font-bold cursor-pointer"
+                >
+                  Continuar
+                </button>
+                <button
+                  type="button"
+                  disabled={isCancelling}
+                  onClick={handleConfirmAbandon}
+                  className="py-2.5 px-3 rounded-xl text-xs font-bold bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/40 transition-colors cursor-pointer flex items-center justify-center gap-1.5"
+                >
+                  {isCancelling ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Cancelando...
+                    </>
+                  ) : (
+                    'Sí, cancelar'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Close Button */}
         <button
-          onClick={handleClose}
-          className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors"
+          onClick={handleRequestClose}
+          className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
+          title="Cerrar ventana"
         >
           <X className="w-5 h-5" />
         </button>
@@ -505,28 +588,37 @@ export function RegistrationWizardModal({
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (!teamName.trim()) {
-                  setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
-                  return;
-                }
-                const invalid = rosterMembers.find(
-                  (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
-                );
-                if (invalid) {
-                  setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
-                  return;
-                }
-                setErrorMessage(null);
-                sounds.playClick();
-                setStep(2);
-              }}
-              className="btn-primary w-full py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
-            >
-              <CheckCircle2 className="w-4 h-4" /> Continuar al Reglamento <ArrowRight className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-3 pt-2">
+              <button
+                type="button"
+                onClick={handleRequestClose}
+                className="btn-secondary py-3 px-4 text-xs font-semibold text-[#8E92A4] hover:text-red-400 cursor-pointer transition-colors"
+              >
+                Cancelar inscripción
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!teamName.trim()) {
+                    setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
+                    return;
+                  }
+                  const invalid = rosterMembers.find(
+                    (m) => m.email.trim() && !m.email.trim().toLowerCase().endsWith('@tecsup.edu.pe')
+                  );
+                  if (invalid) {
+                    setErrorMessage(`El correo "${invalid.email}" de tu compañero debe ser institucional (@tecsup.edu.pe).`);
+                    return;
+                  }
+                  setErrorMessage(null);
+                  sounds.playClick();
+                  setStep(2);
+                }}
+                className="btn-primary flex-1 py-3 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4" /> Continuar al Reglamento <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         )}
 
@@ -556,32 +648,41 @@ export function RegistrationWizardModal({
               </span>
             </label>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="flex items-center justify-between gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="btn-secondary py-2.5 text-xs text-center cursor-pointer"
+                className="btn-secondary py-2.5 px-4 text-xs text-center cursor-pointer"
               >
                 Atrás
               </button>
-              <button
-                type="button"
-                disabled={!acceptedRules || isLoading}
-                onClick={handleCreateRegistration}
-                className="btn-primary py-2.5 text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    Procesando...
-                  </>
-                ) : (
-                  <>
-                    {Number(tournament.cost) === 0 ? 'Confirmar Inscripción' : 'Ir al Pago'}
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </>
-                )}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleRequestClose}
+                  className="px-3 py-2 text-xs font-semibold text-[#8E92A4] hover:text-red-400 cursor-pointer transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  disabled={!acceptedRules || isLoading}
+                  onClick={handleCreateRegistration}
+                  className="btn-primary py-2.5 px-5 text-xs flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      {Number(tournament.cost) === 0 ? 'Confirmar Inscripción' : 'Ir al Pago'}
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
@@ -592,7 +693,7 @@ export function RegistrationWizardModal({
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-[var(--text-primary)]">3. Pago y Comprobante</h4>
               <p className="text-xs text-[var(--text-secondary)]">
-                Monto a pagar: <strong className="text-[var(--text-primary)]">S/ {tournament.cost} PEN</strong>
+                Monto a pagar: <strong className="text-[var(--text-primary)]">S/ {tournament.cost !== undefined && tournament.cost !== null ? Number(tournament.cost).toFixed(2) : '0.00'} {tournament.currency || 'PEN'}</strong>
               </p>
             </div>
 
@@ -767,6 +868,21 @@ export function RegistrationWizardModal({
                   </>
                 )}
               </button>
+
+              <div className="pt-2 flex items-center justify-between">
+                <button
+                  type="button"
+                  disabled={isCancelling}
+                  onClick={handleRequestClose}
+                  className="text-xs text-[#8E92A4] hover:text-red-400 transition-colors flex items-center gap-1.5 cursor-pointer py-1"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  Cancelar inscripción
+                </button>
+                <span className="text-[11px] text-[var(--text-muted)]">
+                  Paso final de comprobante
+                </span>
+              </div>
             </form>
           </div>
         )}

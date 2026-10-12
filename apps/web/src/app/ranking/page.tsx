@@ -50,13 +50,21 @@ const GAME_ICON_MAP_SM: Record<string, React.ReactNode> = {
 
 export default function RankingPage() {
   const [gameCode, setGameCode] = useState<GameCode | 'ALL'>('ALL');
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [topPodium, setTopPodium] = useState<LeaderboardEntry[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>(() => {
+    const cached = api.getCached<{ leaderboard: LeaderboardEntry[]; top_podium: LeaderboardEntry[] }>('/ranking');
+    return cached?.data?.leaderboard || [];
+  });
+  const [topPodium, setTopPodium] = useState<LeaderboardEntry[]>(() => {
+    const cached = api.getCached<{ leaderboard: LeaderboardEntry[]; top_podium: LeaderboardEntry[] }>('/ranking');
+    return cached?.data?.top_podium || [];
+  });
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !api.hasCache('/ranking'));
 
-  const fetchRanking = async () => {
-    setIsLoading(true);
+  const fetchRanking = async (showSkeleton = false) => {
+    if (showSkeleton) {
+      setIsLoading(true);
+    }
     const queryParam = gameCode === 'ALL' ? '' : `?game_code=${gameCode}`;
     const res = await api.get(`/ranking${queryParam}`);
     if (res.success && res.data) {
@@ -67,7 +75,9 @@ export default function RankingPage() {
   };
 
   useEffect(() => {
-    fetchRanking();
+    const queryParam = gameCode === 'ALL' ? '' : `?game_code=${gameCode}`;
+    const cached = api.getCached(`/ranking${queryParam}`);
+    fetchRanking(!cached && gameCode !== 'ALL');
   }, [gameCode]);
 
   const currentGame = gameCode !== 'ALL' ? GAME_CATALOG[gameCode] : null;

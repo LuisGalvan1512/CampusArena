@@ -43,21 +43,24 @@ export class ProfileService implements OnModuleInit {
    * Returns the profile of the authenticated user with linked game accounts.
    */
   async getMyProfile(userId: string) {
-    let user = await this.prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        first_name: true,
-        last_name: true,
-        email_verified: true,
-        created_at: true,
-        profile: true,
-        game_profiles: {
-          orderBy: { synced_at: 'desc' },
+    const [user, medals] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          email_verified: true,
+          created_at: true,
+          profile: true,
+          game_profiles: {
+            orderBy: { synced_at: 'desc' },
+          },
         },
-      },
-    });
+      }),
+      this.calculateUserMedals(userId),
+    ]);
 
     if (!user) {
       throw new NotFoundException('Usuario no encontrado');
@@ -69,8 +72,6 @@ export class ProfileService implements OnModuleInit {
         data: { user_id: userId },
       });
     }
-
-    const medals = await this.calculateUserMedals(userId);
 
     const goldCount = medals.filter((m) => m.medal_type === 'GOLD').length;
     const silverCount = medals.filter((m) => m.medal_type === 'SILVER').length;

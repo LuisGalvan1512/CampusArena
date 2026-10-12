@@ -103,8 +103,11 @@ export default function CommunityPage() {
   const [activeCategory, setActiveCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [isPosting, setIsPosting] = useState(false);
-  const [posts, setPosts] = useState<Post[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState<Post[]>(() => {
+    const cached = api.getCached<any>('/community/posts?page=1&limit=10');
+    return (cached?.data?.items || (Array.isArray(cached?.data) ? cached?.data : [])) || [];
+  });
+  const [loading, setLoading] = useState(() => !api.hasCache('/community/posts?page=1&limit=10'));
 
   // Pagination State
   const [page, setPage] = useState(1);
@@ -211,10 +214,10 @@ export default function CommunityPage() {
     }, 250);
   };
 
-  const fetchPosts = async (targetPage = 1, isLoadMore = false) => {
+  const fetchPosts = async (targetPage = 1, isLoadMore = false, showLoadingSkeleton = false) => {
     if (isLoadMore) {
       setLoadingMore(true);
-    } else {
+    } else if (showLoadingSkeleton) {
       setLoading(true);
     }
 
@@ -249,7 +252,15 @@ export default function CommunityPage() {
   };
 
   useEffect(() => {
-    fetchPosts(1, false);
+    const queryParams = new URLSearchParams({
+      page: '1',
+      limit: '10',
+    });
+    if (activeCategory !== 'ALL') {
+      queryParams.set('category', activeCategory);
+    }
+    const cached = api.getCached(`/community/posts?${queryParams.toString()}`);
+    fetchPosts(1, false, !cached && activeCategory !== 'ALL');
   }, [activeCategory]);
 
   const handleLoadMore = () => {

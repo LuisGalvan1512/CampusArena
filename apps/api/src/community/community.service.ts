@@ -56,41 +56,41 @@ export class CommunityService implements OnModuleInit {
     ]);
 
     const authorIds = posts.map(p => p.user.id);
+    const postIds = posts.map(p => p.id);
     const authorNicknames: Record<string, string> = {};
-    if (authorIds.length > 0) {
-      try {
-        const nicks: any[] = await this.prisma.$queryRawUnsafe(
-          `SELECT user_id, nickname FROM profile.user_profiles WHERE user_id = ANY($1::uuid[]) AND nickname IS NOT NULL`,
-          authorIds
-        );
-        for (const n of nicks) {
-          if (n.nickname) authorNicknames[n.user_id] = n.nickname;
-        }
-      } catch (err) {
-        // fallback
+    let commentsRaw: any[] = [];
+
+    const [nicksResult, commentsResult] = await Promise.all([
+      authorIds.length > 0
+        ? this.prisma.$queryRawUnsafe(
+            `SELECT user_id, nickname FROM profile.user_profiles WHERE user_id = ANY($1::uuid[]) AND nickname IS NOT NULL`,
+            authorIds
+          ).catch(() => [])
+        : Promise.resolve([]),
+      postIds.length > 0
+        ? this.prisma.$queryRawUnsafe(
+            `SELECT 
+               c.id, c.post_id, c.user_id, c.parent_id, c.content, c.media_url, c.created_at,
+               u.first_name, u.last_name,
+               p.nickname, p.career, p.avatar_url
+             FROM community.community_comments c
+             LEFT JOIN identity.users u ON c.user_id = u.id
+             LEFT JOIN profile.user_profiles p ON c.user_id = p.user_id
+             WHERE c.post_id = ANY($1::uuid[])
+             ORDER BY c.created_at ASC`,
+            postIds
+          ).catch(() => [])
+        : Promise.resolve([]),
+    ]);
+
+    if (Array.isArray(nicksResult)) {
+      for (const n of (nicksResult as any[])) {
+        if (n.nickname) authorNicknames[n.user_id] = n.nickname;
       }
     }
 
-    const postIds = posts.map(p => p.id);
-    let commentsRaw: any[] = [];
-
-    if (postIds.length > 0) {
-      try {
-        commentsRaw = await this.prisma.$queryRawUnsafe(
-          `SELECT 
-             c.id, c.post_id, c.user_id, c.parent_id, c.content, c.media_url, c.created_at,
-             u.first_name, u.last_name,
-             p.nickname, p.career, p.avatar_url
-           FROM community.community_comments c
-           LEFT JOIN identity.users u ON c.user_id = u.id
-           LEFT JOIN profile.user_profiles p ON c.user_id = p.user_id
-           WHERE c.post_id = ANY($1::uuid[])
-           ORDER BY c.created_at ASC`,
-          postIds
-        );
-      } catch (err) {
-        // Fallback or retry
-      }
+    if (Array.isArray(commentsResult)) {
+      commentsRaw = commentsResult;
     }
 
     const commentIds = commentsRaw.map(c => c.id);

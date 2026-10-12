@@ -61,6 +61,7 @@ interface ManagedTournament {
   current_participants: number;
   max_slots: number;
   cost: number;
+  currency?: string;
   prize_pool: string;
   campus_name?: string;
   event_modality?: string;
@@ -467,7 +468,9 @@ export default function OrganizerDashboardPage() {
 
               <div className="pt-3 border-t border-[var(--border-card)] flex items-center justify-between text-xs">
                 <span className="text-[var(--text-secondary)]">
-                  {Number(t.cost) === 0 ? 'Gratuito' : `S/ ${t.cost} PEN`}
+                  {t.cost !== undefined && t.cost !== null && Number(t.cost) > 0
+                    ? `S/ ${Number(t.cost).toFixed(2)} ${t.currency || 'PEN'}`
+                    : 'Gratuito'}
                 </span>
 
                 <div className="flex items-center gap-2">

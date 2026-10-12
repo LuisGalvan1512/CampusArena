@@ -43,6 +43,7 @@ export const useAuth = create<AuthState>((set, get) => ({
   initAuth: async () => {
     const syncSessionUser = async (session: any) => {
       if (!session?.access_token) {
+        api.clearCache();
         localStorage.removeItem('campus_token');
         set({ token: null, user: null, isAuthenticated: false, isAdmin: false, isOrganizer: false });
         return;
@@ -176,6 +177,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
 
       if (data.session?.access_token) {
+        api.clearCache();
         localStorage.setItem('campus_token', data.session.access_token);
         set({ token: data.session.access_token });
         await get().refreshUser();
@@ -222,6 +224,7 @@ export const useAuth = create<AuthState>((set, get) => ({
       }
 
       if (data.session?.access_token) {
+        api.clearCache();
         localStorage.setItem('campus_token', data.session.access_token);
         set({ token: data.session.access_token });
         await get().refreshUser();
@@ -243,6 +246,7 @@ export const useAuth = create<AuthState>((set, get) => ({
     } catch (e) {
       // silent
     } finally {
+      api.clearCache();
       localStorage.removeItem('campus_token');
       set({ token: null, user: null, isAuthenticated: false, isAdmin: false, isOrganizer: false });
     }

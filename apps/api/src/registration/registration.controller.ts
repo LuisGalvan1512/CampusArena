@@ -54,6 +54,20 @@ export class RegistrationController {
   }
 
   /**
+   * POST /api/v1/registrations/:id/cancel
+   * Cancels an incomplete/unpaid registration (PENDING_PAYMENT only).
+   */
+  @Post('registrations/:id/cancel')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async cancelRegistration(
+    @CurrentUser('id') userId: string,
+    @Param('id') registrationId: string
+  ) {
+    return this.registrationService.cancelRegistration(userId, registrationId);
+  }
+
+  /**
    * GET /api/v1/registrations/me
    * Returns all registrations of the authenticated user.
    */
