@@ -9,8 +9,8 @@ import { CommandPaletteLazy } from '@/components/CommandPaletteLazy';
 import { Toaster } from 'sonner';
 
 export const metadata: Metadata = {
-  title: 'Campus Arena — Plataforma de Esports Universitarios',
-  description: 'Compite en torneos de videojuegos, representa a tu institución y construye tu legado competitivo oficial en Campus Arena.',
+  title: 'Campus Arena — Plataforma de Esports para Estudiantes de Tecsup',
+  description: 'Compite en torneos de videojuegos, representa a tu carrera o sede y construye tu legado competitivo en Campus Arena.',
   icons: {
     icon: '/brand/logo.jpg',
     apple: '/brand/logo.jpg',

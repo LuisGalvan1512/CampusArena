@@ -181,7 +181,7 @@ export function EditTournamentModal({
             </div>
             <div>
               <h2 className="text-base font-black text-[var(--text-primary)]">Panel de Modificación de Torneo</h2>
-              <p className="text-xs text-[var(--text-secondary)]">Edita parámetros oficiales, fechas, reglas y estado de la competición</p>
+              <p className="text-xs text-[var(--text-secondary)]">Edita parámetros, fechas, reglas y estado de la competición</p>
             </div>
           </div>
           <button
@@ -218,7 +218,7 @@ export function EditTournamentModal({
             
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-primary)]">Nombre Oficial del Torneo</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Nombre del Torneo</label>
                 <input
                   type="text"
                   name="name"
@@ -230,7 +230,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-primary)]">Videojuego Oficial</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Videojuego</label>
                 <select
                   name="game_code"
                   value={formData.game_code}
@@ -344,7 +344,7 @@ export function EditTournamentModal({
           <div className="space-y-4 pt-4 border-t border-[var(--border-card)]">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5" />
-              2. Fechas & Horarios Oficiales
+              2. Fechas & Horarios
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -434,7 +434,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-2 space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-primary)]">Pozo Acumulado Oficial</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Pozo Acumulado</label>
                 <input
                   type="text"
                   name="prize_pool"
@@ -500,7 +500,7 @@ export function EditTournamentModal({
               </div>
 
               <div className="sm:col-span-3 space-y-1.5">
-                <label className="text-xs font-bold text-[var(--text-primary)]">Reglamento Oficial de Competición</label>
+                <label className="text-xs font-bold text-[var(--text-primary)]">Reglamento de Competición</label>
                 <textarea
                   name="rules_text"
                   rows={4}
@@ -516,7 +516,7 @@ export function EditTournamentModal({
           <div className="space-y-4 pt-4 border-t border-[var(--border-card)]">
             <h3 className="text-xs font-black uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
               <Users className="w-3.5 h-3.5" />
-              4. Modalidad de Equipos & Transmisión Oficial
+              4. Modalidad de Equipos & Transmisión en Vivo
             </h3>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

@@ -37,7 +37,7 @@ export const CARD_MATERIALS: MaterialConfig[] = [
     swatchColor: '#7C3AED',
     videoUrl: '/steam/admin_card_bg.webm',
     tag: 'Admin Steam',
-    description: 'Fondo animado de vapor y santuario neón oficial de Steam',
+    description: 'Fondo animado de vapor y santuario neón estilo Steam',
   },
   {
     id: 'sapphire_glass',
@@ -188,7 +188,7 @@ export const PROFILE_WALLPAPERS: WallpaperConfig[] = [
       backgroundColor: '#070913',
     },
     tag: 'Admin Steam',
-    description: 'Viaje espacial estelar animado oficial de Steam Points Shop',
+    description: 'Viaje espacial estelar animado estilo Steam Points Shop',
   },
   {
     id: 'nebula_sapphire',
@@ -444,7 +444,7 @@ export interface CallingCardConfig {
 }
 
 export const CALLING_CARDS: CallingCardConfig[] = [
-  { id: 'arena_championship', name: 'Campus Arena', category: 'ARENA', desc: 'Gran escenario oficial', bgGradient: 'linear-gradient(135deg, #1E1B4B 0%, #311042 50%, #991B1B 100%)', icon: '🏟️', accentColor: '#E63946' },
+  { id: 'arena_championship', name: 'Campus Arena', category: 'ARENA', desc: 'Gran escenario de arena', bgGradient: 'linear-gradient(135deg, #1E1B4B 0%, #311042 50%, #991B1B 100%)', icon: '🏟️', accentColor: '#E63946' },
   { id: 'software_terminal', name: 'Terminal Software', category: 'INGENIERÍA', desc: 'Líneas de código', bgGradient: 'linear-gradient(135deg, #0A0F1D 0%, #0F172A 60%, #1E3A8A 100%)', icon: '💻', accentColor: '#38BDF8' },
   { id: 'mechatronics_hud', name: 'Mecatrónica', category: 'INGENIERÍA', desc: 'Robótica y control', bgGradient: 'linear-gradient(135deg, #18181B 0%, #27272A 50%, #D97706 100%)', icon: '🤖', accentColor: '#F59E0B' },
   { id: 'networks_nodes', name: 'Redes y Fibra', category: 'INGENIERÍA', desc: 'Telecomunicaciones', bgGradient: 'linear-gradient(135deg, #022C22 0%, #064E3B 60%, #047857 100%)', icon: '🌐', accentColor: '#10B981' },
@@ -467,7 +467,7 @@ export interface HonorPin {
 export const HONOR_PINS: HonorPin[] = [
   { id: 'campus_lima', name: 'Sede Lima', icon: '🏛️', description: 'Campus Santa Anita', rarity: 'COMMON', badgeColor: '#E63946' },
   { id: 'pioneer_2026', name: 'Pionero 2026', icon: '🚀', description: 'Temporada Inaugural', rarity: 'RARE', badgeColor: '#8B5CF6' },
-  { id: 'fair_play', name: 'Juego Limpio', icon: '🛡️', description: 'Fair Play Oficial', rarity: 'RARE', badgeColor: '#10B981' },
+  { id: 'fair_play', name: 'Juego Limpio', icon: '🛡️', description: 'Fair Play Verificado', rarity: 'RARE', badgeColor: '#10B981' },
   { id: 'campus_aqp', name: 'Sede Arequipa', icon: '🌋', description: 'Ciudad Blanca', rarity: 'COMMON', badgeColor: '#F59E0B' },
   { id: 'campus_tru', name: 'Sede Trujillo', icon: '🌊', description: 'Costa Norte', rarity: 'COMMON', badgeColor: '#3B82F6' },
   { id: 'win_streak', name: 'Racha Imparable', icon: '🔥', description: 'Racha de Victorias', rarity: 'RARE', badgeColor: '#EC4899' },
@@ -507,7 +507,7 @@ export const ADMIN_PROFILE_PRESET: ProfileCustomizationState = {
   soundbite: 'synthesizer_blip',
   callingCard: 'arena_championship',
   pinnedPins: ['campus_lima', 'pioneer_2026'],
-  warCry: 'Administrador Oficial Campus Arena',
+  warCry: 'Administrador de Campus Arena',
 };
 
 export const DEFAULT_CUSTOMIZATION: ProfileCustomizationState = {

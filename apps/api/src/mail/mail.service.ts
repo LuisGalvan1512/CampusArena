@@ -65,7 +65,7 @@ export class MailService {
   <div class="container">
     <div class="header">
       <h1 class="logo-title">CAMPUS ARENA TECSUP</h1>
-      <p class="subtitle">Plataforma Oficial de Esports Universitarios</p>
+      <p class="subtitle">Plataforma de Esports para la Comunidad Tecsup</p>
     </div>
     <div class="content">
       <span class="badge">${isNewUser ? '🎉 Registro Institucional' : '🛡️ Verificación de Dispositivo'}</span>
@@ -74,7 +74,7 @@ export class MailService {
       <p class="text">
         ${
           isNewUser
-            ? '¡Te damos la bienvenida a la plataforma oficial de torneos de Tecsup! Hemos creado tu cuenta de competidor institucional. Para confirmar tu dispositivo y completar el acceso, ingresa el siguiente código de seguridad:'
+            ? '¡Te damos la bienvenida a la plataforma de torneos de Tecsup! Hemos creado tu cuenta de competidor institucional. Para confirmar tu dispositivo y completar el acceso, ingresa el siguiente código de seguridad:'
             : 'Se ha solicitado el inicio de sesión en tu cuenta institucional. Para verificar que eres tú y autorizar el acceso en este dispositivo, ingresa el siguiente código de 6 dígitos:'
         }
       </p>
@@ -148,10 +148,10 @@ export class MailService {
   <div class="container">
     <div class="header">
       <h1 class="logo-title">CAMPUS ARENA TECSUP</h1>
-      <p class="subtitle">Validación Oficial de Participación</p>
+      <p class="subtitle">Validación de Participación</p>
     </div>
     <div class="content">
-      <span class="badge">${hasSlot ? '✅ Cupo Oficial Confirmado' : '⏳ Lista de Espera'}</span>
+      <span class="badge">${hasSlot ? '✅ Cupo Confirmado' : '⏳ Lista de Espera'}</span>
       <div class="greeting">¡Hola, ${firstName}!</div>
       <p class="text">
         ${hasSlot 
@@ -169,7 +169,7 @@ export class MailService {
       </div>
     </div>
     <div class="footer">
-      Tecsup Sede Lima • Plataforma Oficial de Esports &copy; 2026 Campus Arena.
+      Tecsup Sede Lima • Plataforma de Esports &copy; 2026 Campus Arena.
     </div>
   </div>
 </body>
@@ -220,10 +220,10 @@ export class MailService {
       <h1 class="logo-title">CAMPUS ARENA TECSUP</h1>
     </div>
     <div class="content">
-      <span class="badge">⚔️ Llamado a Partida Oficial</span>
+      <span class="badge">⚔️ Llamado a Partida</span>
       <div class="greeting">¡Prepárate, ${firstName}!</div>
       <p class="text">
-        Se ha habilitado tu enfrentamiento en <strong>${tournamentName}</strong>. Preséntate con tu oponente y sigue las instrucciones de la sala oficial.
+        Se ha habilitado tu enfrentamiento en <strong>${tournamentName}</strong>. Preséntate con tu oponente y sigue las instrucciones de la sala.
       </p>
       <div class="match-box">
         <div style="font-size: 11px; color: #8E92A4; text-transform: uppercase; margin-bottom: 8px;">${roundName} • Match #${matchPosition}</div>
@@ -234,7 +234,7 @@ export class MailService {
       </div>
     </div>
     <div class="footer">
-      Tecsup Sede Lima • Plataforma Oficial de Esports &copy; 2026 Campus Arena.
+      Tecsup Sede Lima • Plataforma de Esports &copy; 2026 Campus Arena.
     </div>
   </div>
 </body>

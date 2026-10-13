@@ -159,7 +159,7 @@ export function RegistrationWizardModal({
 
     if (isTeamTournament) {
       if (!teamName.trim()) {
-        setErrorMessage('Debes ingresar el nombre oficial de tu escuadra o equipo.');
+        setErrorMessage('Debes ingresar el nombre de tu escuadra o equipo.');
         return;
       }
       const invalid = rosterMembers.find(
@@ -354,7 +354,7 @@ export function RegistrationWizardModal({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
             <span className="font-bold text-[#E63946] uppercase tracking-wider">
-              Inscripción Oficial
+              Inscripción al Torneo
             </span>
             <span>Paso {step} de 4</span>
           </div>
@@ -411,7 +411,7 @@ export function RegistrationWizardModal({
                     </p>
                     <p className="text-xs text-[var(--text-secondary)] font-mono truncate">{user?.email}</p>
                     <p className="text-[11px] text-emerald-400 font-semibold mt-0.5">
-                      Sede Lima • Competidor Oficial
+                      Sede Lima • Competidor Verificado
                     </p>
                   </div>
                 </div>
@@ -424,7 +424,7 @@ export function RegistrationWizardModal({
             <div className="p-3 bg-white/[0.02] rounded-xl border border-white/5 text-xs text-[var(--text-secondary)] flex items-start gap-2.5">
               <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
               <span>
-                Tu cuenta institucional de Tecsup es tu identidad oficial en los cuadros de eliminación y partidas del torneo.
+                Tu cuenta institucional de Tecsup es tu identidad en los cuadros de eliminación y partidas del torneo.
               </span>
             </div>
 
@@ -470,7 +470,7 @@ export function RegistrationWizardModal({
               <div className="p-3 bg-white/[0.03] border border-white/10 rounded-xl space-y-1.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400">
-                    Capitán Oficial
+                    Capitán de Escuadra
                   </span>
                   <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                     Verificado
@@ -601,7 +601,7 @@ export function RegistrationWizardModal({
                 type="button"
                 onClick={() => {
                   if (!teamName.trim()) {
-                    setErrorMessage('Debes ingresar el nombre oficial de tu equipo o clan.');
+                    setErrorMessage('Debes ingresar el nombre de tu equipo o clan.');
                     return;
                   }
                   const invalid = rosterMembers.find(
@@ -627,7 +627,7 @@ export function RegistrationWizardModal({
         {step === 2 && (
           <div className="space-y-5 animate-in fade-in">
             <div className="space-y-1">
-              <h4 className="text-sm font-bold text-[var(--text-primary)]">2. Aceptación del Reglamento Oficial</h4>
+              <h4 className="text-sm font-bold text-[var(--text-primary)]">2. Aceptación del Reglamento</h4>
               <p className="text-xs text-[var(--text-secondary)]">
                 Lee y acepta las normas de Fair Play y formato de torneo.
               </p>
@@ -645,7 +645,7 @@ export function RegistrationWizardModal({
                 className="w-4 h-4 mt-0.5 rounded bg-[var(--bg-card)] border-[var(--border-card)] text-[#E63946] focus:ring-[#E63946]"
               />
               <span className="text-xs text-[var(--text-primary)] leading-relaxed">
-                He leído y acepto cumplir el <strong>Reglamento Oficial de Competición</strong> y las sanciones por conducta antideportiva.
+                He leído y acepto cumplir el <strong>Reglamento de Competición</strong> y las sanciones por conducta antideportiva.
               </span>
             </label>
 
@@ -743,7 +743,7 @@ export function RegistrationWizardModal({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img 
                   src={paymentMethod === 'YAPE' ? '/yape-qr.png' : '/plin-qr.png'} 
-                  alt={`QR Oficial de ${paymentMethod}`}
+                  alt={`QR de ${paymentMethod}`}
                   className="w-full h-full object-contain"
                 />
               </a>

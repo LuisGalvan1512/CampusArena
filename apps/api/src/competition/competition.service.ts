@@ -310,7 +310,7 @@ export class CompetitionService {
           await this.notifications.create({
             user_id: reg.competitor_id,
             type: 'MATCH_CALL',
-            title: '⚔️ ¡Bracket Oficial Generado!',
+            title: '⚔️ ¡Bracket Generado!',
             message: `Las llaves del torneo "${tournamentName}" han sido publicadas. ¡Revisa tu llave y tu rival!`,
             link: `/tournaments/${tournamentSlug}`,
             link_label: 'Ver mi llave en Brackets',
@@ -458,7 +458,7 @@ export class CompetitionService {
       return {
         message: matchup.next_matchup_id
           ? `¡Victoria registrada! ${winnerName} avanza a la siguiente ronda.`
-          : `🏆 ¡Gran Final concluida! ¡${winnerName} es el Campeón Oficial del Torneo!`,
+          : `🏆 ¡Gran Final concluida! ¡${winnerName} es el Campeón del Torneo!`,
         matchup_id: matchupId,
         winner_name: winnerName,
         winner_tag: winnerTag,

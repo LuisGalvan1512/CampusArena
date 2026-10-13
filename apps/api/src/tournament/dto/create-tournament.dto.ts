@@ -59,7 +59,7 @@ export class CreateTournamentDto {
   banner_url: string;
 
   @IsString()
-  @IsNotEmpty({ message: 'El reglamento oficial es obligatorio.' })
+  @IsNotEmpty({ message: 'El reglamento es obligatorio.' })
   rules_text: string;
 
   @IsInt({ message: 'El cupo máximo debe ser un número entero.' })

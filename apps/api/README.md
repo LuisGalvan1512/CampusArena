@@ -1,6 +1,6 @@
 # 🏟️ Campus Arena — Backend API (NestJS 12)
 
-API RESTful oficial de **Campus Arena — Tecsup**, desarrollada con **NestJS 12**, **Prisma ORM 5.22** y **PostgreSQL (Supabase)** en multi-esquema.
+API RESTful de **Campus Arena — Tecsup**, desarrollada con **NestJS 12**, **Prisma ORM 5.22** y **PostgreSQL (Supabase)** en multi-esquema.
 
 ---
 

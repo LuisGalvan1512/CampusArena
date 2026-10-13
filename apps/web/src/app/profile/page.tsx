@@ -96,7 +96,7 @@ export const BANNER_THEMES: Array<{
   bgClass: string;
   glowColor: string;
 }> = [
-  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian synthwave oficial', tag: 'Neon', bgClass: 'banner-cyberpunk', glowColor: 'rgba(230, 57, 70, 0.35)' },
+  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian synthwave', tag: 'Neon', bgClass: 'banner-cyberpunk', glowColor: 'rgba(230, 57, 70, 0.35)' },
   { id: 'sapphire', name: 'Zafiro Tecsup', desc: 'Resplandor azul cobalto y cian eléctrico', tag: 'Cobalt', bgClass: 'banner-sapphire', glowColor: 'rgba(37, 99, 235, 0.4)' },
   { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', tag: 'Stealth', bgClass: 'banner-carbon', glowColor: 'rgba(148, 163, 184, 0.25)' },
   { id: 'aurora', name: 'Aurora Cósmica', desc: 'Nebulosa esmeralda y cian etérea', tag: 'Cosmic', bgClass: 'banner-aurora', glowColor: 'rgba(16, 185, 129, 0.3)' },
@@ -104,7 +104,7 @@ export const BANNER_THEMES: Array<{
   { id: 'obsidian', name: 'Titanio Obsidiana', desc: 'Acabado minimalista de cristal templado', tag: 'Titanium', bgClass: 'banner-obsidian', glowColor: 'rgba(59, 130, 246, 0.25)' },
   { id: 'retro', name: 'Retro Synthwave 80s', desc: 'Atardecer neón y rejilla arcade retro', tag: 'Arcade', bgClass: 'banner-retro', glowColor: 'rgba(168, 85, 247, 0.3)' },
   { id: 'matrix', name: 'Cyber Matrix', desc: 'Terminal táctica hacker verde fósforo', tag: 'Matrix', bgClass: 'banner-matrix', glowColor: 'rgba(16, 185, 129, 0.3)' },
-  { id: 'arena', name: 'Tecsup Arena Oficial', desc: 'Rojo carmesí y azul marino institucional', tag: 'Oficial', bgClass: 'banner-arena', glowColor: 'rgba(230, 57, 70, 0.4)' },
+  { id: 'arena', name: 'Tecsup Arena', desc: 'Rojo carmesí y azul marino institucional', tag: 'Tecsup', bgClass: 'banner-arena', glowColor: 'rgba(230, 57, 70, 0.4)' },
 ];
 
 interface ProfileData {
@@ -1075,7 +1075,7 @@ export default function ProfilePage() {
                 <div className="space-y-1.5 max-w-md mx-auto">
                   <h3 className="text-base font-black text-white">Sin torneos activos</h3>
                   <p className="text-xs text-[#8E92A4] leading-relaxed">
-                    Aún no te has inscrito a ningún torneo oficial de Campus Arena. Explora los torneos activos de Tecsup, asegura tu cupo y compite por premios y puntos en el ranking.
+                    Aún no te has inscrito a ningún torneo de Campus Arena. Explora los torneos activos de Tecsup, asegura tu cupo y compite por premios y puntos en el ranking.
                   </p>
                 </div>
                 <div className="pt-2">
@@ -1084,7 +1084,7 @@ export default function ProfilePage() {
                     className="btn-primary inline-flex items-center gap-2 py-2.5 px-6 text-xs font-bold shadow-lg shadow-[#E63946]/20"
                   >
                     <Flame className="w-3.5 h-3.5" />
-                    Ver Torneos Oficiales
+                    Ver Torneos
                   </Link>
                 </div>
               </div>
@@ -1182,7 +1182,7 @@ export default function ProfilePage() {
                     Sin medallas de podio aún
                   </h3>
                   <p className="text-xs text-[#8E92A4] leading-relaxed">
-                    Las medallas oficiales de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se forjan automáticamente en tu carnet de competidor al concluir los torneos según tu posición en el bracket oficial.
+                    Las medallas de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se forjan automáticamente en tu carnet de competidor al concluir los torneos según tu posición en el bracket.
                   </p>
                 </div>
                 <div className="pt-2">
@@ -1263,7 +1263,7 @@ export default function ProfilePage() {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-white">Registro Institucional Tecsup</h3>
-                  <p className="text-xs text-[#8E92A4]">Datos oficiales vinculados a tu cuenta estudiantil</p>
+                  <p className="text-xs text-[#8E92A4]">Datos vinculados a tu cuenta estudiantil</p>
                 </div>
               </div>
 
@@ -1282,7 +1282,7 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="p-4 rounded-2xl bg-[#0A0D14] border border-white/5 space-y-1">
-                <p className="text-[10px] font-mono uppercase text-[#8E92A4]">Sede Oficial</p>
+                <p className="text-[10px] font-mono uppercase text-[#8E92A4]">Sede</p>
                 <p className="text-sm font-black text-white flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-[#E63946]" />
                   <span>Tecsup — Sede {profile.campus || 'Lima'}</span>
@@ -2001,10 +2001,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* 3. Selección de Avatar Oficial o URL */}
+                  {/* 3. Selección de Avatar o Imagen */}
                   <div className="space-y-3 pt-4 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      Avatar Oficial o Imagen
+                      Avatar de la Plataforma o Imagen
                     </label>
 
                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
@@ -2204,7 +2204,7 @@ export default function ProfilePage() {
                       value={editForm.biography || ''}
                       onChange={(e) => setEditForm({ ...editForm, biography: e.target.value })}
                       rows={2}
-                      placeholder="Escribe tu estilo de juego o trayectoria universitaria..."
+                      placeholder="Escribe tu estilo de juego o trayectoria en Tecsup..."
                       className="input-arena w-full bg-[#0A0D14] border-white/10 resize-none text-xs"
                       maxLength={180}
                     />

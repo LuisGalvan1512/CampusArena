@@ -336,7 +336,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate, isFullWidt
         <div className="space-y-2 max-w-md mx-auto">
           <h3 className="text-lg font-black text-[var(--text-primary)]">Llaves de Competición en Espera</h3>
           <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
-            El sorteo oficial y la estructura de emparejamientos se generarán con los competidores confirmados una vez cerradas las inscripciones.
+            El sorteo y la estructura de emparejamientos se generarán con los competidores confirmados una vez cerradas las inscripciones.
           </p>
         </div>
 
@@ -401,7 +401,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate, isFullWidt
 
     if (res.success) {
       fireCelebration();
-      toast.success(res.data?.message || '¡Resultado oficial guardado!');
+      toast.success(res.data?.message || '¡Resultado guardado!');
       setFeedback(res.data?.message || '¡Resultado guardado!');
       setTimeout(() => {
         setSelectedMatchup(null);
@@ -1154,7 +1154,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate, isFullWidt
             <Trophy className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-black text-[var(--text-primary)]">Llaves Oficiales de Eliminación Directa</h3>
+            <h3 className="text-sm font-black text-[var(--text-primary)]">Llaves de Eliminación Directa</h3>
             <p className="text-xs text-[var(--text-secondary)]">Formato BO3 • Toca cualquier emparejamiento para ver el cara a cara</p>
           </div>
         </div>
@@ -1385,7 +1385,7 @@ export function BracketView({ tournamentId, initialBracket, onUpdate, isFullWidt
             <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
               <div className="flex items-center gap-2 text-xs font-bold text-[#E63946]">
                 <Swords className="w-4 h-4" />
-                <span>Panel de Arbitraje Oficial</span>
+                <span>Panel de Arbitraje</span>
               </div>
               <button
                 onClick={() => setSelectedMatchup(null)}

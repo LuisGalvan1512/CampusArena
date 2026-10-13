@@ -24,7 +24,7 @@ export function Footer() {
               </div>
             </div>
             <p className="text-sm text-[var(--text-secondary)] max-w-sm leading-relaxed">
-              La plataforma oficial de esports académicos de Tecsup. Compite por tu carrera, representa a tu sede y construye tu legado competitivo.
+              Plataforma de esports para la comunidad estudiantil de Tecsup. Compite por tu carrera, representa a tu sede y construye tu legado competitivo.
             </p>
             <div className="flex items-center gap-2 text-xs text-[var(--text-muted)]">
               <Shield className="w-4 h-4 text-sky-400" />
@@ -37,7 +37,7 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-[var(--text-primary)]">Plataforma</h4>
             <ul className="space-y-2 text-sm text-[var(--text-secondary)]">
               <li><Link href="/tournaments" className="hover:text-[#E63946] transition-colors">Torneos Activos</Link></li>
-              <li><Link href="/#juegos" className="hover:text-[#E63946] transition-colors">Juegos Oficiales</Link></li>
+              <li><Link href="/#juegos" className="hover:text-[#E63946] transition-colors">Juegos y Disciplinas</Link></li>
               <li><Link href="/ranking" className="hover:text-[#E63946] transition-colors">Ranking Institucional</Link></li>
               <li><Link href="/profile" className="hover:text-[#E63946] transition-colors">Perfil de Jugador</Link></li>
             </ul>

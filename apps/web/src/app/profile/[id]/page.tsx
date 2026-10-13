@@ -726,7 +726,7 @@ export default function PublicProfilePage() {
 
                     <div className="pt-3 border-t border-white/10 flex items-center justify-between">
                       <span className="text-[11px] font-mono text-amber-400 font-bold">
-                        {tour.prize_pool || 'Premio Oficial'}
+                        {tour.prize_pool || 'Premio Tecsup'}
                       </span>
                       <Link
                         href={`/tournaments/${tour.slug}`}

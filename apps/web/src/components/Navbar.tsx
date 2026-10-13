@@ -152,7 +152,7 @@ export function Navbar() {
                           user.role === 'ORGANIZER' ? 'bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30' :
                           'bg-[var(--bg-arena)] text-[var(--text-secondary)] border border-[var(--border-card)]'
                         }`}>
-                          {user.role === 'ADMIN' ? 'SUPER ADMINISTRADOR' : user.role === 'ORGANIZER' ? 'ORGANIZADOR OFICIAL' : 'ALUMNO COMPETIDOR'}
+                          {user.role === 'ADMIN' ? 'SUPER ADMINISTRADOR' : user.role === 'ORGANIZER' ? 'ORGANIZADOR' : 'ALUMNO COMPETIDOR'}
                         </span>
                       </div>
 

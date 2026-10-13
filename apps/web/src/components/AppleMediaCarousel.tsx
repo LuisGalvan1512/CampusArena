@@ -30,7 +30,7 @@ interface AppleMediaCarouselProps {
 export function AppleMediaCarousel({
   items,
   headline = 'Descubre las copas activas.',
-  subheadline = 'Desliza para explorar los torneos y escenarios oficiales de esta temporada.',
+  subheadline = 'Desliza para explorar los torneos y escenarios de esta temporada.',
   tagline = 'GALERÍA DE LA ARENA'
 }: AppleMediaCarouselProps) {
   const containerRef = useRef<HTMLDivElement>(null);

@@ -85,7 +85,7 @@ export function MatchupModal({
                 {roundName} • {tournamentName}
               </span>
               <h3 className="text-lg font-black text-[var(--text-primary)]">
-                Ficha de Enfrentamiento Oficial
+                Ficha de Enfrentamiento
               </h3>
             </div>
             <button
@@ -113,7 +113,7 @@ export function MatchupModal({
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[var(--bg-arena)] border border-[var(--border-card)] text-[var(--text-secondary)] font-bold text-xs">
-                CRUCE OFICIAL PROGRAMADO
+                CRUCE PROGRAMADO
               </span>
             )}
           </div>
@@ -214,7 +214,7 @@ export function MatchupModal({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3 border-t border-[var(--border-card)] relative z-10">
             <span className="text-xs text-[var(--text-secondary)] flex items-center gap-1.5">
               <Shield className="w-3.5 h-3.5 text-emerald-500" />
-              Arbitraje Oficial • Reglas de Fair Play Tecsup
+              Arbitraje • Reglas de Fair Play Tecsup
             </span>
 
             <div className="flex items-center gap-2 w-full sm:w-auto">

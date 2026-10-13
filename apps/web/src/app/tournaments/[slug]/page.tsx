@@ -488,7 +488,7 @@ export default function TournamentDetailPage() {
                     Panel de Gestión de Torneo
                   </span>
                   <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {user?.role === 'ADMIN' ? '👑 Super Admin' : '🛡️ Organizador Oficial'}
+                    {user?.role === 'ADMIN' ? '👑 Super Admin' : '🛡️ Organizador'}
                   </span>
                 </div>
                 <p className="text-[11px] text-[#8E92A4]">
@@ -710,7 +710,7 @@ export default function TournamentDetailPage() {
             <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in border border-[var(--border-card)]">
               <div className="flex items-center gap-2 text-[#E63946]">
                 <ShieldCheck className="w-5 h-5" />
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">Reglamento Oficial de Competición</h3>
+                <h3 className="text-lg font-bold text-[var(--text-primary)]">Reglamento de Competición</h3>
               </div>
               <div className="p-5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs text-[var(--text-secondary)] leading-relaxed font-mono whitespace-pre-line">
                 {tournament.rules_text}
@@ -727,7 +727,7 @@ export default function TournamentDetailPage() {
               </div>
               
               <div className="p-6 rounded-xl bg-gradient-to-r from-[#1D3557]/40 to-[#E63946]/20 border border-[var(--border-card)] space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#A8DADC]">Pozo Acumulado Oficial</p>
+                <p className="text-xs font-bold uppercase tracking-wider text-[#A8DADC]">Pozo Acumulado</p>
                 <p className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400">{tournament.prize_pool}</p>
               </div>
 
@@ -964,7 +964,7 @@ export default function TournamentDetailPage() {
 
                   <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
                     {userRegistration.status === 'CONFIRMED'
-                      ? 'Tu cupo oficial en el bracket está asegurado.'
+                      ? 'Tu cupo en el bracket está asegurado.'
                       : userRegistration.status === 'PENDING_PAYMENT'
                       ? 'Iniciaste el proceso de inscripción. Sube tu comprobante de pago o cancela la solicitud si prefieres recomenzar.'
                       : userRegistration.status === 'CORRECTION_REQUIRED'
@@ -1184,10 +1184,10 @@ export default function TournamentDetailPage() {
                 </div>
                 <div>
                   <h3 className="text-base font-black text-[var(--text-primary)]">
-                    {selectedTeamRoster.team_name || 'Escuadra Oficial'}
+                    {selectedTeamRoster.team_name || 'Escuadra'}
                   </h3>
                   <p className="text-xs text-[var(--text-secondary)]">
-                    Integrantes oficiales de la escuadra
+                    Integrantes de la escuadra
                   </p>
                 </div>
               </div>

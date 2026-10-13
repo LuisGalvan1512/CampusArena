@@ -285,7 +285,7 @@ export function LinkGameModal({
                 {isVerifying ? (
                   <>
                     <Loader2 className="w-4 h-4 animate-spin" />
-                    {isApiGame ? 'Consultando API oficial...' : 'Registrando cuenta...'}
+                    {isApiGame ? 'Consultando API del juego...' : 'Registrando cuenta...'}
                   </>
                 ) : (
                   <>
@@ -356,7 +356,7 @@ export function LinkGameModal({
 
             <div className="space-y-2">
               <p className="text-xs text-center text-[var(--text-secondary)]">
-                ¿Confirmas que esta es tu cuenta oficial de juego?
+                ¿Confirmas que esta es tu cuenta de juego?
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button

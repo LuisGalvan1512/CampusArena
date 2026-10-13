@@ -112,7 +112,7 @@ export class SupercellAdapterService {
       in_game_name: tag,
       trophies: 0,
       level: 0,
-      arena_or_club: 'Competidor Oficial Tecsup',
+      arena_or_club: 'Competidor Tecsup',
     };
   }
 }

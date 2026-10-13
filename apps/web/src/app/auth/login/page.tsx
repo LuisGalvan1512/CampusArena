@@ -218,7 +218,7 @@ export default function LoginPage() {
                   )}
                 </button>
                 <p className="text-[11px] text-center text-[var(--text-secondary)]">
-                  Se abrirá la ventana oficial de Google. Elige tu cuenta institucional de Tecsup.
+                  Se abrirá la ventana de Google. Elige tu cuenta institucional de Tecsup.
                 </p>
               </div>
             ) : (

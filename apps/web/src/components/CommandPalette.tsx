@@ -81,7 +81,7 @@ export function CommandPalette() {
     {
       id: 'nav-tournaments',
       title: 'Explorar Torneos',
-      subtitle: 'Ver catálogo de torneos oficiales y registrarse',
+      subtitle: 'Ver catálogo de torneos y registrarse',
       category: 'Navegación',
       icon: <Trophy className="w-4 h-4 text-amber-500" />,
       action: () => router.push('/tournaments'),
@@ -104,7 +104,7 @@ export function CommandPalette() {
     },
     {
       id: 'nav-live',
-      title: 'Transmisión Oficial En Vivo',
+      title: 'Transmisión En Vivo',
       subtitle: 'Ver streaming activo en Kick, YouTube o TikTok',
       category: 'Navegación',
       icon: <Radio className="w-4 h-4 text-red-500 animate-pulse" />,
@@ -113,7 +113,7 @@ export function CommandPalette() {
     {
       id: 'nav-profile',
       title: 'Mi Perfil de Competidor',
-      subtitle: 'Ver medallas oficiales, insignias y muro personal',
+      subtitle: 'Ver medallas, insignias y muro personal',
       category: 'Navegación',
       icon: <User className="w-4 h-4 text-indigo-500" />,
       action: () => router.push('/profile'),

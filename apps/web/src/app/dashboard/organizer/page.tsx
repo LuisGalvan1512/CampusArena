@@ -96,13 +96,13 @@ export default function OrganizerDashboardPage() {
   const [newTourTeamSize, setNewTourTeamSize] = useState<number>(1);
   const [newTourStreamPlatform, setNewTourStreamPlatform] = useState<string>('KICK');
   const [newTourStreamUrl, setNewTourStreamUrl] = useState<string>('lusen15');
-  const [newTourPrize, setNewTourPrize] = useState('S/ 400 + Trofeo Oficial');
+  const [newTourPrize, setNewTourPrize] = useState('S/ 400 + Trofeo');
   const [newTourPrize1, setNewTourPrize1] = useState('100% del pozo acumulado');
   const [newTourPrize2, setNewTourPrize2] = useState('Medalla de Plata');
   const [newTourPrize3, setNewTourPrize3] = useState('Medalla de Bronce');
   const [newTourBanner, setNewTourBanner] = useState('');
   const [newTourSeriesFormat, setNewTourSeriesFormat] = useState('Semis BO3 • Final BO5 (Previas BO1)');
-  const [newTourDesc, setNewTourDesc] = useState('Torneo oficial de eliminación directa para estudiantes.');
+  const [newTourDesc, setNewTourDesc] = useState('Torneo de eliminación directa para estudiantes de Tecsup.');
   const [newTourRules, setNewTourRules] = useState('1. Formato 1vs1 BO3.\n2. Baneo de 1 carta/brawler por mutuo acuerdo.\n3. Desconexiones: 30 segundos de espera.');
   const [newTourRegOpen, setNewTourRegOpen] = useState(() => new Date().toISOString().slice(0, 16));
   const [newTourRegClose, setNewTourRegClose] = useState(() => new Date(Date.now() + 15 * 86400000).toISOString().slice(0, 16));
@@ -191,7 +191,7 @@ export default function OrganizerDashboardPage() {
       event_modality: newTourEventModality,
       is_online: newTourEventModality === 'ONLINE',
       description_short: newTourDesc,
-      description_full: `${newTourDesc} Competencia oficial con certificación deportiva y premios en efectivo.`,
+      description_full: `${newTourDesc} Competencia de esports de Tecsup con premios en efectivo.`,
       banner_url: bannerUrl,
       rules_text: newTourRules,
       max_slots: Number(newTourSlots),
@@ -302,7 +302,7 @@ export default function OrganizerDashboardPage() {
             <Swords className="w-4 h-4 text-[#E63946]" />
           </div>
           <p className="text-3xl font-black text-[var(--text-primary)]">{tournaments.length}</p>
-          <p className="text-[11px] text-[var(--text-muted)]">Competencias oficiales en curso</p>
+          <p className="text-[11px] text-[var(--text-muted)]">Competencias en curso</p>
         </div>
 
         <div className="arena-card p-5 space-y-1">
@@ -505,9 +505,9 @@ export default function OrganizerDashboardPage() {
               <span className="text-[10px] font-bold uppercase tracking-wider text-[#E63946]">
                 Asistente Deportivo
               </span>
-              <h3 className="text-xl font-black text-[var(--text-primary)]">Lanzar Nuevo Torneo Oficial</h3>
+              <h3 className="text-xl font-black text-[var(--text-primary)]">Lanzar Nuevo Torneo</h3>
               <p className="text-xs text-[var(--text-secondary)]">
-                Configura los parámetros del torneo para publicarlo en la cartelera universitaria.
+                Configura los parámetros del torneo para publicarlo en la cartelera de torneos de Tecsup.
               </p>
             </div>
 
@@ -530,7 +530,7 @@ export default function OrganizerDashboardPage() {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Disciplina Oficial
+                    Disciplina
                   </label>
                   <select
                     value={newTourGame}
@@ -617,7 +617,7 @@ export default function OrganizerDashboardPage() {
 
                 <div className="space-y-1.5">
                   <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Pozo Acumulado Oficial
+                    Pozo Acumulado
                   </label>
                   <input
                     type="text"
@@ -676,7 +676,7 @@ export default function OrganizerDashboardPage() {
                 </div>
               </div>
 
-              {/* Fechas & Horarios Oficiales */}
+              {/* Fechas & Horarios */}
               <div className="space-y-3 p-4 rounded-xl bg-[var(--bg-arena)] border border-[var(--border-card)]">
                 <label className="text-xs font-semibold uppercase tracking-wider text-[#A8DADC] flex items-center gap-1.5">
                   <Calendar className="w-3.5 h-3.5 text-[#457B9D]" />
@@ -767,7 +767,7 @@ export default function OrganizerDashboardPage() {
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-indigo-400" />
-                    Banner Oficial del Torneo
+                    Banner del Torneo
                   </label>
                   <span className="text-[10px] text-[var(--text-secondary)]">URL directa de imagen</span>
                 </div>
@@ -789,7 +789,7 @@ export default function OrganizerDashboardPage() {
                   <div className="text-[11px] text-[var(--text-secondary)] space-y-1">
                     <p className="text-[var(--text-primary)] font-semibold">Previsualización del Banner</p>
                     <p className="text-[10px] text-[var(--text-muted)]">
-                      Si dejas este campo vacío, se usará la imagen oficial por defecto del juego ({newTourGame}).
+                      Si dejas este campo vacío, se usará la imagen por defecto del juego ({newTourGame}).
                     </p>
                   </div>
                 </div>
@@ -841,7 +841,7 @@ export default function OrganizerDashboardPage() {
 
               <div className="space-y-1.5">
                 <label className="block text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
-                  Reglamento Oficial
+                  Reglamento de Competición
                 </label>
                 <textarea
                   rows={3}
@@ -910,7 +910,7 @@ export default function OrganizerDashboardPage() {
             <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-3">
               <h4 className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-2">
                 <QrCode className="w-4 h-4 text-[#A8DADC]" />
-                Comprobante Oficial de Pago
+                Comprobante de Pago
               </h4>
               <button 
                 onClick={() => setViewingVoucherUrl(null)}

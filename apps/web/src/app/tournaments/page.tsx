@@ -97,7 +97,7 @@ export default function TournamentsPage() {
         <div className="max-w-3xl space-y-5 relative z-10">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--bg-arena)] text-xs font-mono font-bold uppercase tracking-wider text-[#38BDF8] border border-[var(--border-card)]">
             <Flame className="w-3.5 h-3.5 text-[#E63946]" />
-            <span>Circuito Oficial Tecsup</span>
+            <span>Circuito de Torneos Tecsup</span>
           </div>
 
           <div className="space-y-2">
@@ -105,7 +105,7 @@ export default function TournamentsPage() {
               Catálogo de Torneos.
             </h1>
             <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed max-w-2xl">
-              Inscríbete a los torneos oficiales de tu institución, compite en brackets en vivo y suma medallas permanentes a tu historial de competidor estudiantil.
+              Inscríbete a los torneos de la comunidad estudiantil de Tecsup, compite en brackets en vivo y suma medallas permanentes a tu historial de competidor.
             </p>
           </div>
 

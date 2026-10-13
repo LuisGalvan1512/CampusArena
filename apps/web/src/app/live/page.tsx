@@ -146,7 +146,7 @@ export default function LiveStreamPage() {
             id: '1',
             sender_name: 'Campus Arena',
             sender_campus: 'Tecsup Lima',
-            text: '¡Bienvenidos a la transmisión oficial de Campus Arena! Que gane el mejor.',
+            text: '¡Bienvenidos a la transmisión en vivo de Campus Arena! Que gane el mejor.',
             created_at: new Date(Date.now() - 3600000).toISOString(),
             is_verified: true
           },
@@ -312,10 +312,10 @@ export default function LiveStreamPage() {
             </div>
             <div>
               <h1 className="text-lg sm:text-2xl font-black text-[var(--text-primary)]">
-                Transmisión Oficial de Campus Arena
+                Transmisión en Vivo de Campus Arena
               </h1>
               <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                {selectedTournament ? `Torneo activo: ${selectedTournament.name}` : 'Canal oficial de directos de Campus Arena'}
+                {selectedTournament ? `Torneo activo: ${selectedTournament.name}` : 'Canal de directos de Campus Arena'}
               </p>
             </div>
           </div>
@@ -497,7 +497,7 @@ export default function LiveStreamPage() {
             {isLoading ? (
               <div className="flex flex-col items-center gap-3">
                 <Loader2 className="w-8 h-8 text-[#E63946] animate-spin" />
-                <p className="text-xs text-[#8E92A4]">Conectando a la señal oficial...</p>
+                <p className="text-xs text-[#8E92A4]">Conectando a la señal en vivo...</p>
               </div>
             ) : activePlatform === 'KICK' ? (
               <iframe
@@ -541,7 +541,7 @@ export default function LiveStreamPage() {
                   </div>
                   <h3 className="text-xl font-black text-white">Transmisión en TikTok Live</h3>
                   <p className="text-xs text-[#8E92A4] mt-1 max-w-sm">
-                    Canal oficial: <strong className="text-white font-mono">@{tiktokUser}</strong>
+                    Canal de transmisión: <strong className="text-white font-mono">@{tiktokUser}</strong>
                   </p>
                 </div>
                 <a 
@@ -634,7 +634,7 @@ export default function LiveStreamPage() {
                       </div>
                       <h4 className="text-[var(--text-primary)] text-xs font-bold">Chat de YouTube en Vivo</h4>
                       <p className="text-[11px] leading-relaxed text-[var(--text-secondary)]">
-                        Canal oficial: <strong className="text-[var(--text-primary)]">@LuisGalvan1512</strong>. Puedes abrir el chat de YouTube en una ventana flotante o ingresar el ID del video si estás transmitiendo.
+                        Canal: <strong className="text-[var(--text-primary)]">@LuisGalvan1512</strong>. Puedes abrir el chat de YouTube en una ventana flotante o ingresar el ID del video si estás transmitiendo.
                       </p>
 
                       {showYtInput ? (
@@ -683,7 +683,7 @@ export default function LiveStreamPage() {
                     </div>
                     <h4 className="text-[var(--text-primary)] text-xs font-bold">Chat de TikTok Live</h4>
                     <p className="text-[11px] leading-relaxed">
-                      TikTok no permite chats en iframes externos por seguridad de sesión. Puedes abrir la ventana emergente oficial o usar el Chat Tecsup.
+                      TikTok no permite chats en iframes externos por seguridad de sesión. Puedes abrir la ventana emergente o usar el Chat Tecsup.
                     </p>
                     <div className="flex flex-col gap-2 w-full pt-1">
                       <button 

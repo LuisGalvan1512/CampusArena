@@ -5,7 +5,7 @@
 <h1 align="center">🏟️ Campus Arena — Tecsup</h1>
 
 <p align="center">
-  <strong>Plataforma oficial de torneos de eSports universitarios para Tecsup</strong><br/>
+  <strong>Plataforma de torneos de esports para estudiantes del instituto Tecsup</strong><br/>
   Gestión completa de torneos, brackets automáticos, rankings por juego y comunidad interactiva.
 </p>
 

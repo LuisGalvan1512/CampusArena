@@ -117,7 +117,7 @@ export default function RankingPage() {
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[var(--bg-arena)] text-xs font-mono font-bold uppercase tracking-wider text-[#38BDF8] border border-[var(--border-card)]">
             <Trophy className="w-3.5 h-3.5 text-amber-400" />
-            <span>Medallero y Cuadro de Honor Oficial</span>
+            <span>Medallero y Cuadro de Honor</span>
           </div>
 
           <div className="space-y-2">
@@ -125,7 +125,7 @@ export default function RankingPage() {
               Ranking de Campeones.
             </h1>
             <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-              Clasificación de estudiantes de Tecsup medida exclusivamente por trofeos de torneos oficiales: 🥇 1° Lugar (Campeón), 🥈 2° Lugar (Subcampeón) y 🥉 3° Lugar.
+              Clasificación de estudiantes de Tecsup medida exclusivamente por trofeos de torneos de Tecsup: 🥇 1° Lugar (Campeón), 🥈 2° Lugar (Subcampeón) y 🥉 3° Lugar.
             </p>
           </div>
 
@@ -192,7 +192,7 @@ export default function RankingPage() {
                 Temporada Inaugural Campus Arena en Curso
               </p>
               <p className="text-[11px] sm:text-xs text-[var(--text-secondary)]">
-                Los trofeos de 1°, 2° y 3° puesto se otorgarán oficialmente al definirse las finales presenciales de los torneos activos de Tecsup.
+                Los trofeos de 1°, 2° y 3° puesto se otorgarán al definirse las finales presenciales de los torneos activos de Tecsup.
               </p>
             </div>
           )}
@@ -336,7 +336,7 @@ export default function RankingPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[var(--border-card)] pb-4">
               <div>
                 <h2 className="text-xl font-black text-[var(--text-primary)]">Tabla General de Competidores</h2>
-                <p className="text-xs text-[var(--text-secondary)]">Clasificación oficial por trofeos de torneos Tecsup</p>
+                <p className="text-xs text-[var(--text-secondary)]">Clasificación por trofeos de torneos Tecsup</p>
               </div>
 
               {/* Search filter */}

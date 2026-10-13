@@ -105,12 +105,12 @@ export default function HomePage() {
         id: `real-${t.id}`,
         title: t.name,
         category: gameInfo?.name || t.game_code,
-        description: t.description_short || `Torneo oficial en Sede ${t.campus_name || 'Lima'}. Compite y gana reconocimiento institucional.`,
+        description: t.description_short || `Torneo en Sede ${t.campus_name || 'Lima'}. Compite y gana reconocimiento estudiantil.`,
         imageUrl: t.banner_url || gameInfo?.bannerUrl || '/games/clash_royale_banner.jpg',
         accentColor: gameInfo?.color || '#E63946',
         badge: `Sede ${t.campus_name || 'Lima'}`,
         tag: t.format || (t.team_size && t.team_size > 1 ? `${t.team_size}v${t.team_size}` : '1v1'),
-        prize: t.prize_pool || 'Premio Oficial Tecsup',
+        prize: t.prize_pool || 'Premio Tecsup',
         linkHref: `/tournaments/${t.slug}`,
         linkText: getEffectiveStatus(t) === 'REGISTRATION_OPEN' ? 'Inscribirme' : 'Ver Detalles',
       };
@@ -150,7 +150,7 @@ export default function HomePage() {
 
             {/* Crisp Subtitle */}
             <p className="text-base sm:text-lg text-[var(--text-secondary)] leading-relaxed max-w-2xl font-normal">
-              La plataforma oficial de esports de Tecsup. Brackets automatizados, clasificaciones sin trampas con tu cuenta institucional y una Gran Final presencial en el campus de Tecsup.
+              La plataforma de esports para estudiantes de Tecsup. Brackets automatizados, clasificaciones sin trampas con tu cuenta institucional y una Gran Final presencial en el campus de Tecsup.
             </p>
 
             {/* Apple-Style Pill CTA Buttons */}
@@ -222,7 +222,7 @@ export default function HomePage() {
                   <div className="flex items-center gap-2">
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
                     <span className="text-[11px] font-black uppercase tracking-wider text-emerald-500">
-                      {getEffectiveStatus(featuredTournament) === 'REGISTRATION_OPEN' ? 'Inscripciones Abiertas' : 'Torneo Oficial Activo'}
+                      {getEffectiveStatus(featuredTournament) === 'REGISTRATION_OPEN' ? 'Inscripciones Abiertas' : 'Torneo Activo'}
                     </span>
                   </div>
                   <span className="text-[10px] font-mono font-bold text-[var(--text-muted)] uppercase">
@@ -261,7 +261,7 @@ export default function HomePage() {
                   {/* Prize Badge */}
                   <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs">
                     <span className="font-bold text-amber-300 bg-black/85 px-3 py-1 rounded-lg border border-amber-400/25 backdrop-blur-md shadow-md">
-                      Premio: {featuredTournament.prize_pool || 'Premio Oficial Tecsup'}
+                      Premio: {featuredTournament.prize_pool || 'Premio Tecsup'}
                     </span>
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function HomePage() {
                   {/* Live Capacity Fill Bar */}
                   <div className="space-y-1.5 text-xs pt-1">
                     <div className="flex items-center justify-between text-[11px] text-[var(--text-muted)]">
-                      <span>Cupos Oficiales</span>
+                      <span>Cupos del Torneo</span>
                       <span className="font-mono font-bold text-[var(--text-primary)]">
                         {featuredTournament.current_participants || 0} / {featuredTournament.max_slots || 16} {featuredTournament.team_size && featuredTournament.team_size > 1 ? 'Equipos' : 'Jugadores'}
                       </span>
@@ -328,7 +328,7 @@ export default function HomePage() {
 
                 <div className="space-y-2">
                   <h3 className="text-2xl font-black text-[var(--text-primary)]">
-                    Próximas Copas Oficiales en Preparación
+                    Próximas Copas en Preparación
                   </h3>
                   <p className="text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed">
                     Los organizadores y centros de estudiantes están configurando los brackets de la temporada. Explora las 7 disciplinas y prepara tu escuadra.
@@ -371,7 +371,7 @@ export default function HomePage() {
             Descubre las 7 disciplinas.
           </h2>
           <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
-            De los duelos tácticos móviles a los títulos de estrategia por equipos. Selecciona un juego para conocer su escenario de copa oficial en Tecsup.
+            De los duelos tácticos móviles a los títulos de estrategia por equipos. Selecciona un juego para conocer su escenario de competición en Tecsup.
           </p>
         </div>
 
@@ -445,7 +445,7 @@ export default function HomePage() {
                   <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Modalidad Tecsup</p>
                   <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5 mt-1">
                     <Gamepad2 className="w-3.5 h-3.5 text-[#38BDF8]" />
-                    <span>Torneo Universitario</span>
+                    <span>Torneo de Tecsup</span>
                   </p>
                 </div>
 
@@ -495,7 +495,7 @@ export default function HomePage() {
                   <span>{activeGame.shortName} • Circuito Tecsup</span>
                 </span>
                 <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/20 px-2.5 py-1 rounded-lg border border-emerald-500/30">
-                  ● En Rotación Oficial
+                  ● En Rotación
                 </span>
               </div>
             </div>
@@ -512,7 +512,7 @@ export default function HomePage() {
           <AppleMediaCarousel
             items={carouselItems}
             headline="Descubre los torneos activos."
-            subheadline="Desliza para explorar los torneos oficiales registrados en esta temporada."
+            subheadline="Desliza para explorar los torneos registrados en esta temporada."
           />
         </section>
       )}
@@ -545,7 +545,7 @@ export default function HomePage() {
                 Juego limpio garantizado con tu correo @tecsup.edu.pe
               </h3>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
-                Evitamos el smurfing y las inscripciones fantasma. Solo estudiantes y docentes verificados con credenciales institucionales pueden crear equipos, registrar planteles y competir por medallas oficiales.
+                Evitamos el smurfing y las inscripciones fantasma. Solo estudiantes y docentes verificados con credenciales institucionales pueden crear equipos, registrar planteles y competir por el podio y medallas.
               </p>
             </div>
 
@@ -609,7 +609,7 @@ export default function HomePage() {
 
             <div className="p-4 bg-[var(--bg-arena)] rounded-2xl border border-[var(--border-card)] flex items-center justify-between">
               <div>
-                <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Registro Oficial</span>
+                <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase">Registro</span>
                 <span className="text-xs font-bold text-[var(--text-primary)] block">Medallas Verificadas</span>
               </div>
               <span className="text-2xl">🥇</span>
@@ -623,7 +623,7 @@ export default function HomePage() {
                 <Tv className="w-6 h-6" />
               </div>
               <h3 className="text-2xl sm:text-3xl font-black text-[var(--text-primary)] tracking-tight">
-                Brackets sincronizados en tiempo real y transmisión oficial
+                Brackets sincronizados en tiempo real y transmisión en vivo
               </h3>
               <p className="text-sm text-[var(--text-secondary)] leading-relaxed max-w-xl">
                 Avanza en llaves de eliminación directa con generación automatizada de enfrentamientos, asignación de árbitros y casters estudiantiles transmitiendo las partidas clave.

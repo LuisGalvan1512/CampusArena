@@ -58,7 +58,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagLabel: 'Player Tag',
     tagPlaceholder: '#8YRP92VJ',
     description: 'Torneo 1vs1 al mejor de 3 (BO3) en la arena de Tecsup. Clasificación por llaves de eliminación directa.',
-    badge: '1 vs 1 Oficial',
+    badge: '1 vs 1',
   },
   BRAWL_STARS: {
     code: 'BRAWL_STARS',
@@ -160,7 +160,7 @@ export const GAME_CATALOG: Record<GameCode, GameDefinition> = {
     tagLabel: 'Steam ID / Nickname',
     tagPlaceholder: 'Ej: Arteezy / 76561197960287930',
     description: 'Torneos clásicos 5vs5 en modo Capitán. Únete con tu equipo y representa a tu sede.',
-    badge: '5 vs 5 Oficial',
+    badge: '5 vs 5',
   },
   FORTNITE: {
     code: 'FORTNITE',
