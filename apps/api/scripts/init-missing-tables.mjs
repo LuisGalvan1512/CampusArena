@@ -90,6 +90,63 @@ async function init() {
     `);
     console.log('✓ comments columns verified.');
 
+    // 6. Ensure community media_url is TEXT
+    console.log('Ensuring community media_url is TEXT...');
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE community.community_posts ALTER COLUMN media_url TYPE TEXT;
+    `);
+    await prisma.$executeRawUnsafe(`
+      ALTER TABLE community.community_comments ALTER COLUMN media_url TYPE TEXT;
+    `);
+    console.log('✓ community media_url verified as TEXT.');
+
+    // 7. Ensure Supabase Storage buckets & policies
+    console.log('Ensuring Supabase storage buckets & policies...');
+    await prisma.$executeRawUnsafe(`
+      INSERT INTO storage.buckets (id, name, public, file_size_limit)
+      VALUES 
+        ('community', 'community', true, 10485760),
+        ('vouchers', 'vouchers', true, 10485760),
+        ('signatures', 'signatures', true, 10485760)
+      ON CONFLICT (id) DO UPDATE SET public = true, allowed_mime_types = NULL;
+    `);
+
+    await prisma.$executeRawUnsafe(`
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'buckets' AND policyname = 'Public Access to Buckets'
+        ) THEN
+          CREATE POLICY "Public Access to Buckets" ON storage.buckets FOR SELECT USING (true);
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Public Read Objects'
+        ) THEN
+          CREATE POLICY "Public Read Objects" ON storage.objects FOR SELECT USING (bucket_id IN ('community', 'vouchers', 'signatures'));
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Public Insert Objects'
+        ) THEN
+          CREATE POLICY "Public Insert Objects" ON storage.objects FOR INSERT WITH CHECK (bucket_id IN ('community', 'vouchers', 'signatures'));
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Public Update Objects'
+        ) THEN
+          CREATE POLICY "Public Update Objects" ON storage.objects FOR UPDATE USING (bucket_id IN ('community', 'vouchers', 'signatures'));
+        END IF;
+
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_policies WHERE schemaname = 'storage' AND tablename = 'objects' AND policyname = 'Public Delete Objects'
+        ) THEN
+          CREATE POLICY "Public Delete Objects" ON storage.objects FOR DELETE USING (bucket_id IN ('community', 'vouchers', 'signatures'));
+        END IF;
+      END $$;
+    `);
+    console.log('✓ Supabase storage buckets & policies verified.');
+
     console.log('\n--- ALL TABLES AND COLUMNS READY ---');
   } catch (err) {
     console.error('Failed to initialize tables:', err);

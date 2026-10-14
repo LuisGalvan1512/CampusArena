@@ -291,7 +291,10 @@ export default function CommunityPage() {
         toast.success('¡Publicación creada exitosamente!');
         fetchPosts(1, false);
       } else {
-        toast.error(res.error?.message || 'Error al publicar.');
+        const errorMsg = Array.isArray(res.error?.details)
+          ? res.error.details.join('. ')
+          : (res.error?.message || 'Error al publicar.');
+        toast.error(errorMsg);
       }
     } catch (err: any) {
       toast.error(err.message || 'Error de conexión');
@@ -410,7 +413,10 @@ export default function CommunityPage() {
       setReplyingTo(null);
       toast.success('Comentario enviado');
     } else {
-      toast.error(res.error?.message || 'Error al enviar comentario');
+      const errorMsg = Array.isArray(res.error?.details)
+        ? res.error.details.join('. ')
+        : (res.error?.message || 'Error al enviar comentario');
+      toast.error(errorMsg);
     }
   };
 

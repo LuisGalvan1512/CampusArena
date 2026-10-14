@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsOptional, MaxLength, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsString, IsOptional, MaxLength } from 'class-validator';
 
 export class CreatePostDto {
   @IsNotEmpty()
@@ -16,6 +16,5 @@ export class CreatePostDto {
 
   @IsOptional()
   @IsString()
-  @IsUrl()
   media_url?: string;
 }

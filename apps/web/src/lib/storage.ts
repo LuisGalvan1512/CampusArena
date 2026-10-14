@@ -27,6 +27,7 @@ export async function uploadPaymentVoucher(
       .upload(filePath, uploadFile, {
         cacheControl: '3600',
         upsert: true,
+        contentType: uploadFile.type || 'image/webp',
       });
 
     if (!error && data) {
@@ -88,6 +89,7 @@ export async function uploadCommunityMedia(
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true,
+        contentType: file.type || 'image/png',
       });
 
     if (!error && data) {
@@ -231,6 +233,7 @@ export async function uploadSignatureMedia(
       .upload(filePath, uploadFile, {
         cacheControl: '86400',
         upsert: true,
+        contentType: uploadFile.type || 'image/webp',
       });
 
     if (!error && data) {

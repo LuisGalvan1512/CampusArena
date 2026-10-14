@@ -190,7 +190,7 @@ model Post {
   category    String         @db.VarChar(50)
   title       String         @db.VarChar(200)
   description String
-  media_url   String?        @db.VarChar(500)
+  media_url   String?
   created_at  DateTime       @default(now()) @db.Timestamp(6)
   updated_at  DateTime       @updatedAt @db.Timestamp(6)
   comments    Comment[]
@@ -208,7 +208,7 @@ model Comment {
   parent_id  String?           @db.Uuid
   content    String?
   created_at DateTime          @default(now()) @db.Timestamp(6)
-  media_url  String?           @db.VarChar(500)
+  media_url  String?
   post       Post              @relation(fields: [post_id], references: [id], onDelete: Cascade)
   user       User              @relation(fields: [user_id], references: [id], onDelete: Cascade)
   parent     Comment?          @relation("CommentReplies", fields: [parent_id], references: [id], onDelete: Cascade)
