@@ -45,7 +45,7 @@
 
 ## 🎮 Descripción del Proyecto
 
-**Campus Arena** es la plataforma web oficial para la gestión integral de torneos de eSports presenciales y online dentro de **Tecsup (Sede Lima)**. Permite a los estudiantes:
+**Campus Arena** es la plataforma web para la gestión integral de torneos de eSports presenciales y online para la comunidad de **Tecsup (Sede Lima)**. Permite a los estudiantes:
 
 - 🏆 **Inscribirse en torneos** de juegos como Clash Royale, Brawl Stars, Smash Bros, L4D2, eFootball y Dota 2.
 - 🎯 **Vincular perfiles y tags de juego** con validación y confirmación automática.
@@ -53,7 +53,7 @@
 - 📺 **Modo Escenario / OBS Studio**: Vista de llaves en pantalla completa con ajuste al 100% sin scroll, tarjetas compactas de alta visibilidad (~46px) y conectores láser interactivos.
 - 🥇 **Ranking institucional** por juego con estadísticas y podio de honor en tiempo real.
 - 💬 **Comunidad tipo foro** con publicaciones, reacciones, menciones y comentarios.
-- 🔐 **Autenticación institucional** con correos oficiales `@tecsup.edu.pe` protegida con Argon2id y JWT.
+- 🔐 **Autenticación institucional** con correos `@tecsup.edu.pe` protegida con Argon2id y JWT.
 
 ---
 
@@ -65,7 +65,7 @@
 ![Modo Escenario OBS](docs/assets/obs_bracket_stage.png)
 
 ### 🏟️ 2. Ficha Técnica del Torneo, Marcador en Vivo & Registro
-> *Countdown dinámico, información del pozo de premios, reglamento oficial de competición y vista en vivo de llaves y participantes.*
+> *Countdown dinámico, información del pozo de premios, reglamento de competición y vista en vivo de llaves y participantes.*
 
 ![Detalle del Torneo](docs/assets/tournament_detail.png)
 
@@ -88,7 +88,7 @@
 | ✨ Transiciones de Página Fluidas & Carrusel Interactivo | ✅ Funcional | 100% |
 | 🏆 CRUD de Torneos (Admin / Organizador) | ✅ Funcional | 100% |
 | 📋 Inscripción a Torneos (Individual y Equipos con Roster) | ✅ Funcional | 100% |
-| 🗡️ Generación de Brackets (Sorteo Aleatorio Oficial & Arbitraje) | ✅ Funcional | 100% |
+| 🗡️ Generación de Brackets (Sorteo Aleatorio & Arbitraje) | ✅ Funcional | 100% |
 | 📺 Modo Escenario / OBS Studio (Zero-Scroll & Compact Cards) | ✅ Funcional | 100% |
 | 📊 Ranking Institucional y Medallero de Honor | ✅ Funcional | 100% |
 | 💬 Comunidad / Foro de Estudiantes | ✅ Funcional | 100% |
@@ -96,7 +96,7 @@
 | 👑 Panel de Administración, Moderación y Sanciones | ✅ Funcional | 100% |
 | 🎓 Onboarding de Nuevos Estudiantes | ✅ Funcional | 100% |
 | 📡 Centro de Notificaciones In-App (con Borrado y Vaciado) | ✅ Funcional | 100% |
-| 🎨 Sistema de Diseño, Dual Theme y Branding Oficial | ✅ Funcional | 100% |
+| 🎨 Sistema de Diseño, Dual Theme y Branding Tecsup | ✅ Funcional | 100% |
 | 🐳 Dockerización & Docker Compose | ✅ Funcional | 100% |
 | 🌐 Deploy a Producción (Opción A / Docker VPS) | ✅ Listo para Despliegue | 100% |
 

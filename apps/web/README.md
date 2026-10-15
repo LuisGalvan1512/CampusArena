@@ -1,6 +1,6 @@
 # 🏟️ Campus Arena — Frontend (Next.js 16)
 
-Frontend oficial de **Campus Arena — Tecsup**, desarrollado con **Next.js 16 (App Router)**, Turbopack, TailwindCSS y Framer Motion.
+Frontend de **Campus Arena — Tecsup**, desarrollado con **Next.js 16 (App Router)**, Turbopack, TailwindCSS y Framer Motion.
 
 ---
 

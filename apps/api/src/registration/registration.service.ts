@@ -114,13 +114,13 @@ export class RegistrationService {
       }
     }
 
-    // 3. Check for existing active registration (Rule: 1 active registration per competitor per tournament)
+    // 3. Check for existing active or previous registration (Rule: 1 active registration per competitor per tournament)
     const existingRegistration = await this.prisma.registration.findFirst({
       where: {
         tournament_id: tournamentId,
         competitor_id: userId,
         status: {
-          notIn: ['CANCELLED', 'REJECTED'],
+          notIn: ['CANCELLED'],
         },
         deleted_at: null,
       },
@@ -128,26 +128,43 @@ export class RegistrationService {
     });
 
     if (existingRegistration) {
-      // Si el competidor ya tiene una solicitud pendiente de pago, se retoma limpiamente en vez de bloquear con 409
-      if (existingRegistration.status === 'PENDING_PAYMENT' && existingRegistration.payment) {
-        if (dto.team_name || dto.roster_members) {
-          await this.prisma.registration.update({
-            where: { id: existingRegistration.id },
-            data: {
-              team_name: dto.team_name || existingRegistration.team_name,
-              roster_members: dto.roster_members ? dto.roster_members : existingRegistration.roster_members,
-            },
-          });
-        }
+      if (existingRegistration.status === 'CONFIRMED') {
+        throw new ConflictException('Ya cuentas con un cupo confirmado en este torneo.');
+      }
+      if (existingRegistration.status === 'PAYMENT_UNDER_REVIEW') {
+        throw new ConflictException('Tu comprobante de pago está actualmente en revisión por el organizador.');
+      }
+      // Si la inscripción está en PENDING_PAYMENT, REJECTED o CORRECTION_REQUIRED, se actualiza y reutiliza la misma fila
+      if (['PENDING_PAYMENT', 'REJECTED', 'CORRECTION_REQUIRED'].includes(existingRegistration.status) && existingRegistration.payment) {
+        await this.prisma.registration.update({
+          where: { id: existingRegistration.id },
+          data: {
+            team_name: dto.team_name || existingRegistration.team_name,
+            roster_members: dto.roster_members !== undefined ? dto.roster_members : existingRegistration.roster_members,
+            game_profile_id: gameProfile.id,
+            status: 'PENDING_PAYMENT',
+          },
+        });
+        await this.prisma.payment.update({
+          where: { id: existingRegistration.payment.id },
+          data: {
+            status: 'PENDING',
+            amount: tournament.cost,
+            currency: tournament.currency,
+            evidence_url: null,
+            operation_reference: null,
+            reviewed_at: null,
+          },
+        });
         return {
           registration_id: existingRegistration.id,
           payment_id: existingRegistration.payment.id,
           team_name: dto.team_name || existingRegistration.team_name,
-          status: existingRegistration.status,
+          status: 'PENDING_PAYMENT',
           is_free: false,
-          amount: Number(existingRegistration.payment.amount),
-          currency: existingRegistration.payment.currency,
-          message: 'Retomando solicitud de inscripción pendiente de pago.',
+          amount: Number(tournament.cost),
+          currency: tournament.currency,
+          message: 'Retomando solicitud de inscripción.',
         };
       }
 
@@ -160,6 +177,18 @@ export class RegistrationService {
     return this.prisma.$transaction(async (tx) => {
       // 0. Verify slot availability atomically inside transaction to prevent race conditions
       if (isFree) {
+        const alreadyConfirmed = await tx.registration.findFirst({
+          where: {
+            tournament_id: tournamentId,
+            competitor_id: userId,
+            status: 'CONFIRMED',
+            deleted_at: null,
+          },
+        });
+        if (alreadyConfirmed) {
+          throw new ConflictException('Ya cuentas con un cupo confirmado en este torneo.');
+        }
+
         const confirmedCount = await tx.registration.count({
           where: {
             tournament_id: tournamentId,
@@ -200,11 +229,18 @@ export class RegistrationService {
         },
       });
 
-      // If free, increment current participants
+      // If free, sync exact confirmed participants
       if (isFree) {
+        const totalConfirmed = await tx.registration.count({
+          where: {
+            tournament_id: tournamentId,
+            status: 'CONFIRMED',
+            deleted_at: null,
+          },
+        });
         await tx.tournament.update({
           where: { id: tournamentId },
-          data: { current_participants: { increment: 1 } },
+          data: { current_participants: totalConfirmed },
         });
       }
 
@@ -449,7 +485,17 @@ export class RegistrationService {
       orderBy: { confirmed_at: 'asc' },
     });
 
-    return registrations.map((r) => ({
+    // Deduplicar estrictamente por competidor (defensa en profundidad)
+    const seenCompetitors = new Set<string>();
+    const deduplicatedRegistrations = registrations.filter((r) => {
+      if (seenCompetitors.has(r.competitor.id)) {
+        return false;
+      }
+      seenCompetitors.add(r.competitor.id);
+      return true;
+    });
+
+    return deduplicatedRegistrations.map((r) => ({
       id: r.id,
       user_id: r.competitor.id,
       competitor_name: `${r.competitor.first_name} ${r.competitor.last_name}`,
@@ -497,6 +543,37 @@ export class RegistrationService {
     const { tournament } = registration;
 
     const result = await this.prisma.$transaction(async (tx) => {
+      // 0. Si ya está confirmada, evitar doble aprobación
+      if (registration.status === 'CONFIRMED') {
+        throw new BadRequestException('Esta inscripción ya se encuentra confirmada.');
+      }
+
+      // 0.1 Verificar si este competidor ya cuenta con otra inscripción confirmada en este torneo
+      const alreadyConfirmed = await tx.registration.findFirst({
+        where: {
+          tournament_id: tournament.id,
+          competitor_id: registration.competitor_id,
+          status: 'CONFIRMED',
+          id: { not: registration.id },
+          deleted_at: null,
+        },
+      });
+
+      if (alreadyConfirmed) {
+        // Cancelar de inmediato esta inscripción redundante y rechazar su pago
+        await tx.registration.update({
+          where: { id: registration.id },
+          data: { status: 'CANCELLED', cancelled_at: new Date() },
+        });
+        await tx.payment.update({
+          where: { id: paymentId },
+          data: { status: 'REJECTED' },
+        });
+        throw new ConflictException(
+          'El competidor o equipo ya cuenta con un cupo confirmado en este torneo. La solicitud duplicada ha sido cancelada.'
+        );
+      }
+
       // 1. Lock and count confirmed slots
       const confirmedCount = await tx.registration.count({
         where: {
@@ -528,13 +605,47 @@ export class RegistrationService {
         },
       });
 
-      // 4. Update Tournament current count if has direct slot
-      if (hasSlot) {
-        await tx.tournament.update({
-          where: { id: tournament.id },
-          data: { current_participants: { increment: 1 } },
-        });
-      }
+      // 3.1 Limpiar cualquier otra inscripción no confirmada de este competidor para este torneo
+      await tx.registration.updateMany({
+        where: {
+          tournament_id: tournament.id,
+          competitor_id: registration.competitor_id,
+          id: { not: registration.id },
+          status: { in: ['PENDING_PAYMENT', 'PAYMENT_UNDER_REVIEW', 'CORRECTION_REQUIRED', 'REJECTED'] },
+        },
+        data: {
+          status: 'CANCELLED',
+          cancelled_at: new Date(),
+        },
+      });
+
+      await tx.payment.updateMany({
+        where: {
+          registration: {
+            tournament_id: tournament.id,
+            competitor_id: registration.competitor_id,
+            id: { not: registration.id },
+          },
+          status: { in: ['PENDING', 'UNDER_REVIEW', 'CORRECTION_REQUIRED'] },
+        },
+        data: {
+          status: 'REJECTED',
+        },
+      });
+
+      // 4. Update Tournament current count exactly from confirmed registrations
+      const finalConfirmedCount = await tx.registration.count({
+        where: {
+          tournament_id: tournament.id,
+          status: 'CONFIRMED',
+          deleted_at: null,
+        },
+      });
+
+      await tx.tournament.update({
+        where: { id: tournament.id },
+        data: { current_participants: finalConfirmedCount },
+      });
 
       // 5. Create Review record
       await tx.paymentReview.create({

@@ -267,8 +267,15 @@ export default function TournamentDetailPage() {
       
       // Fetch participants list
       const partRes = await api.get(`/tournaments/${res.data.id}/participants`);
-      if (partRes.success && partRes.data) {
-        setParticipants(partRes.data);
+      if (partRes.success && Array.isArray(partRes.data)) {
+        const seen = new Set<string>();
+        const unique = partRes.data.filter((item: Participant) => {
+          const key = item.user_id || item.id;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+        setParticipants(unique);
       }
 
       // Fetch bracket

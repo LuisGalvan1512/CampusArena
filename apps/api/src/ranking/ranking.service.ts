@@ -177,6 +177,10 @@ export class RankingService {
           { status: 'PENDING', evidence_url: { not: null } },
           { status: 'CORRECTION_REQUIRED', evidence_url: { not: null } },
         ],
+        registration: {
+          deleted_at: null,
+          status: { notIn: ['CANCELLED', 'CONFIRMED'] },
+        },
       },
       include: {
         registration: {
