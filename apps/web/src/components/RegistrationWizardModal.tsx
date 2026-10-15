@@ -53,6 +53,9 @@ interface RegistrationWizardModalProps {
     format?: string;
   };
   onSuccess: () => void;
+  initialRegistrationId?: string;
+  initialStep?: 1 | 2 | 3 | 4;
+  rejectionObservation?: string;
 }
 
 export function RegistrationWizardModal({
@@ -60,6 +63,9 @@ export function RegistrationWizardModal({
   onClose,
   tournament,
   onSuccess,
+  initialRegistrationId,
+  initialStep,
+  rejectionObservation,
 }: RegistrationWizardModalProps) {
   const { user } = useAuth();
   
@@ -97,6 +103,18 @@ export function RegistrationWizardModal({
   const [registrationResult, setRegistrationResult] = useState<any>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (initialRegistrationId) {
+        setRegistrationResult({ registration_id: initialRegistrationId });
+        setStep(initialStep || 3);
+      } else {
+        setStep(1);
+        setRegistrationResult(null);
+      }
+    }
+  }, [isOpen, initialRegistrationId, initialStep]);
 
   // Load user's linked game profiles
   useEffect(() => {
@@ -691,6 +709,15 @@ export function RegistrationWizardModal({
         {/* STEP 3: PAYMENT & VOUCHER UPLOAD */}
         {step === 3 && (
           <div className="space-y-5 animate-in fade-in">
+            {rejectionObservation && (
+              <div className="p-3.5 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-rose-400" />
+                <div className="space-y-0.5">
+                  <p className="font-bold text-rose-300">Observación previa del organizador:</p>
+                  <p className="text-[11px] text-rose-200/90 leading-relaxed">{rejectionObservation}</p>
+                </div>
+              </div>
+            )}
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-[var(--text-primary)]">3. Pago y Comprobante</h4>
               <p className="text-xs text-[var(--text-secondary)]">

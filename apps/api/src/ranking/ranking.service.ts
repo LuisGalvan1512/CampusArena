@@ -172,7 +172,11 @@ export class RankingService {
   async getPendingPayments() {
     const payments = await this.prisma.payment.findMany({
       where: {
-        status: { in: ['UNDER_REVIEW', 'PENDING'] },
+        OR: [
+          { status: 'UNDER_REVIEW' },
+          { status: 'PENDING', evidence_url: { not: null } },
+          { status: 'CORRECTION_REQUIRED', evidence_url: { not: null } },
+        ],
       },
       include: {
         registration: {

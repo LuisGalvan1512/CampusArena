@@ -55,6 +55,7 @@ import {
   Clock, 
   CheckCircle2, 
   AlertCircle, 
+  XCircle, 
   Loader2, 
   Mail, 
   UserCheck, 
@@ -246,6 +247,7 @@ export default function TournamentDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [userRegistration, setUserRegistration] = useState<any>(null);
+  const [wizardInitialRegId, setWizardInitialRegId] = useState<string | null>(null);
   const [isBracketFullWidth, setIsBracketFullWidth] = useState(true);
 
   // Ticks every second near open/close so the registration button flips on time
@@ -286,11 +288,17 @@ export default function TournamentDetailPage() {
     if (!isAuthenticated) return;
     const res = await api.get('/registrations/me', { skipCache: true });
     if (res.success && Array.isArray(res.data)) {
-      const activeReg = res.data.find(
-        (r: any) =>
-          r.tournament_id === tournamentId &&
-          !['CANCELLED', 'REJECTED'].includes(r.status)
+      const regs = res.data.filter(
+        (r: any) => r.tournament_id === tournamentId && r.status !== 'CANCELLED'
       );
+      // Prioridad: CONFIRMED > PAYMENT_UNDER_REVIEW > PENDING_PAYMENT > CORRECTION_REQUIRED > REJECTED
+      const activeReg =
+        regs.find((r: any) => r.status === 'CONFIRMED') ||
+        regs.find((r: any) => r.status === 'PAYMENT_UNDER_REVIEW') ||
+        regs.find((r: any) => r.status === 'PENDING_PAYMENT') ||
+        regs.find((r: any) => r.status === 'CORRECTION_REQUIRED') ||
+        regs.find((r: any) => r.status === 'REJECTED');
+
       setUserRegistration(activeReg || null);
     } else {
       setUserRegistration(null);
@@ -392,6 +400,7 @@ export default function TournamentDetailPage() {
       router.push('/auth/login');
       return;
     }
+    setWizardInitialRegId(null);
     setIsWizardOpen(true);
   };
 
@@ -935,6 +944,8 @@ export default function TournamentDetailPage() {
                     : userRegistration.status === 'PENDING_PAYMENT'
                     ? 'bg-amber-500/10 border-amber-500/30'
                     : userRegistration.status === 'CORRECTION_REQUIRED'
+                    ? 'bg-amber-500/10 border-amber-500/30'
+                    : userRegistration.status === 'REJECTED'
                     ? 'bg-rose-500/10 border-rose-500/30'
                     : 'bg-indigo-500/10 border-indigo-500/30'
                 }`}>
@@ -950,9 +961,14 @@ export default function TournamentDetailPage() {
                         <span>Pago Pendiente de Comprobante</span>
                       </div>
                     ) : userRegistration.status === 'CORRECTION_REQUIRED' ? (
-                      <div className="flex items-center gap-2 text-rose-400">
+                      <div className="flex items-center gap-2 text-amber-300">
                         <AlertCircle className="w-4 h-4" />
-                        <span>Corrección de Comprobante Requerida</span>
+                        <span>Comprobante Observado por Organizador</span>
+                      </div>
+                    ) : userRegistration.status === 'REJECTED' ? (
+                      <div className="flex items-center gap-2 text-rose-400">
+                        <XCircle className="w-4 h-4" />
+                        <span>Comprobante Rechazado</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 text-indigo-400">
@@ -968,7 +984,9 @@ export default function TournamentDetailPage() {
                       : userRegistration.status === 'PENDING_PAYMENT'
                       ? 'Iniciaste el proceso de inscripción. Sube tu comprobante de pago o cancela la solicitud si prefieres recomenzar.'
                       : userRegistration.status === 'CORRECTION_REQUIRED'
-                      ? 'El organizador solicitó corregir tu comprobante. Revisa tus notificaciones o actualiza tu voucher.'
+                      ? (userRegistration.payment?.reviews?.[0]?.public_observation || 'El organizador solicitó corregir tu comprobante. Sube una captura más clara.')
+                      : userRegistration.status === 'REJECTED'
+                      ? (userRegistration.payment?.reviews?.[0]?.public_observation || 'Tu comprobante previo fue observado o rechazado. Puedes adjuntar un nuevo comprobante o cancelar para recomenzar.')
                       : 'Tu comprobante de pago está siendo verificado por el organizador.'}
                   </p>
 
@@ -980,7 +998,7 @@ export default function TournamentDetailPage() {
                       Ver en Mi Perfil &rarr;
                     </Link>
 
-                    {userRegistration.status === 'PENDING_PAYMENT' && (
+                    {['PENDING_PAYMENT', 'CORRECTION_REQUIRED', 'REJECTED'].includes(userRegistration.status) && (
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
@@ -988,14 +1006,21 @@ export default function TournamentDetailPage() {
                           onClick={() => handleCancelPendingRegistration(userRegistration.id)}
                           className="text-[11px] font-semibold text-[#8E92A4] hover:text-red-400 transition-colors cursor-pointer"
                         >
-                          {isCancellingPending ? 'Cancelando...' : 'Cancelar Solicitud'}
+                          {isCancellingPending ? 'Cancelando...' : 'Cancelar y Recomenzar'}
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIsWizardOpen(true)}
+                          onClick={() => {
+                            setWizardInitialRegId(userRegistration.id);
+                            setIsWizardOpen(true);
+                          }}
                           className="btn-primary py-1 px-3 text-[11px] font-bold cursor-pointer"
                         >
-                          Completar Pago
+                          {userRegistration.status === 'REJECTED'
+                            ? 'Reintentar Comprobante'
+                            : userRegistration.status === 'CORRECTION_REQUIRED'
+                            ? 'Corregir Voucher'
+                            : 'Completar Pago'}
                         </button>
                       </div>
                     )}
@@ -1127,7 +1152,13 @@ export default function TournamentDetailPage() {
       {/* Registration Wizard Modal */}
       <RegistrationWizardModal
         isOpen={isWizardOpen}
-        onClose={() => setIsWizardOpen(false)}
+        onClose={() => {
+          setIsWizardOpen(false);
+          setWizardInitialRegId(null);
+        }}
+        initialRegistrationId={wizardInitialRegId || undefined}
+        initialStep={wizardInitialRegId ? 3 : 1}
+        rejectionObservation={userRegistration?.payment?.reviews?.[0]?.public_observation || undefined}
         tournament={{
           id: tournament.id,
           name: tournament.name,

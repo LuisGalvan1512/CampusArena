@@ -124,9 +124,33 @@ export class RegistrationService {
         },
         deleted_at: null,
       },
+      include: { payment: true },
     });
 
     if (existingRegistration) {
+      // Si el competidor ya tiene una solicitud pendiente de pago, se retoma limpiamente en vez de bloquear con 409
+      if (existingRegistration.status === 'PENDING_PAYMENT' && existingRegistration.payment) {
+        if (dto.team_name || dto.roster_members) {
+          await this.prisma.registration.update({
+            where: { id: existingRegistration.id },
+            data: {
+              team_name: dto.team_name || existingRegistration.team_name,
+              roster_members: dto.roster_members ? dto.roster_members : existingRegistration.roster_members,
+            },
+          });
+        }
+        return {
+          registration_id: existingRegistration.id,
+          payment_id: existingRegistration.payment.id,
+          team_name: dto.team_name || existingRegistration.team_name,
+          status: existingRegistration.status,
+          is_free: false,
+          amount: Number(existingRegistration.payment.amount),
+          currency: existingRegistration.payment.currency,
+          message: 'Retomando solicitud de inscripción pendiente de pago.',
+        };
+      }
+
       throw new ConflictException('Ya posees una solicitud de inscripción activa para este torneo.');
     }
 
@@ -225,7 +249,7 @@ export class RegistrationService {
       throw new BadRequestException('No existe una obligación de pago asociada a esta inscripción.');
     }
 
-    if (['CONFIRMED', 'CANCELLED', 'REJECTED'].includes(registration.status)) {
+    if (['CONFIRMED', 'CANCELLED'].includes(registration.status)) {
       throw new BadRequestException(`No se puede subir comprobante en estado ${registration.status}.`);
     }
 
