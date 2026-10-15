@@ -7,6 +7,7 @@ import { Footer } from '@/components/Footer';
 import { PageTransition } from '@/components/PageTransition';
 import { CommandPaletteLazy } from '@/components/CommandPaletteLazy';
 import { Toaster } from 'sonner';
+import { Analytics } from '@vercel/analytics/next';
 
 export const metadata: Metadata = {
   title: 'Campus Arena — Plataforma de Esports para Estudiantes de Tecsup',
@@ -54,6 +55,7 @@ export default function RootLayout({
             </main>
             <Footer />
             <Toaster richColors position="bottom-right" closeButton theme="system" />
+            <Analytics />
           </AuthProvider>
         </ThemeProvider>
       </body>
