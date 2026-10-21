@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -96,15 +96,15 @@ export const BANNER_THEMES: Array<{
   bgClass: string;
   glowColor: string;
 }> = [
-  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesÃ­ & cian synthwave', tag: 'Neon', bgClass: 'banner-cyberpunk', glowColor: 'rgba(230, 57, 70, 0.35)' },
-  { id: 'sapphire', name: 'Zafiro Tecsup', desc: 'Resplandor azul cobalto y cian elÃ©ctrico', tag: 'Cobalt', bgClass: 'banner-sapphire', glowColor: 'rgba(37, 99, 235, 0.4)' },
+  { id: 'cyberpunk', name: 'Cyberpunk Neon', desc: 'Rejilla carmesí & cian synthwave', tag: 'Neon', bgClass: 'banner-cyberpunk', glowColor: 'rgba(230, 57, 70, 0.35)' },
+  { id: 'sapphire', name: 'Zafiro Tecsup', desc: 'Resplandor azul cobalto y cian eléctrico', tag: 'Cobalt', bgClass: 'banner-sapphire', glowColor: 'rgba(37, 99, 235, 0.4)' },
   { id: 'carbon', name: 'Midnight Carbon', desc: 'Malla stealth de fibra de carbono oscura', tag: 'Stealth', bgClass: 'banner-carbon', glowColor: 'rgba(148, 163, 184, 0.25)' },
-  { id: 'aurora', name: 'Aurora CÃ³smica', desc: 'Nebulosa esmeralda y cian etÃ©rea', tag: 'Cosmic', bgClass: 'banner-aurora', glowColor: 'rgba(16, 185, 129, 0.3)' },
-  { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeÃ³n', tag: 'Gold', bgClass: 'banner-gold', glowColor: 'rgba(245, 158, 11, 0.35)' },
+  { id: 'aurora', name: 'Aurora Cósmica', desc: 'Nebulosa esmeralda y cian etérea', tag: 'Cosmic', bgClass: 'banner-aurora', glowColor: 'rgba(16, 185, 129, 0.3)' },
+  { id: 'gold', name: '24K Championship', desc: 'Reflejos dorados de gran campeón', tag: 'Gold', bgClass: 'banner-gold', glowColor: 'rgba(245, 158, 11, 0.35)' },
   { id: 'obsidian', name: 'Titanio Obsidiana', desc: 'Acabado minimalista de cristal templado', tag: 'Titanium', bgClass: 'banner-obsidian', glowColor: 'rgba(59, 130, 246, 0.25)' },
-  { id: 'retro', name: 'Retro Synthwave 80s', desc: 'Atardecer neÃ³n y rejilla arcade retro', tag: 'Arcade', bgClass: 'banner-retro', glowColor: 'rgba(168, 85, 247, 0.3)' },
-  { id: 'matrix', name: 'Cyber Matrix', desc: 'Terminal tÃ¡ctica hacker verde fÃ³sforo', tag: 'Matrix', bgClass: 'banner-matrix', glowColor: 'rgba(16, 185, 129, 0.3)' },
-  { id: 'arena', name: 'Tecsup Arena', desc: 'Rojo carmesÃ­ y azul marino institucional', tag: 'Tecsup', bgClass: 'banner-arena', glowColor: 'rgba(230, 57, 70, 0.4)' },
+  { id: 'retro', name: 'Retro Synthwave 80s', desc: 'Atardecer neón y rejilla arcade retro', tag: 'Arcade', bgClass: 'banner-retro', glowColor: 'rgba(168, 85, 247, 0.3)' },
+  { id: 'matrix', name: 'Cyber Matrix', desc: 'Terminal táctica hacker verde fósforo', tag: 'Matrix', bgClass: 'banner-matrix', glowColor: 'rgba(16, 185, 129, 0.3)' },
+  { id: 'arena', name: 'Tecsup Arena', desc: 'Rojo carmesí y azul marino institucional', tag: 'Tecsup', bgClass: 'banner-arena', glowColor: 'rgba(230, 57, 70, 0.4)' },
 ];
 
 interface ProfileData {
@@ -329,7 +329,7 @@ export default function ProfilePage() {
           nickname: res.data.profile.nickname || '',
           campus: res.data.profile.campus || 'Lima',
           biography: res.data.profile.biography || '',
-          career: careerStr || 'DiseÃ±o y Desarrollo de Software',
+          career: careerStr || 'Diseño y Desarrollo de Software',
           cycle: rawCycle !== undefined && rawCycle !== null ? rawCycle : 1,
           avatar_url: res.data.profile.avatar_url || null,
         };
@@ -382,7 +382,7 @@ export default function ProfilePage() {
   };
 
   const handleDeleteSignature = async (sigId: string) => {
-    if (!confirm('Â¿Deseas eliminar esta dedicatoria de tu muro?')) return;
+    if (!confirm('¿Deseas eliminar esta dedicatoria de tu muro?')) return;
     try {
       const res = await api.delete(`/profile/signatures/${sigId}`);
       if (res.success) {
@@ -461,7 +461,7 @@ export default function ProfilePage() {
 
       sounds.playSuccess();
       fireCelebration();
-      toast.success('Â¡Carnet competitivo y personalizaciones guardadas con Ã©xito!');
+      toast.success('¡Carnet competitivo y personalizaciones guardadas con éxito!');
       setShowEditModal(false);
     } else {
       toast.error(res.error?.message || 'Error al guardar los cambios.');
@@ -475,7 +475,7 @@ export default function ProfilePage() {
     const url = `${window.location.origin}/profile/${user?.id}`;
     try {
       await navigator.clipboard.writeText(url);
-      toast.success('Â¡Enlace de tu perfil copiado al portapapeles!');
+      toast.success('¡Enlace de tu perfil copiado al portapapeles!');
     } catch {
       toast.info(`Comparte este enlace: ${url}`);
     }
@@ -492,12 +492,12 @@ export default function ProfilePage() {
     });
 
     if (res.success) {
-      toast.success('Â¡Tu apelaciÃ³n fue enviada y serÃ¡ revisada por el tribunal!');
+      toast.success('¡Tu apelación fue enviada y será revisada por el tribunal!');
       setAppealModalSanction(null);
       setAppealText('');
       loadFullProfile();
     } else {
-      toast.error(res.error?.message || 'Error al enviar la apelaciÃ³n.');
+      toast.error(res.error?.message || 'Error al enviar la apelación.');
     }
     setIsSubmittingAppeal(false);
   };
@@ -554,7 +554,7 @@ export default function ProfilePage() {
       });
     } else {
       if (currentPins.length >= 3) {
-        toast.info('Solo puedes fijar hasta 3 pines en tu carnet. Desmarca uno para aÃ±adir este.');
+        toast.info('Solo puedes fijar hasta 3 pines en tu carnet. Desmarca uno para añadir este.');
         return;
       }
       setEditCustomization({
@@ -577,7 +577,7 @@ export default function ProfilePage() {
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            Pago en RevisiÃ³n
+            Pago en Revisión
           </span>
         );
       case 'PENDING_PAYMENT':
@@ -591,14 +591,14 @@ export default function ProfilePage() {
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1">
             <AlertCircle className="w-3 h-3" />
-            CorrecciÃ³n Requerida
+            Corrección Requerida
           </span>
         );
       case 'REJECTED':
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 flex items-center gap-1">
             <X className="w-3 h-3" />
-            InscripciÃ³n Rechazada
+            Inscripción Rechazada
           </span>
         );
       case 'CANCELLED':
@@ -673,7 +673,7 @@ export default function ProfilePage() {
           <Link
             href={`/profile/${user.id}`}
             className="btn-secondary px-3.5 py-2.5 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shrink-0 text-[#A8DADC] hover:text-white"
-            title="Ver cÃ³mo observan tu perfil los demÃ¡s estudiantes y organizadores"
+            title="Ver cómo observan tu perfil los demás estudiantes y organizadores"
           >
             <Eye className="w-3.5 h-3.5 text-cyan-400" />
             <span className="hidden sm:inline">Vista Visitante</span>
@@ -741,15 +741,15 @@ export default function ProfilePage() {
                   {/* Academic Condition Pill */}
                   {academicRole === 'DOCENTE' ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex items-center gap-1">
-                      ðŸ‘¨â€ðŸ« Docente Tecsup
+                      👨‍🏫 Docente Tecsup
                     </span>
                   ) : academicRole === 'EGRESADO' ? (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30 flex items-center gap-1">
-                      ðŸŽ“ Egresado Tecsup
+                      🎓 Egresado Tecsup
                     </span>
                   ) : (
                     <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                      ðŸ“š {profile.cycle || 1}Â° Ciclo
+                      📚 {profile.cycle || 1}° Ciclo
                     </span>
                   )}
 
@@ -761,7 +761,7 @@ export default function ProfilePage() {
                 {/* Real Name & Academic Career */}
                 <p className="text-xs sm:text-sm font-semibold text-[#8E92A4] flex items-center gap-2 flex-wrap">
                   <span className="text-white">{capitalizeWords(`${user.first_name} ${user.last_name}`)}</span>
-                  <span>â€¢</span>
+                  <span>•</span>
                   <span>{profile.career || 'Tecsup Profesional'}</span>
                 </p>
 
@@ -769,7 +769,7 @@ export default function ProfilePage() {
                 <div className="flex items-center gap-3 pt-1 text-[11px] text-[#A8DADC] flex-wrap">
                   <span className="flex items-center gap-1 bg-black/30 px-2 py-0.5 rounded-md border border-white/5">
                     <Building2 className="w-3 h-3 text-[#E63946]" />
-                    Tecsup â€” Sede {profile.campus || 'Lima'}
+                    Tecsup — Sede {profile.campus || 'Lima'}
                   </span>
                   <span className="flex items-center gap-1 text-[#8E92A4] font-mono">
                     <Mail className="w-3 h-3 text-[#8E92A4]" />
@@ -787,7 +787,7 @@ export default function ProfilePage() {
                   data-no-sound
                   onClick={() => playCustomSoundbite(customization.soundbite)}
                   className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-cyan-300 hover:text-white transition-all cursor-pointer flex items-center gap-1.5 text-xs font-semibold shadow-sm"
-                  title="Reproducir audio tÃ¡ctil"
+                  title="Reproducir audio táctil"
                 >
                   <Volume2 className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
                   <span className="text-[11px] font-mono">Audio de Perfil</span>
@@ -836,13 +836,13 @@ export default function ProfilePage() {
             </div>
           ) : (
             <div className="p-3 rounded-xl bg-white/5 border border-dashed border-white/10 text-xs text-[#8E92A4] flex items-center justify-between">
-              <span>Â¿Tienes una historia o estilo de juego? AÃ±ade tu biografÃ­a competitiva.</span>
+              <span>¿Tienes una historia o estilo de juego? Añade tu biografía competitiva.</span>
               <button
                 type="button"
                 onClick={handleOpenEditModal}
                 className="text-[#E63946] hover:underline font-bold text-xs cursor-pointer ml-2 shrink-0"
               >
-                + AÃ±adir BiografÃ­a
+                + Añadir Biografía
               </button>
             </div>
           )}
@@ -866,7 +866,7 @@ export default function ProfilePage() {
 
             <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/20">
-                <span className="text-base">ðŸ¥‡</span>
+                <span className="text-base">🥇</span>
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Campeonatos</p>
@@ -878,7 +878,7 @@ export default function ProfilePage() {
 
             <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-slate-300/15 text-slate-300 flex items-center justify-center shrink-0 border border-slate-300/20">
-                <span className="text-base">ðŸ¥ˆ</span>
+                <span className="text-base">🥈</span>
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Platas</p>
@@ -890,7 +890,7 @@ export default function ProfilePage() {
 
             <div className="bg-black/40 backdrop-blur-md p-3 rounded-2xl border border-white/5 flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-amber-700/15 text-amber-500 flex items-center justify-center shrink-0 border border-amber-700/20">
-                <span className="text-base">ðŸ¥‰</span>
+                <span className="text-base">🥉</span>
               </div>
               <div>
                 <p className="text-[10px] font-mono text-[#8E92A4] uppercase">Bronces</p>
@@ -927,7 +927,7 @@ export default function ProfilePage() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-white text-sm">
-                        {isMute ? 'Cuenta Silenciada en la Comunidad' : isTempBan ? 'SuspensiÃ³n Competitiva Temporal' : 'SuspensiÃ³n de Cuenta'}
+                        {isMute ? 'Cuenta Silenciada en la Comunidad' : isTempBan ? 'Suspensión Competitiva Temporal' : 'Suspensión de Cuenta'}
                       </span>
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
                         {endStr}
@@ -938,7 +938,7 @@ export default function ProfilePage() {
                     </p>
                     {rejectedAppeal && (
                       <p className="text-[11px] text-red-400 pt-1">
-                        Tu apelaciÃ³n previa fue rechazada: "{rejectedAppeal.admin_response || 'SanciÃ³n confirmada'}"
+                        Tu apelación previa fue rechazada: "{rejectedAppeal.admin_response || 'Sanción confirmada'}"
                       </p>
                     )}
                   </div>
@@ -948,7 +948,7 @@ export default function ProfilePage() {
                   {pendingAppeal ? (
                     <span className="px-3 py-1.5 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold inline-flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5" />
-                      ApelaciÃ³n en RevisiÃ³n
+                      Apelación en Revisión
                     </span>
                   ) : (
                     <button
@@ -956,7 +956,7 @@ export default function ProfilePage() {
                       className="btn-primary py-2 px-4 text-xs font-bold bg-amber-500 hover:bg-amber-400 text-black flex items-center gap-1.5 cursor-pointer shadow-lg shadow-amber-500/20"
                     >
                       <Scale className="w-3.5 h-3.5" />
-                      Enviar ApelaciÃ³n
+                      Enviar Apelación
                     </button>
                   )}
                 </div>
@@ -1027,7 +1027,7 @@ export default function ProfilePage() {
               }`}
             >
               <GraduationCap className="w-4 h-4 text-[#457B9D]" />
-              <span>Ficha AcadÃ©mica</span>
+              <span>Ficha Académica</span>
               {activeTab === 'ACADEMIC' && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#457B9D] rounded-full" />
               )}
@@ -1076,7 +1076,7 @@ export default function ProfilePage() {
                 <div className="space-y-1.5 max-w-md mx-auto">
                   <h3 className="text-base font-black text-white">Sin torneos activos</h3>
                   <p className="text-xs text-[#8E92A4] leading-relaxed">
-                    AÃºn no te has inscrito a ningÃºn torneo de Campus Arena. Explora los torneos activos de Tecsup, asegura tu cupo y compite por premios y puntos en el ranking.
+                    Aún no te has inscrito a ningún torneo de Campus Arena. Explora los torneos activos de Tecsup, asegura tu cupo y compite por premios y puntos en el ranking.
                   </p>
                 </div>
                 <div className="pt-2">
@@ -1115,7 +1115,7 @@ export default function ProfilePage() {
                                   ? 'bg-slate-300/20 text-slate-200 border-slate-300/40'
                                   : 'bg-amber-700/20 text-amber-400 border-amber-700/40'
                               }`}>
-                                {earnedMedal.medal_type === 'GOLD' ? 'ðŸ¥‡ 1Â° Lugar' : earnedMedal.medal_type === 'SILVER' ? 'ðŸ¥ˆ 2Â° Lugar' : 'ðŸ¥‰ 3Â° Lugar'}
+                                {earnedMedal.medal_type === 'GOLD' ? '🥇 1° Lugar' : earnedMedal.medal_type === 'SILVER' ? '🥈 2° Lugar' : '🥉 3° Lugar'}
                               </span>
                             )}
                             {getRegistrationBadge(reg.status)}
@@ -1176,14 +1176,14 @@ export default function ProfilePage() {
             {medals.length === 0 ? (
               <div className="p-10 text-center bg-[#111520] rounded-3xl border border-white/10 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mx-auto text-3xl shadow-inner">
-                  ðŸ…
+                  🏅
                 </div>
                 <div className="space-y-1.5 max-w-md mx-auto">
                   <h3 className="text-base font-black text-white">
-                    Sin medallas de podio aÃºn
+                    Sin medallas de podio aún
                   </h3>
                   <p className="text-xs text-[#8E92A4] leading-relaxed">
-                    Las medallas de <strong>Oro (1Â° Lugar)</strong>, <strong>Plata (2Â° Lugar)</strong> y <strong>Bronce (3Â° Lugar)</strong> se forjan automÃ¡ticamente en tu carnet de competidor al concluir los torneos segÃºn tu posiciÃ³n en el bracket.
+                    Las medallas de <strong>Oro (1° Lugar)</strong>, <strong>Plata (2° Lugar)</strong> y <strong>Bronce (3° Lugar)</strong> se forjan automáticamente en tu carnet de competidor al concluir los torneos según tu posición en el bracket.
                   </p>
                 </div>
                 <div className="pt-2">
@@ -1254,7 +1254,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        {/* TAB 3: FICHA ACADÃ‰MICA TECSUP */}
+        {/* TAB 3: FICHA ACADÉMICA TECSUP */}
         {activeTab === 'ACADEMIC' && (
           <div className="bg-[#111520] p-6 sm:p-8 rounded-3xl border border-white/10 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -1286,14 +1286,14 @@ export default function ProfilePage() {
                 <p className="text-[10px] font-mono uppercase text-[#8E92A4]">Sede</p>
                 <p className="text-sm font-black text-white flex items-center gap-1.5">
                   <Building2 className="w-3.5 h-3.5 text-[#E63946]" />
-                  <span>Tecsup â€” Sede {profile.campus || 'Lima'}</span>
+                  <span>Tecsup — Sede {profile.campus || 'Lima'}</span>
                 </p>
               </div>
 
               <div className="p-4 rounded-2xl bg-[#0A0D14] border border-white/5 space-y-1">
-                <p className="text-[10px] font-mono uppercase text-[#8E92A4]">CondiciÃ³n en Tecsup</p>
+                <p className="text-[10px] font-mono uppercase text-[#8E92A4]">Condición en Tecsup</p>
                 <p className="text-sm font-black text-white">
-                  {academicRole === 'DOCENTE' ? 'ðŸ‘¨â€ðŸ« Docente' : academicRole === 'EGRESADO' ? 'ðŸŽ“ Egresado' : `ðŸ“š Estudiante (${profile.cycle || 1}Â° Ciclo)`}
+                  {academicRole === 'DOCENTE' ? '👨‍🏫 Docente' : academicRole === 'EGRESADO' ? '🎓 Egresado' : `📚 Estudiante (${profile.cycle || 1}° Ciclo)`}
                 </p>
               </div>
 
@@ -1332,7 +1332,7 @@ export default function ProfilePage() {
                   Muro de Firmas y Dedicatorias
                 </h3>
                 <p className="text-xs text-[#8E92A4]">
-                  Visualiza los mensajes de honor dejados por tus compaÃ±eros y rivales en tu perfil pÃºblico.
+                  Visualiza los mensajes de honor dejados por tus compañeros y rivales en tu perfil público.
                 </p>
               </div>
 
@@ -1344,7 +1344,7 @@ export default function ProfilePage() {
                       const shareUrl = `${window.location.origin}/profile/${user.id}`;
                       navigator.clipboard.writeText(shareUrl);
                       sounds.playSynthesizerBlip();
-                      toast.success('Â¡Enlace de tu carnet pÃºblico copiado al portapapeles!');
+                      toast.success('¡Enlace de tu carnet público copiado al portapapeles!');
                     }}
                     className="btn-secondary px-3.5 py-2 text-xs flex items-center gap-1.5 cursor-pointer hover:border-pink-500/40"
                     title="Copiar enlace para compartir tu muro con amigos"
@@ -1358,7 +1358,7 @@ export default function ProfilePage() {
                     title="Ver tu carnet tal como lo ven los visitantes"
                   >
                     <Eye className="w-3.5 h-3.5" />
-                    <span>Vista PÃºblica</span>
+                    <span>Vista Pública</span>
                   </Link>
                 </div>
               )}
@@ -1372,14 +1372,14 @@ export default function ProfilePage() {
             ) : signatures.length === 0 ? (
               <div className="p-10 text-center bg-[#111520] rounded-3xl border border-white/10 space-y-4">
                 <div className="w-16 h-16 rounded-2xl bg-pink-500/10 border border-pink-500/20 text-pink-400 flex items-center justify-center mx-auto text-3xl shadow-inner">
-                  âœï¸
+                  ✍️
                 </div>
                 <div className="space-y-1.5 max-w-md mx-auto">
                   <h3 className="text-base font-black text-white">
-                    Tu muro aÃºn no tiene dedicatorias
+                    Tu muro aún no tiene dedicatorias
                   </h3>
                   <p className="text-xs text-[#8E92A4] leading-relaxed">
-                    Comparte tu carnet con tus compaÃ±eros de clase o compaÃ±eros de escuadra para que firmen tu muro y te dejen mensajes de honor.
+                    Comparte tu carnet con tus compañeros de clase o compañeros de escuadra para que firmen tu muro y te dejen mensajes de honor.
                   </p>
                 </div>
                 {user?.id && (
@@ -1390,7 +1390,7 @@ export default function ProfilePage() {
                         const shareUrl = `${window.location.origin}/profile/${user.id}`;
                         navigator.clipboard.writeText(shareUrl);
                         sounds.playSynthesizerBlip();
-                        toast.success('Â¡Enlace de tu perfil copiado!');
+                        toast.success('¡Enlace de tu perfil copiado!');
                       }}
                       className="btn-primary inline-flex items-center gap-2 py-2 px-5 text-xs font-bold shadow-lg shadow-[#E63946]/20 cursor-pointer"
                     >
@@ -1494,7 +1494,7 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* 4. MODAL DE PERSONALIZACIÃ“N PASO A PASO (LIMPIO, SIN TEXTO INNECESARIO) */}
+      {/* 4. MODAL DE PERSONALIZACIÓN PASO A PASO (LIMPIO, SIN TEXTO INNECESARIO) */}
       {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-3xl bg-[#111520] border border-white/10 rounded-3xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col">
@@ -1533,7 +1533,7 @@ export default function ProfilePage() {
               <div className="flex items-center justify-between mb-2">
                 <p className="text-[10px] font-mono uppercase tracking-wider text-cyan-400 flex items-center gap-1.5 font-bold">
                   <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                  <span>PrevisualizaciÃ³n en Vivo de tu Carnet</span>
+                  <span>Previsualización en Vivo de tu Carnet</span>
                 </p>
                 <span className="px-2 py-0.5 rounded-md bg-black/60 border border-white/10 text-white font-semibold text-[10px] font-mono">
                   {previewMaterialConfig.name}
@@ -1560,11 +1560,11 @@ export default function ProfilePage() {
                           className="text-base font-black truncate"
                         />
                         <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30">
-                          {editRole === 'ESTUDIANTE' ? `${editForm.cycle || 1}Â° Ciclo` : editRole}
+                          {editRole === 'ESTUDIANTE' ? `${editForm.cycle || 1}° Ciclo` : editRole}
                         </span>
                       </div>
                       <p className="text-[11px] text-[#CBD5E1] truncate">
-                        {capitalizeWords(`${user.first_name} ${user.last_name}`)} â€¢ Sede {editForm.campus || 'Lima'}
+                        {capitalizeWords(`${user.first_name} ${user.last_name}`)} • Sede {editForm.campus || 'Lima'}
                       </p>
                     </div>
                   </div>
@@ -1573,9 +1573,9 @@ export default function ProfilePage() {
                     <button
                       type="button"
                       data-no-sound
-                  onClick={() => playCustomSoundbite(editCustomization.soundbite)}
+                      onClick={() => playCustomSoundbite(editCustomization.soundbite)}
                       className="px-2.5 py-1 rounded-xl bg-white/10 hover:bg-cyan-500/20 text-cyan-300 text-[10px] font-mono flex items-center gap-1 shrink-0 cursor-pointer border border-white/10"
-                      title="Probar sonido rÃ¡pido"
+                      title="Probar sonido rápido"
                     >
                       <Volume2 className="w-3 h-3" />
                       <span>Probar</span>
@@ -1675,12 +1675,12 @@ export default function ProfilePage() {
               {editTab === 'WALLPAPER_CARD' && (
                 <div className="space-y-6 animate-in fade-in">
                   
-                  {/* 1. Fondo de la PÃ¡gina de Perfil */}
+                  {/* 1. Fondo de la Página de Perfil */}
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <label className="block text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                         <Palette className="w-3.5 h-3.5 text-cyan-400" />
-                        <span>Fondo de la PÃ¡gina de Perfil</span>
+                        <span>Fondo de la Página de Perfil</span>
                       </label>
                       <span className="text-[10px] font-mono text-[#8E92A4]">5 Fondos</span>
                     </div>
@@ -1706,7 +1706,7 @@ export default function ProfilePage() {
                               <span className="text-xs font-black text-white">{wp.name}</span>
                               {isSelected && (
                                 <span className="w-4 h-4 rounded-full bg-cyan-400 text-black flex items-center justify-center text-[10px] font-bold">
-                                  âœ“
+                                  ✓
                                 </span>
                               )}
                             </div>
@@ -1751,7 +1751,7 @@ export default function ProfilePage() {
                               <span className="text-xs font-black text-white">{mat.name}</span>
                               {isSelected && (
                                 <span className="w-4 h-4 rounded-full bg-[#38BDF8] text-black flex items-center justify-center text-[10px] font-bold">
-                                  âœ“
+                                  ✓
                                 </span>
                               )}
                             </div>
@@ -1847,7 +1847,7 @@ export default function ProfilePage() {
                         <Type className="w-3.5 h-3.5 text-purple-400" />
                         <span>Tipo de Letra del Nombre (Fuente)</span>
                       </label>
-                      <span className="text-[10px] font-mono text-[#8E92A4]">8 TipografÃ­as</span>
+                      <span className="text-[10px] font-mono text-[#8E92A4]">8 Tipografías</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -1876,7 +1876,7 @@ export default function ProfilePage() {
                             </div>
                             {isSelected && (
                               <span className="w-5 h-5 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-bold shrink-0">
-                                âœ“
+                                ✓
                               </span>
                             )}
                           </button>
@@ -1925,7 +1925,7 @@ export default function ProfilePage() {
                               {colorConfig.name}
                             </span>
                             {isSelected && (
-                              <span className="text-[10px] font-bold text-emerald-400">âœ“</span>
+                              <span className="text-[10px] font-bold text-emerald-400">✓</span>
                             )}
                           </button>
                         );
@@ -1962,7 +1962,7 @@ export default function ProfilePage() {
                             )}
                           </p>
                           <p className="text-[11px] text-[#8E92A4]">
-                            Elige cualquier tono exacto. Se reflejarÃ¡ con brillo neÃ³n en tu perfil, podios y foros.
+                            Elige cualquier tono exacto. Se reflejará con brillo neón en tu perfil, podios y foros.
                           </p>
                         </div>
                       </div>
@@ -2003,7 +2003,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* 3. SelecciÃ³n de Avatar o Imagen */}
+                  {/* 3. Selección de Avatar o Imagen */}
                   <div className="space-y-3 pt-4 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
                       Avatar de la Plataforma o Imagen
@@ -2107,14 +2107,14 @@ export default function ProfilePage() {
                               <p className={`text-xs font-bold truncate ${isSelected ? 'text-white' : 'text-[#CBD5E1]'}`}>
                                 {game.name}
                               </p>
-                              <p className="text-[10px] text-[#8E92A4]">{game.badge} â€¢ {game.shortName}</p>
+                              <p className="text-[10px] text-[#8E92A4]">{game.badge} • {game.shortName}</p>
                             </div>
                           </div>
 
                           <div className={`w-5 h-5 rounded-lg flex items-center justify-center text-xs shrink-0 border ${
                             isSelected ? 'bg-[#E63946] border-[#E63946] text-white font-bold' : 'border-white/20 text-transparent'
                           }`}>
-                            âœ“
+                            ✓
                           </div>
                         </button>
                       );
@@ -2130,7 +2130,7 @@ export default function ProfilePage() {
                   {/* Gamertag / Apodo */}
                   <div className="space-y-1.5">
                     <label className="block text-xs font-bold uppercase tracking-wider text-amber-400">
-                      ðŸŽ® Gamertag / Apodo Competitivo
+                      🎮 Gamertag / Apodo Competitivo
                     </label>
                     <input
                       type="text"
@@ -2142,16 +2142,16 @@ export default function ProfilePage() {
                     />
                   </div>
 
-                  {/* Audio de Entrada RÃ¡pido */}
+                  {/* Audio de Entrada Rápido */}
                   <div className="space-y-3 pt-3 border-t border-white/10">
                     <div className="flex items-center justify-between">
                       <div>
                         <label className="block text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
                           <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
-                          <span>Audio de Entrada RÃ¡pido (Soundbite)</span>
+                          <span>Audio de Entrada Rápido (Soundbite)</span>
                         </label>
                         <p className="text-[11px] text-[#8E92A4]">
-                          Sonido sintetizado ultrarrÃ¡pido al entrar o presionar el botÃ³n de tu perfil
+                          Sonido sintetizado ultrarrápido al entrar o presionar el botón de tu perfil
                         </p>
                       </div>
                     </div>
@@ -2184,7 +2184,7 @@ export default function ProfilePage() {
                               <button
                                 type="button"
                                 data-no-sound
-                  onClick={() => playCustomSoundbite(snd.id)}
+                                onClick={() => playCustomSoundbite(snd.id)}
                                 className="px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/15 text-cyan-300 text-xs font-mono flex items-center gap-1 shrink-0 border border-white/10 cursor-pointer"
                                 title="Reproducir sonido de prueba"
                               >
@@ -2198,10 +2198,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* BiografÃ­a */}
+                  {/* Biografía */}
                   <div className="space-y-1.5 pt-3 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      âœï¸ BiografÃ­a
+                      ✍️ Biografía
                     </label>
                     <textarea
                       value={editForm.biography || ''}
@@ -2216,13 +2216,13 @@ export default function ProfilePage() {
                   {/* Sede Institucional */}
                   <div className="space-y-2 pt-3 border-t border-white/10">
                     <label className="block text-xs font-bold uppercase tracking-wider text-white">
-                      ðŸ“ Sede Institucional Tecsup
+                      📍 Sede Institucional Tecsup
                     </label>
                     <div className="grid grid-cols-3 gap-2">
                       {[
-                        { id: 'Lima', name: 'Lima', flag: 'ðŸ›ï¸' },
-                        { id: 'Arequipa', name: 'Arequipa', flag: 'ðŸŒ‹' },
-                        { id: 'Trujillo', name: 'Trujillo', flag: 'ðŸŒŠ' },
+                        { id: 'Lima', name: 'Lima', flag: '🏛️' },
+                        { id: 'Arequipa', name: 'Arequipa', flag: '🌋' },
+                        { id: 'Trujillo', name: 'Trujillo', flag: '🌊' },
                       ].map((c) => {
                         const isSelected = (editForm.campus || 'Lima') === c.id;
                         return (
@@ -2244,7 +2244,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  {/* CondiciÃ³n AcadÃ©mica */}
+                  {/* Condición Académica */}
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
                     <button
                       type="button"
@@ -2298,13 +2298,13 @@ export default function ProfilePage() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div className={editRole === 'ESTUDIANTE' ? 'sm:col-span-2 space-y-1' : 'sm:col-span-3 space-y-1'}>
                       <label className="block text-[11px] font-semibold text-[#8E92A4]">
-                        {editRole === 'DOCENTE' ? 'Ãrea Docente' : 'Carrera'}
+                        {editRole === 'DOCENTE' ? 'Área Docente' : 'Carrera'}
                       </label>
                       <input
                         type="text"
                         value={editForm.career || ''}
                         onChange={(e) => setEditForm({ ...editForm, career: e.target.value })}
-                        placeholder="Ej. DiseÃ±o y Desarrollo de Software"
+                        placeholder="Ej. Diseño y Desarrollo de Software"
                         className="input-arena w-full bg-[#0A0D14] border-white/10 text-xs"
                         required
                       />
@@ -2322,7 +2322,7 @@ export default function ProfilePage() {
                         >
                           {[1, 2, 3, 4, 5, 6].map((c) => (
                             <option key={c} value={c} className="bg-[#111520] text-white">
-                              {c}Â° Ciclo
+                              {c}° Ciclo
                             </option>
                           ))}
                         </select>
@@ -2381,9 +2381,9 @@ export default function ProfilePage() {
                   <Scale className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-white">Solicitud de ApelaciÃ³n Disciplinaria</h3>
+                  <h3 className="text-base font-bold text-white">Solicitud de Apelación Disciplinaria</h3>
                   <p className="text-xs text-[#8E92A4]">
-                    EnvÃ­a tu descargo para que el tribunal revise tu sanciÃ³n
+                    Envía tu descargo para que el tribunal revise tu sanción
                   </p>
                 </div>
               </div>
@@ -2397,7 +2397,7 @@ export default function ProfilePage() {
 
             <div className="bg-[#0A0D14] p-3.5 rounded-xl border border-white/10 text-xs space-y-1.5">
               <p className="text-[#8E92A4]">
-                <strong className="text-white">Tipo de sanciÃ³n:</strong> {appealModalSanction.type}
+                <strong className="text-white">Tipo de sanción:</strong> {appealModalSanction.type}
               </p>
               <p className="text-[#8E92A4]">
                 <strong className="text-white">Motivo aplicado:</strong> {appealModalSanction.reason}
@@ -2406,11 +2406,11 @@ export default function ProfilePage() {
 
             <form onSubmit={handleSubmitAppeal} className="space-y-4 text-xs">
               <div className="space-y-2">
-                <label className="font-bold text-white">Tu descargo y explicaciÃ³n de los hechos:</label>
+                <label className="font-bold text-white">Tu descargo y explicación de los hechos:</label>
                 <textarea
                   value={appealText}
                   onChange={(e) => setAppealText(e.target.value)}
-                  placeholder="Explica con respeto y detalle por quÃ© consideras que la sanciÃ³n debe ser revocada o reducida (mÃ­nimo 10 caracteres)..."
+                  placeholder="Explica con respeto y detalle por qué consideras que la sanción debe ser revocada o reducida (mínimo 10 caracteres)..."
                   rows={4}
                   required
                   minLength={10}
@@ -2432,7 +2432,7 @@ export default function ProfilePage() {
                   className="btn-primary px-5 py-2 flex items-center gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-bold disabled:opacity-50"
                 >
                   {isSubmittingAppeal ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                  Enviar ApelaciÃ³n al Tribunal
+                  Enviar Apelación al Tribunal
                 </button>
               </div>
             </form>
