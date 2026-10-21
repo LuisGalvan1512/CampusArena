@@ -9,6 +9,9 @@ import { sounds } from '@/lib/sound';
  * clicks any <button> or element with role="button".
  * Uses a pre-loaded <audio> pool so the sound plays with minimal latency.
  * No CSS or visual properties are touched — purely audio side-effect.
+ *
+ * To exclude a button from this global sound, add data-no-sound to it:
+ *   <button data-no-sound ...>
  */
 export function GlobalButtonSound() {
   const poolRef = useRef<HTMLAudioElement[]>([]);
@@ -31,10 +34,14 @@ export function GlobalButtonSound() {
       if (sounds.isMuted()) return;
       const target = e.target as Element | null;
       if (!target) return;
+
       const clickable = target.closest(
         'button, [role="button"], [type="submit"], [type="reset"]'
       );
       if (!clickable) return;
+
+      // Skip buttons that handle their own sound (data-no-sound attribute)
+      if (clickable.hasAttribute('data-no-sound')) return;
 
       const idx = poolIndexRef.current % POOL_SIZE;
       poolIndexRef.current++;
