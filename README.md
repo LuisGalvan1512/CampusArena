@@ -752,9 +752,9 @@ pnpm run build
 | Nombre | Rol | Contacto |
 |---|---|---|
 | Luis Galvan | Desarrollador Principal / Admin | luis.galvan@tecsup.edu.pe |
-| jru-dev  | Filantropo y playboy  | privado |
+| jru-dev  | Filantropo y playboy  | vidal.azanero@tecsup.edu.pe |
 | debiy | bailarin | deyby.gonzales@tecsup.edu.pe |
-| jose | cosplay | emmanuel.flores@tecsup.edu.pe |
+| jose | cosplay | emanuel.flores@tecsup.edu.pe |
 
 
 ---
