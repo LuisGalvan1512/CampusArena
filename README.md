@@ -752,12 +752,8 @@ pnpm run build
 | Nombre | Rol | Contacto |
 |---|---|---|
 | Luis Galvan | Desarrollador Principal / Admin | luis.galvan@tecsup.edu.pe |
-| jru-dev  | Filantropo y playboy  | vidal.azanero@tecsup.edu.pe |
-| debiy | bailarin | deyby.gonzales@tecsup.edu.pe |
-| jose | cosplay | emanuel.flores@tecsup.edu.pe |
+| Samir Alfonso  | arquitecto en la nube (aws/azure)  | samir.alfonso@tecsup.edu.pe |
 
-
----
 
 <p align="center">
   <strong>🏟️ Campus Arena — Desarrollado para la comunidad de eSports de Tecsup.</strong><br/>
