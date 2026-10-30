@@ -12,15 +12,16 @@ import { useAuth } from '@/context/AuthContext';
 import { GAME_CATALOG, type GameCode } from '@/lib/games';
 import { getEffectiveStatus, formatCountdown, useNowTick } from '@/lib/registrationWindow';
 
-// Dynamic imports for code-splitting heavy modals and interactive bracket
 const BracketView = dynamic(
   () => import('@/components/BracketView').then((m) => m.BracketView),
   {
     ssr: false,
     loading: () => (
       <div className="flex items-center justify-center p-12 text-[var(--text-muted)] gap-3">
-        <div className="w-5 h-5 border-2 border-[#E63946] border-t-transparent rounded-full animate-spin" />
-        <span className="text-sm font-medium">Cargando llaves y bracket interactivo...</span>
+        <div className="w-5 h-5 border-2 border-[#D9232E] border-t-transparent rounded-full animate-spin" />
+        <span className="text-xs font-mono uppercase tracking-wider">
+          CARGANDO MOTOR DE LLAVES...
+        </span>
       </div>
     ),
   }
@@ -40,35 +41,38 @@ const DeleteTournamentModal = dynamic(
   () => import('@/components/DeleteTournamentModal').then((m) => m.DeleteTournamentModal),
   { ssr: false }
 );
+
 import { AnimatedCounter } from '@/components/AnimatedCounter';
-import { ScrollParallaxImage } from '@/components/ScrollParallaxImage';
-import { 
-  Trophy, 
-  Swords, 
-  Gamepad2, 
-  Calendar, 
-  MapPin, 
-  Users, 
-  ShieldCheck, 
-  FileText, 
-  ArrowLeft, 
-  Clock, 
-  CheckCircle2, 
-  AlertCircle, 
-  XCircle, 
-  Loader2, 
-  Mail, 
-  UserCheck, 
+import { LivingBanner } from '@/components/LivingBanner';
+import {
+  GameDisciplineEmblem,
+  LiveWaveformIcon,
+  AegisTrophyIcon,
+  BracketTreeIcon,
+  CommandConsoleIcon,
+} from '@/components/EsportsIcons';
+import {
+  Trophy,
+  Swords,
+  Calendar,
+  MapPin,
+  Users,
+  ShieldCheck,
+  FileText,
+  ArrowLeft,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
+  Loader2,
+  Mail,
+  UserCheck,
   GitBranch,
-  Flame,
   Crown,
-  Tv,
   ExternalLink,
   Edit3,
   Trash2,
-  Settings,
-  Sparkles,
-  X
+  X,
 } from 'lucide-react';
 
 interface TournamentDetail {
@@ -82,7 +86,14 @@ interface TournamentDetail {
   description_full: string;
   banner_url: string;
   rules_text: string;
-  status: 'DRAFT' | 'PUBLISHED' | 'REGISTRATION_OPEN' | 'REGISTRATION_CLOSED' | 'IN_PROGRESS' | 'FINISHED' | 'CANCELLED';
+  status:
+    | 'DRAFT'
+    | 'PUBLISHED'
+    | 'REGISTRATION_OPEN'
+    | 'REGISTRATION_CLOSED'
+    | 'IN_PROGRESS'
+    | 'FINISHED'
+    | 'CANCELLED';
   max_slots: number;
   min_slots: number;
   current_participants: number;
@@ -125,7 +136,13 @@ interface Participant {
 }
 
 function TournamentCountdown({ targetDate, status }: { targetDate: string; status: string }) {
-  const [timeLeft, setTimeLeft] = useState<{ days: number; hours: number; minutes: number; seconds: number; isPassed: boolean }>({
+  const [timeLeft, setTimeLeft] = useState<{
+    days: number;
+    hours: number;
+    minutes: number;
+    seconds: number;
+    isPassed: boolean;
+  }>({
     days: 0,
     hours: 0,
     minutes: 0,
@@ -147,7 +164,6 @@ function TournamentCountdown({ targetDate, status }: { targetDate: string; statu
       const days = Math.floor(diff / (1000 * 60 * 60 * 24));
       const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % 1000) / 1000);
 
       setTimeLeft({
         days,
@@ -165,12 +181,14 @@ function TournamentCountdown({ targetDate, status }: { targetDate: string; statu
 
   if (status === 'IN_PROGRESS') {
     return (
-      <div className="p-3.5 rounded-2xl bg-[#E63946]/10 border border-[#E63946]/30 flex items-center justify-between shadow-lg shadow-[#E63946]/10">
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-[#E63946] animate-ping" />
-          <span className="text-xs font-black uppercase tracking-wider text-[#E63946]">Partidas en Disputa</span>
+      <div className="p-4 rounded-sm bg-[#D9232E]/15 border border-[#D9232E]/40 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <LiveWaveformIcon className="w-4 h-3.5 text-[#D9232E]" />
+          <span className="text-xs font-mono font-bold uppercase tracking-[0.16em] text-[#F4F2ED]">
+            PARTIDAS EN DISPUTA
+          </span>
         </div>
-        <span className="text-[11px] font-mono font-bold text-white bg-[#E63946] px-2.5 py-0.5 rounded-md shadow-sm">
+        <span className="text-[10px] font-mono font-bold text-white bg-[#D9232E] px-2.5 py-0.5 rounded-sm uppercase">
           EN VIVO
         </span>
       </div>
@@ -179,49 +197,58 @@ function TournamentCountdown({ targetDate, status }: { targetDate: string; statu
 
   if (status === 'FINISHED') {
     return (
-      <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between">
+      <div className="p-4 rounded-sm bg-[#C5A059]/15 border border-[#C5A059]/40 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Crown className="w-4 h-4 text-amber-400" />
-          <span className="text-xs font-black uppercase tracking-wider text-amber-400">Torneo Concluido</span>
+          <Crown className="w-4 h-4 text-[#C5A059]" />
+          <span className="text-xs font-mono font-bold uppercase tracking-[0.16em] text-[#C5A059]">
+            TORNEO CONCLUIDO
+          </span>
         </div>
-        <span className="text-[11px] font-mono text-amber-300 font-semibold">Podio Definido</span>
+        <span className="text-[10px] font-mono text-[#C5A059] uppercase font-bold">
+          PODIO OFICIAL
+        </span>
       </div>
     );
   }
 
   if (timeLeft.isPassed) {
     return (
-      <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between">
+      <div className="p-4 rounded-sm bg-[var(--bg-arena)] border border-[var(--border-card)] flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-blue-400" />
-          <span className="text-xs font-bold text-blue-400">Comenzando en breve...</span>
+          <Clock className="w-4 h-4 text-[#C5A059]" />
+          <span className="text-xs font-mono font-bold uppercase text-[var(--text-primary)]">
+            CHECK-IN ACTIVO
+          </span>
         </div>
-        <span className="text-[10px] font-mono text-blue-300 font-bold">Check-in Activo</span>
+        <span className="text-[10px] font-mono text-[#C5A059] font-bold uppercase">EN BREVE</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-2 p-3.5 rounded-2xl bg-black/40 border border-white/10 backdrop-blur-md shadow-inner">
-      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-[var(--text-muted)]">
-        <span className="flex items-center gap-1.5 text-[#E63946] font-bold">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#E63946] animate-pulse" />
-          Cuenta Regresiva
+    <div className="space-y-3 p-4 rounded-sm bg-[var(--bg-arena)] border border-[var(--border-card)]">
+      <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-[0.18em] text-[var(--text-muted)]">
+        <span className="flex items-center gap-1.5 text-[#D9232E] font-bold">
+          <span className="w-1.5 h-1.5 bg-[#D9232E] animate-pulse" />
+          CUENTA REGRESIVA
         </span>
-        <span className="text-[var(--text-secondary)]">Hora de Apertura</span>
+        <span>APERTURA DE ARENA</span>
       </div>
-      <div className="grid grid-cols-4 gap-1.5 text-center">
+      <div className="grid grid-cols-4 gap-2 text-center">
         {[
           { label: 'DÍAS', val: timeLeft.days },
-          { label: 'HORAS', val: timeLeft.hours },
+          { label: 'HRS', val: timeLeft.hours },
           { label: 'MIN', val: timeLeft.minutes },
           { label: 'SEG', val: timeLeft.seconds },
         ].map((unit, idx) => (
-          <div key={idx} className="bg-white/5 rounded-xl py-2 border border-white/5 shadow-sm">
-            <span className="text-base font-black font-mono text-white block leading-none tracking-tight">
+          <div
+            key={idx}
+            className="bg-[var(--bg-card)] rounded-sm py-2.5 border border-[var(--border-card)]"
+          >
+            <span className="text-lg font-display font-bold text-[var(--text-primary)] block leading-none tabular-nums">
               {String(unit.val).padStart(2, '0')}
             </span>
-            <span className="text-[8px] font-mono font-bold text-[var(--text-muted)] block mt-1 tracking-wider">
+            <span className="text-[8px] font-mono font-bold text-[var(--text-muted)] block mt-1 tracking-[0.16em]">
               {unit.label}
             </span>
           </div>
@@ -235,14 +262,18 @@ export default function TournamentDetailPage() {
   const { slug } = useParams();
   const router = useRouter();
   const { user, isAuthenticated, isAdmin, isOrganizer } = useAuth();
-  const canManage = isAuthenticated && (isAdmin || isOrganizer || user?.role === 'ADMIN' || user?.role === 'ORGANIZER');
+  const canManage =
+    isAuthenticated &&
+    (isAdmin || isOrganizer || user?.role === 'ADMIN' || user?.role === 'ORGANIZER');
 
   const [tournament, setTournament] = useState<TournamentDetail | null>(null);
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [selectedTeamRoster, setSelectedTeamRoster] = useState<Participant | null>(null);
   const [bracket, setBracket] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'info' | 'rules' | 'prizes' | 'participants' | 'brackets'>('info');
+  const [activeTab, setActiveTab] = useState<
+    'info' | 'rules' | 'prizes' | 'participants' | 'brackets'
+  >('info');
   const [isWizardOpen, setIsWizardOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -250,44 +281,43 @@ export default function TournamentDetailPage() {
   const [wizardInitialRegId, setWizardInitialRegId] = useState<string | null>(null);
   const [isBracketFullWidth, setIsBracketFullWidth] = useState(true);
 
-  // Ticks every second near open/close so the registration button flips on time
-  const nowMs = useNowTick(
-    [tournament?.registration_open_at, tournament?.registration_close_at],
-    { fine: true }
+  const nowMs = useNowTick([tournament?.registration_open_at, tournament?.registration_close_at], {
+    fine: true,
+  });
+
+  const fetchTournament = useCallback(
+    async (isInitial = false) => {
+      if (!slug) return;
+      if (isInitial) {
+        setIsLoading(true);
+      }
+      const res = await api.get(`/tournaments/${slug}`);
+      if (res.success && res.data) {
+        setTournament(res.data);
+
+        const partRes = await api.get(`/tournaments/${res.data.id}/participants`);
+        if (partRes.success && Array.isArray(partRes.data)) {
+          const seen = new Set<string>();
+          const unique = partRes.data.filter((item: Participant) => {
+            const key = item.user_id || item.id;
+            if (seen.has(key)) return false;
+            seen.add(key);
+            return true;
+          });
+          setParticipants(unique);
+        }
+
+        const bracketRes = await api.get(`/tournaments/${res.data.id}/bracket`);
+        if (bracketRes.success && bracketRes.data) {
+          setBracket(bracketRes.data);
+        }
+      }
+      if (isInitial) {
+        setIsLoading(false);
+      }
+    },
+    [slug]
   );
-
-  const fetchTournament = useCallback(async (isInitial = false) => {
-    if (!slug) return;
-    if (isInitial) {
-      setIsLoading(true);
-    }
-    const res = await api.get(`/tournaments/${slug}`);
-    if (res.success && res.data) {
-      setTournament(res.data);
-      
-      // Fetch participants list
-      const partRes = await api.get(`/tournaments/${res.data.id}/participants`);
-      if (partRes.success && Array.isArray(partRes.data)) {
-        const seen = new Set<string>();
-        const unique = partRes.data.filter((item: Participant) => {
-          const key = item.user_id || item.id;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return true;
-        });
-        setParticipants(unique);
-      }
-
-      // Fetch bracket
-      const bracketRes = await api.get(`/tournaments/${res.data.id}/bracket`);
-      if (bracketRes.success && bracketRes.data) {
-        setBracket(bracketRes.data);
-      }
-    }
-    if (isInitial) {
-      setIsLoading(false);
-    }
-  }, [slug]);
 
   const [isCancellingPending, setIsCancellingPending] = useState(false);
 
@@ -298,7 +328,6 @@ export default function TournamentDetailPage() {
       const regs = res.data.filter(
         (r: any) => r.tournament_id === tournamentId && r.status !== 'CANCELLED'
       );
-      // Prioridad: CONFIRMED > PAYMENT_UNDER_REVIEW > PENDING_PAYMENT > CORRECTION_REQUIRED > REJECTED
       const activeReg =
         regs.find((r: any) => r.status === 'CONFIRMED') ||
         regs.find((r: any) => r.status === 'PAYMENT_UNDER_REVIEW') ||
@@ -313,7 +342,11 @@ export default function TournamentDetailPage() {
   };
 
   const handleCancelPendingRegistration = async (registrationId: string) => {
-    if (!confirm('¿Deseas cancelar esta solicitud de inscripción pendiente? Tu cuenta quedará libre para iniciar una nueva inscripción cuando gustes.')) {
+    if (
+      !confirm(
+        '¿Deseas cancelar esta solicitud de inscripción pendiente? Tu cuenta quedará libre para iniciar una nueva inscripción cuando gustes.'
+      )
+    ) {
       return;
     }
     setIsCancellingPending(true);
@@ -338,31 +371,40 @@ export default function TournamentDetailPage() {
     if (tournament && isAuthenticated) {
       fetchUserRegistrationStatus(tournament.id);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tournament, isAuthenticated]);
 
   if (isLoading) {
     return (
       <div className="min-h-[70vh] flex flex-col items-center justify-center space-y-3">
-        <Loader2 className="w-8 h-8 animate-spin text-[#E63946]" />
-        <p className="text-xs text-[#8E92A4]">Cargando detalles del torneo...</p>
+        <Loader2 className="w-8 h-8 animate-spin text-[#D9232E]" />
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-[var(--text-muted)]">
+          CARGANDO EXPEDIENTE DEL TORNEO...
+        </p>
       </div>
     );
   }
 
   if (!tournament) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-20 text-center space-y-4">
-        <h2 className="text-2xl font-bold text-[var(--text-primary)]">Torneo no encontrado</h2>
-        <p className="text-sm text-[var(--text-secondary)]">El torneo que buscas no existe o ha sido despublicado.</p>
-        <Link href="/tournaments" className="btn-primary px-6 py-2.5 text-sm inline-block">
-          Volver a Torneos
+      <div className="widescreen-container py-20 text-center space-y-4">
+        <h2 className="font-display text-3xl font-bold uppercase text-[var(--text-primary)]">
+          TORNEO NO ENCONTRADO
+        </h2>
+        <p className="text-sm text-[var(--text-secondary)]">
+          El torneo que buscas no existe o ha sido despublicado.
+        </p>
+        <Link
+          href="/tournaments"
+          className="btn-primary px-6 py-3 text-xs font-mono font-bold uppercase tracking-wider inline-block"
+        >
+          VOLVER AL CATÁLOGO
         </Link>
       </div>
     );
   }
 
   const gameDef = GAME_CATALOG[tournament.game_code as GameCode];
-  const isClash = tournament.game_code === 'CLASH_ROYALE';
   const startDate = new Date(tournament.tournament_start_at).toLocaleDateString('es-PE', {
     weekday: 'long',
     day: 'numeric',
@@ -387,7 +429,6 @@ export default function TournamentDetailPage() {
     minute: '2-digit',
   });
 
-  // Registration window: dates take precedence over the manually stored status
   const effectiveStatus = getEffectiveStatus(tournament, nowMs);
   const registrationOpenMs = new Date(tournament.registration_open_at).getTime();
   const registrationCloseMs = new Date(tournament.registration_close_at).getTime();
@@ -415,40 +456,40 @@ export default function TournamentDetailPage() {
     switch (effectiveStatus) {
       case 'REGISTRATION_OPEN':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            Inscripciones Abiertas
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#09090B]/90 text-emerald-400 border border-emerald-500/40 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 bg-emerald-400 animate-pulse" />
+            INSCRIPCIONES ABIERTAS
           </span>
         );
       case 'IN_PROGRESS':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#E63946]/20 text-[#E63946] border border-[#E63946]/30 flex items-center gap-1.5">
-            <Flame className="w-3.5 h-3.5" />
-            En Juego • Brackets Activos
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#D9232E] text-white flex items-center gap-2">
+            <LiveWaveformIcon className="w-3.5 h-3 text-white" />
+            EN JUEGO • LLAVES ACTIVAS
           </span>
         );
       case 'PUBLISHED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#457B9D]/20 text-[#A8DADC] border border-[#457B9D]/30">
-            Próximamente
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#09090B]/90 text-[#C5A059] border border-[#C5A059]/40">
+            PRÓXIMAMENTE
           </span>
         );
       case 'REGISTRATION_CLOSED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30">
-            Inscripciones Cerradas
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#09090B]/90 text-amber-400 border border-amber-500/40">
+            INSCRIPCIONES CERRADAS
           </span>
         );
       case 'FINISHED':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-amber-500/20 text-amber-400 border border-amber-500/30 flex items-center gap-1.5">
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#09090B]/90 text-[#C5A059] border border-[#C5A059]/40 flex items-center gap-1.5">
             <Crown className="w-3.5 h-3.5" />
-            Torneo Concluido
+            TORNEO CONCLUIDO
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-white/10 text-[#8E92A4]">
+          <span className="px-3 py-1 rounded-sm text-[10px] font-mono font-bold uppercase tracking-[0.18em] bg-[#09090B]/90 text-[#A3A19A]">
             {effectiveStatus}
           </span>
         );
@@ -456,133 +497,108 @@ export default function TournamentDetailPage() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      
-      {/* Back navigation & Live stream bar */}
+    <div className="widescreen-container py-6 sm:py-8 space-y-8 pb-24">
+      {/* Top Breadcrumb & Broadcast Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <Link 
+        <Link
           href="/tournaments"
-          className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors"
+          className="inline-flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-secondary)] hover:text-[#D9232E] transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Volver al Catálogo de Torneos
+          <span>VOLVER AL CATÁLOGO DE TORNEOS</span>
         </Link>
 
-        {/* Live Stream Bar */}
-        <div className="flex items-center gap-2.5 bg-[var(--bg-card)] px-4 py-1.5 rounded-full border border-[var(--border-card)] text-xs shadow-sm">
-          <div className="w-2 h-2 rounded-full bg-[#E63946] animate-ping" />
-          <span className="text-[var(--text-secondary)]">Transmisión:</span>
+        <div className="flex items-center gap-3 bg-[var(--bg-card)] px-4 py-2 rounded-sm border border-[var(--border-card)] text-xs font-mono">
+          <LiveWaveformIcon className="w-4 h-3.5 text-[#D9232E]" />
+          <span className="text-[var(--text-muted)] uppercase tracking-wider">SEÑAL:</span>
           <Link
             href="/live"
-            className="font-bold text-emerald-500 dark:text-emerald-400 hover:underline flex items-center gap-1.5 transition-colors"
+            className="font-bold text-emerald-400 hover:underline flex items-center gap-1.5 uppercase tracking-wider"
           >
-            <span>{tournament.stream_platform || 'KICK'} en Vivo</span>
+            <span>{tournament.stream_platform || 'KICK'} EN VIVO</span>
             <ExternalLink className="w-3 h-3" />
           </Link>
           {tournament.team_size && tournament.team_size > 1 && (
             <>
-              <span className="text-[var(--text-secondary)]">•</span>
-              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30">
-                Escuadras {tournament.team_size}v{tournament.team_size}
+              <span className="text-[var(--text-muted)]">|</span>
+              <span className="px-2 py-0.5 rounded-sm text-[10px] font-bold bg-[#C5A059]/15 text-[#C5A059] border border-[#C5A059]/35 uppercase">
+                ESCUADRAS {tournament.team_size}V{tournament.team_size}
               </span>
             </>
           )}
         </div>
       </div>
 
-      {/* ORGANIZER / ADMIN MANAGEMENT TOOLBAR */}
+      {/* ORGANIZER / ADMIN OPERATIONS DECK */}
       {canManage && (
-        <div className="arena-card p-4 sm:p-5 bg-gradient-to-r from-indigo-500/10 via-[var(--bg-card)] to-[#E63946]/10 border border-amber-500/40 rounded-2xl shadow-xl space-y-3">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center font-black">
-                <Crown className="w-4 h-4" />
+        <div className="double-bezel">
+          <div className="double-bezel-inner p-4 sm:p-5 bg-[#111116] flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-sm bg-[#D9232E]/15 border border-[#D9232E]/40 text-[#D9232E] flex items-center justify-center shrink-0">
+                <CommandConsoleIcon className="w-5 h-5" />
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-black text-amber-400 uppercase tracking-wider">
-                    Panel de Gestión de Torneo
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono text-xs font-bold text-[#F4F2ED] uppercase tracking-[0.18em]">
+                    CONSOLA DE OPERACIONES DEL TORNEO
                   </span>
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                    {user?.role === 'ADMIN' ? '👑 Super Admin' : '🛡️ Organizador'}
+                  <span className="px-2 py-0.5 rounded-sm font-mono text-[9px] font-bold uppercase tracking-wider bg-[#C5A059]/20 text-[#C5A059] border border-[#C5A059]/40">
+                    {user?.role === 'ADMIN' ? 'ROOT ADMIN' : 'ORGANIZADOR OFICIAL'}
                   </span>
                 </div>
-                <p className="text-[11px] text-[#8E92A4]">
-                  Tienes privilegios para editar este torneo, gestionar brackets, participantes o eliminarlo en caso de excepción.
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Modifica parámetros en caliente, administra el árbol de llaves o reporta
+                  marcadores arbitrales.
                 </p>
               </div>
             </div>
 
-            {/* Quick Action Buttons */}
-            <div className="flex items-center flex-wrap gap-2 w-full sm:w-auto">
+            <div className="flex items-center flex-wrap gap-2 w-full lg:w-auto">
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="btn-primary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer shadow-lg shadow-[#E63946]/20"
+                className="btn-primary py-2.5 px-4 text-xs font-mono font-bold uppercase tracking-[0.14em] flex items-center gap-2 cursor-pointer"
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                Editar Torneo
+                <span>EDITAR TORNEO</span>
               </button>
 
               <button
-                onClick={() => {
-                  setActiveTab('brackets');
-                }}
-                className="btn-secondary py-2 px-3.5 text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+                onClick={() => setActiveTab('brackets')}
+                className="btn-secondary py-2.5 px-4 text-xs font-mono font-bold uppercase tracking-[0.14em] flex items-center gap-2 cursor-pointer"
               >
-                <GitBranch className="w-3.5 h-3.5 text-[#E63946]" />
-                Brackets & Llaves
+                <BracketTreeIcon className="w-3.5 h-3.5 text-[#D9232E]" />
+                <span>ADMINISTRAR LLAVES</span>
               </button>
 
               <button
                 onClick={() => setIsDeleteModalOpen(true)}
-                className="py-2 px-3.5 rounded-xl text-xs font-bold bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-500/30 hover:border-red-500 flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="py-2.5 px-4 rounded-sm font-mono text-xs font-bold uppercase tracking-[0.14em] bg-[#D9232E]/15 hover:bg-[#D9232E]/25 text-[#D9232E] border border-[#D9232E]/35 flex items-center gap-2 transition-colors cursor-pointer"
               >
                 <Trash2 className="w-3.5 h-3.5" />
-                Eliminar Torneo
+                <span>ELIMINAR</span>
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* 1. HERO BANNER */}
-      <div className="relative rounded-3xl overflow-hidden arena-card border border-white/10 shadow-2xl">
-        <div className="relative h-72 sm:h-96 w-full bg-[#0B0C10] overflow-hidden">
-          <ScrollParallaxImage
-            src={tournament.banner_url || gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
-            alt={tournament.name}
-            fallbackSrc={gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
-            scaleRange={[1.0, 1.15]}
-            yRange={[-25, 25]}
-            containerClassName="w-full h-full"
-            className="opacity-80 transition-opacity duration-500"
-          />
-          {/* Ambient Game Light Bleed with Sapphire Accent */}
-          <div 
-            className="absolute -top-16 -left-16 w-64 h-64 rounded-full blur-3xl opacity-45 pointer-events-none"
-            style={{ backgroundColor: gameDef?.color || '#E63946' }}
-          />
-          <div 
-            className="absolute top-1/2 -right-16 w-80 h-80 rounded-full blur-3xl opacity-25 pointer-events-none bg-[#2563EB]"
-          />
-
-          {/* Cinematic Vignette */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[var(--bg-card)] via-[var(--bg-card)]/50 to-black/40" />
-          <div className="absolute inset-0 bg-gradient-to-r from-[var(--bg-card)]/80 via-transparent to-[var(--bg-card)]/40" />
-
-          {/* Floating Badges */}
-          <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 gap-2">
-            <div 
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xl backdrop-blur-md text-white border border-white/20 ring-1 ring-black/30"
-              style={{ backgroundColor: gameDef?.color ? `${gameDef.color}E6` : '#E63946' }}
-            >
-              {gameDef?.logoUrl ? (
-                <img src={gameDef.logoUrl} alt={gameDef.name} className="w-5 h-5 object-contain filter drop-shadow" />
-              ) : isClash ? (
-                <Swords className="w-4 h-4" />
-              ) : (
-                <Gamepad2 className="w-4 h-4" />
-              )}
+      {/* 1. MONUMENTAL LIVING HERO BANNER */}
+      <LivingBanner
+        imageSrc={tournament.banner_url || gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
+        fallbackSrc={gameDef?.bannerUrl || '/games/clash_royale_banner.jpg'}
+        alt={tournament.name}
+        heightClassName="min-h-[380px] sm:min-h-[460px] flex flex-col justify-between"
+        overlayVariant="stadium"
+        telemetryTag={`ID // ${tournament.slug.toUpperCase().slice(0, 24)}`}
+      >
+        <div className="p-6 sm:p-10 lg:p-12 flex flex-col justify-between h-full space-y-10">
+          {/* Top Bar */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="px-3.5 py-1.5 rounded-sm bg-[#09090B]/92 border border-[#F4F2ED]/15 font-mono text-xs font-bold uppercase tracking-[0.16em] text-[#F4F2ED] flex items-center gap-2.5">
+              <GameDisciplineEmblem
+                gameCode={tournament.game_code}
+                className="w-4 h-4 text-[#D9232E]"
+              />
               <span>{gameDef?.name || tournament.game_code}</span>
             </div>
 
@@ -590,48 +606,60 @@ export default function TournamentDetailPage() {
           </div>
 
           {/* Bottom Title, Modality & Prize */}
-          <div className="absolute bottom-6 left-6 right-6 space-y-3 z-10">
+          <div className="space-y-4 max-w-5xl">
             <div className="flex flex-wrap items-center gap-3">
-              <div className="inline-flex items-center gap-1.5 text-xs text-[#A8DADC] bg-black/60 px-3 py-1 rounded-full backdrop-blur-md border border-white/10">
-                <MapPin className="w-3.5 h-3.5 text-[#457B9D] shrink-0" />
+              <div className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-[#F4F2ED] bg-[#09090B]/90 px-3.5 py-1.5 rounded-sm border border-[#F4F2ED]/15">
+                <MapPin className="w-3.5 h-3.5 text-[#D9232E] shrink-0" />
                 <span>
-                  {tournament.event_modality === 'ONLINE' || (tournament.is_online && tournament.event_modality !== 'PRESENTIAL')
-                    ? `${tournament.organization_name} • 100% Online / Remoto`
+                  {tournament.event_modality === 'ONLINE' ||
+                  (tournament.is_online && tournament.event_modality !== 'PRESENTIAL')
+                    ? `${tournament.organization_name} • 100% REMOTO`
                     : tournament.event_modality === 'HYBRID'
-                    ? `${tournament.organization_name} • Sede ${tournament.campus_name} (Híbrido)`
-                    : `${tournament.organization_name} • Sede ${tournament.campus_name} (Presencial)`}
+                      ? `${tournament.organization_name} • SEDE ${tournament.campus_name.toUpperCase()} (HÍBRIDO)`
+                      : `${tournament.organization_name} • SEDE ${tournament.campus_name.toUpperCase()} (PRESENCIAL)`}
                 </span>
               </div>
 
               {tournament.prize_pool && (
-                <div className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-300 bg-amber-500/20 px-3 py-1 rounded-full backdrop-blur-md border border-amber-400/30">
-                  <Trophy className="w-3.5 h-3.5 text-amber-400 shrink-0" />
-                  <span>Premio: {tournament.prize_pool}</span>
+                <div className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#C5A059] bg-[#09090B]/90 px-3.5 py-1.5 rounded-sm border border-[#C5A059]/40">
+                  <AegisTrophyIcon className="w-3.5 h-3.5 text-[#C5A059] shrink-0" animated={false} />
+                  <span>POZO: {tournament.prize_pool}</span>
                 </div>
               )}
             </div>
 
-            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-black text-white tracking-tight drop-shadow-md">
+            <h1 className="font-display text-[clamp(2.4rem,5.8vw,5.4rem)] font-bold text-[#F4F2ED] tracking-[-0.03em] leading-[0.92] uppercase">
               {tournament.name}
             </h1>
           </div>
         </div>
-      </div>
+      </LivingBanner>
 
       {/* 2. MAIN CONTENT GRID */}
-      <div className={`grid grid-cols-1 ${activeTab === 'brackets' && isBracketFullWidth ? 'lg:grid-cols-1' : 'lg:grid-cols-12'} gap-8 items-start`}>
-        
-        {/* LEFT COLUMN: TABS & DETAILS */}
-        <div className={`${activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-8'} space-y-6`}>
-          
-          {/* Modern Tabs header with Framer Motion spring indicator */}
-          <div className="relative flex items-center gap-1 sm:gap-2 p-1.5 rounded-2xl arena-card overflow-x-auto scrollbar-hide border border-[var(--border-card)]">
+      <div
+        className={`grid grid-cols-1 ${
+          activeTab === 'brackets' && isBracketFullWidth ? 'lg:grid-cols-1' : 'lg:grid-cols-12'
+        } gap-8 items-start`}
+      >
+        {/* LEFT COLUMN: ARCHITECTURAL TABS & DETAILS */}
+        <div
+          className={`${
+            activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-8'
+          } space-y-6`}
+        >
+          {/* Architectural Tabs Deck */}
+          <div className="flex items-center border-b border-[var(--border-card)] bg-[var(--bg-card)] overflow-x-auto no-scrollbar rounded-t-sm">
             {[
-              { id: 'info', label: 'Información', icon: FileText },
-              { id: 'brackets', label: 'Brackets & Llaves', icon: GitBranch },
-              { id: 'rules', label: 'Reglamento', icon: ShieldCheck },
-              { id: 'prizes', label: 'Premios', icon: Trophy },
-              { id: 'participants', label: `Participantes (${participants.length})`, icon: UserCheck },
+              { id: 'info', code: '01', label: 'EXPEDIENTE', icon: FileText },
+              { id: 'brackets', code: '02', label: 'LLAVES & BRACKET', icon: GitBranch },
+              { id: 'rules', code: '03', label: 'REGLAMENTO', icon: ShieldCheck },
+              { id: 'prizes', code: '04', label: 'POZO & PREMIOS', icon: Trophy },
+              {
+                id: 'participants',
+                code: '05',
+                label: `INSCRITOS (${participants.length})`,
+                icon: UserCheck,
+              },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -639,27 +667,27 @@ export default function TournamentDetailPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`relative px-3.5 sm:px-4 py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 shrink-0 z-10 ${
-                    isActive 
-                      ? 'text-white' 
+                  className={`relative px-5 py-4 font-mono text-xs font-bold uppercase tracking-[0.14em] transition-colors cursor-pointer flex items-center gap-2.5 shrink-0 ${
+                    isActive
+                      ? 'text-[var(--text-primary)] bg-[#F4F2ED]/[0.03]'
                       : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
+                  <span className="text-[9px] text-[var(--text-muted)]">{tab.code}</span>
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#D9232E]' : ''}`} />
+                  <span>{tab.label}</span>
                   {isActive && (
                     <motion.div
-                      layoutId="activeTournamentTabPill"
-                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#E63946] to-[#D62839] shadow-md shadow-[#E63946]/30 z-[-1]"
+                      layoutId="activeTournamentTabLaser"
+                      className="absolute bottom-0 inset-x-0 h-[2px] bg-[#D9232E]"
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
-                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : ''}`} />
-                  <span>{tab.label}</span>
                 </button>
               );
             })}
           </div>
 
-          {/* Tab content animated container */}
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
@@ -670,490 +698,515 @@ export default function TournamentDetailPage() {
             >
               {/* Tab: Brackets */}
               {activeTab === 'brackets' && (
-            <div className="space-y-4">
-              <BracketView
-                tournamentId={tournament.id}
-                initialBracket={bracket}
-                onUpdate={() => fetchTournament(false)}
-                isFullWidth={isBracketFullWidth}
-                onToggleFullWidth={() => setIsBracketFullWidth(!isBracketFullWidth)}
-              />
-            </div>
-          )}
-
-          {/* Tab 1: Info */}
-          {activeTab === 'info' && (
-            <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in border border-[var(--border-card)]">
-              <div className="space-y-3">
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">Acerca de este Torneo</h3>
-                <p className="text-sm text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
-                  {tournament.description_full}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-[var(--border-card)]">
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
-                  <p className="text-xs text-[var(--text-muted)]">Modalidad del Evento</p>
-                  <p className="text-sm font-bold text-[var(--text-primary)] flex items-center gap-1.5">
-                    {tournament.event_modality === 'ONLINE' || (tournament.is_online && tournament.event_modality !== 'PRESENTIAL') ? (
-                      <>
-                        <span className="text-blue-500">🌐</span>
-                        <span>100% Online / Virtual</span>
-                      </>
-                    ) : tournament.event_modality === 'HYBRID' ? (
-                      <>
-                        <span className="text-amber-500">⚡</span>
-                        <span>Híbrido (Previas Online • Final Presencial en Tecsup {tournament.campus_name})</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="text-emerald-500">📍</span>
-                        <span>100% Presencial (Campus Tecsup {tournament.campus_name})</span>
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-1">
-                  <p className="text-xs text-[var(--text-muted)]">Formato Deportivo</p>
-                  <p className="text-sm font-bold text-[var(--text-primary)]">{tournament.format}</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tab 2: Rules */}
-          {activeTab === 'rules' && (
-            <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in border border-[var(--border-card)]">
-              <div className="flex items-center gap-2 text-[#E63946]">
-                <ShieldCheck className="w-5 h-5" />
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">Reglamento de Competición</h3>
-              </div>
-              <div className="p-5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs text-[var(--text-secondary)] leading-relaxed font-mono whitespace-pre-line">
-                {tournament.rules_text}
-              </div>
-            </div>
-          )}
-
-          {/* Tab 3: Prizes */}
-          {activeTab === 'prizes' && (
-            <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in border border-[var(--border-card)]">
-              <div className="flex items-center gap-2 text-amber-500">
-                <Trophy className="w-5 h-5" />
-                <h3 className="text-lg font-bold text-[var(--text-primary)]">Premios & Reconocimientos</h3>
-              </div>
-              
-              <div className="p-6 rounded-xl bg-gradient-to-r from-[#1D3557]/40 to-[#E63946]/20 border border-[var(--border-card)] space-y-2">
-                <p className="text-xs font-bold uppercase tracking-wider text-[#A8DADC]">Pozo Acumulado</p>
-                <p className="text-2xl sm:text-3xl font-black text-amber-500 dark:text-amber-400">{tournament.prize_pool}</p>
-              </div>
-
-              <div className="space-y-3 pt-2">
-                {tournament.prize_distribution?.first_place ? (
-                  <div className="flex items-center justify-between p-3.5 bg-[var(--bg-arena)] rounded-xl border border-amber-500/30 text-xs">
-                    <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                      🥇 1er Lugar (Campeón Institucional)
-                    </span>
-                    <span className="font-bold text-amber-500 dark:text-amber-400">{tournament.prize_distribution.first_place}</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-between p-3.5 bg-[var(--bg-arena)] rounded-xl border border-amber-500/30 text-xs">
-                    <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                      🥇 1er Lugar (Campeón Institucional)
-                    </span>
-                    <span className="font-bold text-amber-500 dark:text-amber-400">{tournament.prize_pool}</span>
-                  </div>
-                )}
-
-                {tournament.prize_distribution?.second_place && (
-                  <div className="flex items-center justify-between p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs">
-                    <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                      🥈 2do Lugar (Subcampeón)
-                    </span>
-                    <span className="font-bold text-[var(--text-secondary)]">{tournament.prize_distribution.second_place}</span>
-                  </div>
-                )}
-
-                {tournament.prize_distribution?.third_place && (
-                  <div className="flex items-center justify-between p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] text-xs">
-                    <span className="font-bold text-[var(--text-primary)] flex items-center gap-2">
-                      🥉 3er Lugar
-                    </span>
-                    <span className="font-bold text-amber-600 dark:text-amber-500">{tournament.prize_distribution.third_place}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Tab 4: Confirmed Participants */}
-          {activeTab === 'participants' && (
-            <div className="arena-card p-6 sm:p-8 space-y-6 animate-in fade-in">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <UserCheck className="w-5 h-5 text-sky-500 dark:text-[#A8DADC]" />
-                  <h3 className="text-lg font-bold text-[var(--text-primary)]">
-                    {tournament.team_size && tournament.team_size > 1 ? 'Equipos y Escuadras Confirmadas' : 'Competidores Confirmados'}
-                  </h3>
-                </div>
-                <span className="text-xs text-[var(--text-secondary)]">
-                  {tournament.current_participants} de {tournament.max_slots} cupos ocupados
-                </span>
-              </div>
-
-              {participants.length === 0 ? (
-                <div className="p-8 text-center bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] space-y-2">
-                  <p className="text-sm font-bold text-[var(--text-primary)]">Sé el primer competidor o equipo en inscribirte</p>
-                  <p className="text-xs text-[var(--text-secondary)]">Los participantes aparecerán aquí una vez validado su cupo.</p>
-                </div>
-              ) : tournament.team_size && tournament.team_size > 1 ? (
-                /* --- TEAM TOURNAMENT PARTICIPANTS VIEW --- */
-                <div className="grid grid-cols-1 gap-3.5">
-                  {participants.map((p) => {
-                    const emblem = p.roster_members?.team_emblem || '🐉';
-                    const membersCount = 1 + (Array.isArray(p.roster_members?.members) ? p.roster_members.members.length : Array.isArray(p.roster_members) ? p.roster_members.length : 0);
-
-                    return (
-                      <div
-                        key={p.id}
-                        className="p-4 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] hover:border-indigo-500/30 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
-                      >
-                        <div className="flex items-center gap-3.5 min-w-0">
-                          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/25 text-2xl flex items-center justify-center shrink-0 shadow-inner">
-                            {emblem}
-                          </div>
-                          <div className="min-w-0 space-y-0.5">
-                            <div className="flex items-center gap-2">
-                              <h4 className="text-sm font-black text-[var(--text-primary)] truncate">
-                                {p.team_name || 'Escuadra Competitiva'}
-                              </h4>
-                              <span className="px-2 py-0.2 rounded-full text-[9px] font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                                {membersCount} Jugadores
-                              </span>
-                            </div>
-                            <p className="text-xs text-[var(--text-secondary)]">
-                              Capitán: <strong className="text-[var(--text-primary)]">{p.competitor_name}</strong>
-                            </p>
-                            <p className="text-[11px] text-[var(--text-muted)] font-mono truncate">
-                              {p.email || 'correo@tecsup.edu.pe'}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedTeamRoster(p)}
-                            className="btn-secondary py-1.5 px-3.5 text-xs flex items-center gap-1.5 cursor-pointer text-indigo-600 dark:text-indigo-300 hover:text-[var(--text-primary)]"
-                          >
-                            <Users className="w-3.5 h-3.5" />
-                            Ver Integrantes
-                          </button>
-                          <span className="px-2.5 py-1 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                            {p.status === 'CONFIRMED' ? 'Confirmado' : 'Espera'}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                /* --- INDIVIDUAL TOURNAMENT PARTICIPANTS VIEW --- */
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {participants.map((p) => (
-                    <Link
-                      key={p.id}
-                      href={p.user_id ? `/profile/${p.user_id}` : '#'}
-                      className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] hover:border-[#E63946]/40 transition-all flex items-center justify-between group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        {/* Foto de perfil a la izquierda */}
-                        <div className="w-11 h-11 rounded-full bg-[var(--bg-card)] border border-[var(--border-card)] overflow-hidden flex items-center justify-center shrink-0">
-                          {p.avatar_url ? (
-                            /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={p.avatar_url} alt="" className="w-full h-full object-cover" />
-                          ) : (
-                            <span className="text-sm font-bold text-[var(--text-primary)]">
-                              {p.competitor_name?.charAt(0) || 'C'}
-                            </span>
-                          )}
-                        </div>
-
-                        {/* A la derecha: Nombre, abajo correo, y equipo */}
-                        <div className="min-w-0 space-y-0.5">
-                          <p className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[#E63946] transition-colors truncate">
-                            {p.competitor_name}
-                          </p>
-                          <p className="text-[11px] text-[var(--text-muted)] font-mono truncate">
-                            {p.email || 'correo@tecsup.edu.pe'}
-                          </p>
-                          {p.team_name ? (
-                            <p className="text-[10px] text-indigo-400 font-bold truncate">
-                              Equipo: {p.team_name}
-                            </p>
-                          ) : (
-                            <p className="text-[10px] text-emerald-500 dark:text-emerald-400 font-medium">
-                              Sede {p.campus || 'Tecsup'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end gap-1 shrink-0 pl-2">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          {p.status === 'CONFIRMED' ? 'Confirmado' : 'Espera'}
-                        </span>
-                        <span className="text-[10px] text-[var(--text-muted)] group-hover:text-[var(--text-primary)] flex items-center gap-0.5 pt-1">
-                          Ver Perfil &rarr;
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
+                <div className="space-y-4">
+                  <BracketView
+                    tournamentId={tournament.id}
+                    initialBracket={bracket}
+                    onUpdate={() => fetchTournament(false)}
+                    isFullWidth={isBracketFullWidth}
+                    onToggleFullWidth={() => setIsBracketFullWidth(!isBracketFullWidth)}
+                  />
                 </div>
               )}
-            </div>
-          )}
-        </motion.div>
-      </AnimatePresence>
 
-        </div>
+              {/* Tab 1: Info */}
+              {activeTab === 'info' && (
+                <div className="double-bezel">
+                  <div className="double-bezel-inner p-6 sm:p-10 space-y-8">
+                    <div className="space-y-3">
+                      <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#D9232E]">
+                        DESCRIPCIÓN OFICIAL
+                      </span>
+                      <h3 className="font-display text-2xl sm:text-3xl font-bold uppercase text-[var(--text-primary)]">
+                        ESPECIFICACIONES DE LA COMPETICIÓN
+                      </h3>
+                      <p className="text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed whitespace-pre-line">
+                        {tournament.description_full}
+                      </p>
+                    </div>
 
-        {/* RIGHT COLUMN: TECHNICAL SHEET & INSCRIPTION */}
-        <div className={`${activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-4'} space-y-6`}>
-          
-          <div className="arena-card p-6 space-y-6 shadow-2xl sticky top-24 border border-[var(--border-card)]">
-            
-            <div className="space-y-1 pb-4 border-b border-[var(--border-card)]">
-              <span className="text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)]">Inscripción</span>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-black text-[var(--text-primary)]">
-                  {tournament.cost !== undefined && tournament.cost !== null && Number(tournament.cost) > 0
-                    ? `S/ ${Number(tournament.cost).toFixed(2)} ${tournament.currency || 'PEN'}`
-                    : 'Gratis'}
-                </span>
-                <span className="text-xs text-[var(--text-secondary)]">
-                  / {(tournament.team_size && Number(tournament.team_size) > 1) || (tournament.format && (tournament.format.toLowerCase().includes('equipo') || tournament.format.toLowerCase().includes('escuadra') || /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.format))) || (tournament.name && /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.name)) ? 'por equipo' : 'por competidor'}
-                </span>
-              </div>
-            </div>
-
-            {/* Live Competition Countdown Box */}
-            <TournamentCountdown 
-              targetDate={tournament.tournament_start_at} 
-              status={tournament.status} 
-            />
-
-            {/* Inscription Status Alert if Already Registered */}
-            {userRegistration ? (
-              <div className="space-y-3">
-                <div className={`p-4 rounded-xl border space-y-2.5 ${
-                  userRegistration.status === 'CONFIRMED'
-                    ? 'bg-emerald-500/10 border-emerald-500/30'
-                    : userRegistration.status === 'PENDING_PAYMENT'
-                    ? 'bg-amber-500/10 border-amber-500/30'
-                    : userRegistration.status === 'CORRECTION_REQUIRED'
-                    ? 'bg-amber-500/10 border-amber-500/30'
-                    : userRegistration.status === 'REJECTED'
-                    ? 'bg-rose-500/10 border-rose-500/30'
-                    : 'bg-indigo-500/10 border-indigo-500/30'
-                }`}>
-                  <div className="flex items-center gap-2 font-bold text-xs">
-                    {userRegistration.status === 'CONFIRMED' ? (
-                      <div className="flex items-center gap-2 text-emerald-400">
-                        <CheckCircle2 className="w-4 h-4" />
-                        <span>¡Inscripción Confirmada!</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6 border-t border-[var(--border-card)]">
+                      <div className="p-5 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] space-y-1.5">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                          MODALIDAD DEL EVENTO
+                        </p>
+                        <p className="font-display text-lg font-bold uppercase text-[var(--text-primary)]">
+                          {tournament.event_modality === 'ONLINE' ||
+                          (tournament.is_online && tournament.event_modality !== 'PRESENTIAL')
+                            ? '100% ONLINE / REMOTO'
+                            : tournament.event_modality === 'HYBRID'
+                              ? `HÍBRIDO (PREVIAS ONLINE • FINAL EN SEDE ${tournament.campus_name.toUpperCase()})`
+                              : `100% PRESENCIAL (CAMPUS TECSUP ${tournament.campus_name.toUpperCase()})`}
+                        </p>
                       </div>
-                    ) : userRegistration.status === 'PENDING_PAYMENT' ? (
-                      <div className="flex items-center gap-2 text-amber-400">
-                        <Clock className="w-4 h-4" />
-                        <span>Pago Pendiente de Comprobante</span>
+                      <div className="p-5 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] space-y-1.5">
+                        <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                          FORMATO DE SERIE
+                        </p>
+                        <p className="font-display text-lg font-bold uppercase text-[var(--text-primary)]">
+                          {tournament.format}
+                        </p>
                       </div>
-                    ) : userRegistration.status === 'CORRECTION_REQUIRED' ? (
-                      <div className="flex items-center gap-2 text-amber-300">
-                        <AlertCircle className="w-4 h-4" />
-                        <span>Comprobante Observado por Organizador</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 2: Rules */}
+              {activeTab === 'rules' && (
+                <div className="double-bezel">
+                  <div className="double-bezel-inner p-6 sm:p-10 space-y-6">
+                    <div className="flex items-center gap-2.5 text-[#D9232E]">
+                      <ShieldCheck className="w-5 h-5" />
+                      <h3 className="font-display text-2xl font-bold uppercase text-[var(--text-primary)]">
+                        REGLAMENTO OFICIAL DE ARBITRAJE
+                      </h3>
+                    </div>
+                    <div className="p-6 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-mono whitespace-pre-line">
+                      {tournament.rules_text}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 3: Prizes */}
+              {activeTab === 'prizes' && (
+                <div className="double-bezel">
+                  <div className="double-bezel-inner p-6 sm:p-10 space-y-6">
+                    <div className="flex items-center gap-2.5 text-[#C5A059]">
+                      <AegisTrophyIcon className="w-6 h-6 text-[#C5A059]" />
+                      <h3 className="font-display text-2xl font-bold uppercase text-[var(--text-primary)]">
+                        DISTRIBUCIÓN DE POZO Y PREMIOS
+                      </h3>
+                    </div>
+
+                    <div className="p-6 rounded-sm bg-[var(--bg-arena)] border border-[#C5A059]/35 space-y-1">
+                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#C5A059]">
+                        POZO TOTAL GARANTIZADO
+                      </p>
+                      <p className="font-display text-3xl sm:text-5xl font-bold text-[var(--text-primary)] uppercase">
+                        {tournament.prize_pool}
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 pt-2 font-mono text-xs">
+                      <div className="flex items-center justify-between p-4 bg-[var(--bg-arena)] rounded-sm border border-[#C5A059]/40">
+                        <span className="font-bold text-[var(--text-primary)] uppercase">
+                          01 // CAMPEÓN INSTITUCIONAL (1ER PUESTO)
+                        </span>
+                        <span className="font-bold text-[#C5A059]">
+                          {tournament.prize_distribution?.first_place || tournament.prize_pool}
+                        </span>
                       </div>
-                    ) : userRegistration.status === 'REJECTED' ? (
-                      <div className="flex items-center gap-2 text-rose-400">
-                        <XCircle className="w-4 h-4" />
-                        <span>Comprobante Rechazado</span>
+
+                      {tournament.prize_distribution?.second_place && (
+                        <div className="flex items-center justify-between p-4 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)]">
+                          <span className="font-bold text-[var(--text-primary)] uppercase">
+                            02 // SUBCAMPEÓN (2DO PUESTO)
+                          </span>
+                          <span className="font-bold text-[var(--text-secondary)]">
+                            {tournament.prize_distribution.second_place}
+                          </span>
+                        </div>
+                      )}
+
+                      {tournament.prize_distribution?.third_place && (
+                        <div className="flex items-center justify-between p-4 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)]">
+                          <span className="font-bold text-[var(--text-primary)] uppercase">
+                            03 // PODIO DE BRONCE (3ER PUESTO)
+                          </span>
+                          <span className="font-bold text-[var(--text-secondary)]">
+                            {tournament.prize_distribution.third_place}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tab 4: Confirmed Participants */}
+              {activeTab === 'participants' && (
+                <div className="double-bezel">
+                  <div className="double-bezel-inner p-6 sm:p-10 space-y-6">
+                    <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
+                      <div className="flex items-center gap-2.5">
+                        <UserCheck className="w-5 h-5 text-[#D9232E]" />
+                        <h3 className="font-display text-2xl font-bold uppercase text-[var(--text-primary)]">
+                          {tournament.team_size && tournament.team_size > 1
+                            ? 'ESCUADRAS CONFIRMADAS'
+                            : 'COMPETIDORES CONFIRMADOS'}
+                        </h3>
+                      </div>
+                      <span className="font-mono text-xs text-[#C5A059] font-bold uppercase">
+                        {tournament.current_participants} / {tournament.max_slots} CUPOS
+                      </span>
+                    </div>
+
+                    {participants.length === 0 ? (
+                      <div className="p-10 text-center bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] space-y-2">
+                        <p className="font-display text-xl font-bold uppercase text-[var(--text-primary)]">
+                          REGISTRO ABIERTO PARA EL PRIMER COMPETIDOR
+                        </p>
+                        <p className="text-xs text-[var(--text-secondary)]">
+                          Los participantes aparecerán aquí una vez validado su cupo.
+                        </p>
+                      </div>
+                    ) : tournament.team_size && tournament.team_size > 1 ? (
+                      <div className="grid grid-cols-1 gap-3">
+                        {participants.map((p) => {
+                          const emblem = p.roster_members?.team_emblem || '🛡️';
+                          const membersCount =
+                            1 +
+                            (Array.isArray(p.roster_members?.members)
+                              ? p.roster_members.members.length
+                              : Array.isArray(p.roster_members)
+                                ? p.roster_members.length
+                                : 0);
+
+                          return (
+                            <div
+                              key={p.id}
+                              className="p-4 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] hover:border-[#D9232E]/50 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+                            >
+                              <div className="flex items-center gap-3.5 min-w-0">
+                                <div className="w-12 h-12 rounded-sm bg-[var(--bg-card)] border border-[var(--border-card)] text-2xl flex items-center justify-center shrink-0">
+                                  {emblem}
+                                </div>
+                                <div className="min-w-0 space-y-0.5">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-display text-lg font-bold uppercase text-[var(--text-primary)] truncate">
+                                      {p.team_name || 'Escuadra Competitiva'}
+                                    </h4>
+                                    <span className="px-2 py-0.5 rounded-sm font-mono text-[9px] font-bold uppercase bg-[var(--bg-card)] text-[#C5A059] border border-[#C5A059]/30">
+                                      {membersCount} JUGADORES
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-[var(--text-secondary)]">
+                                    Capitán:{' '}
+                                    <strong className="text-[var(--text-primary)]">
+                                      {p.competitor_name}
+                                    </strong>
+                                  </p>
+                                  <p className="text-[11px] text-[var(--text-muted)] font-mono truncate">
+                                    {p.email || 'correo@tecsup.edu.pe'}
+                                  </p>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedTeamRoster(p)}
+                                  className="btn-secondary py-2 px-3.5 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 cursor-pointer"
+                                >
+                                  <Users className="w-3.5 h-3.5 text-[#D9232E]" />
+                                  <span>VER ROSTER</span>
+                                </button>
+                                <span className="px-2.5 py-1.5 rounded-sm font-mono text-[10px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                  {p.status === 'CONFIRMED' ? 'CONFIRMADO' : 'ESPERA'}
+                                </span>
+                              </div>
+                            </div>
+                          );
+                        })}
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 text-indigo-400">
-                        <Clock className="w-4 h-4" />
-                        <span>Comprobante en Revisión</span>
-                      </div>
-                    )}
-                  </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {participants.map((p) => (
+                          <Link
+                            key={p.id}
+                            href={p.user_id ? `/profile/${p.user_id}` : '#'}
+                            className="p-4 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] hover:border-[#D9232E]/50 transition-all flex items-center justify-between group"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-11 h-11 rounded-sm bg-[var(--bg-card)] border border-[var(--border-card)] overflow-hidden flex items-center justify-center shrink-0">
+                                {p.avatar_url ? (
+                                  <img
+                                    src={p.avatar_url}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <span className="text-sm font-bold text-[var(--text-primary)]">
+                                    {p.competitor_name?.charAt(0) || 'C'}
+                                  </span>
+                                )}
+                              </div>
 
-                  <p className="text-[11px] text-[var(--text-secondary)] leading-relaxed">
-                    {userRegistration.status === 'CONFIRMED'
-                      ? 'Tu cupo en el bracket está asegurado.'
-                      : userRegistration.status === 'PENDING_PAYMENT'
-                      ? 'Iniciaste el proceso de inscripción. Sube tu comprobante de pago o cancela la solicitud si prefieres recomenzar.'
-                      : userRegistration.status === 'CORRECTION_REQUIRED'
-                      ? (userRegistration.payment?.reviews?.[0]?.public_observation || 'El organizador solicitó corregir tu comprobante. Sube una captura más clara.')
-                      : userRegistration.status === 'REJECTED'
-                      ? (userRegistration.payment?.reviews?.[0]?.public_observation || 'Tu comprobante previo fue observado o rechazado. Puedes adjuntar un nuevo comprobante o cancelar para recomenzar.')
-                      : 'Tu comprobante de pago está siendo verificado por el organizador.'}
-                  </p>
+                              <div className="min-w-0 space-y-0.5">
+                                <p className="text-xs font-bold text-[var(--text-primary)] group-hover:text-[#D9232E] transition-colors truncate uppercase">
+                                  {p.competitor_name}
+                                </p>
+                                <p className="text-[11px] text-[var(--text-muted)] font-mono truncate">
+                                  {p.email || 'correo@tecsup.edu.pe'}
+                                </p>
+                                <p className="text-[10px] font-mono text-[#C5A059] uppercase">
+                                  SEDE {p.campus || 'TECSUP'}
+                                </p>
+                              </div>
+                            </div>
 
-                  <div className="flex items-center justify-between pt-1 text-xs">
-                    <Link
-                      href="/profile"
-                      className="text-[11px] font-bold text-[#E63946] hover:underline inline-block"
-                    >
-                      Ver en Mi Perfil &rarr;
-                    </Link>
-
-                    {['PENDING_PAYMENT', 'CORRECTION_REQUIRED', 'REJECTED'].includes(userRegistration.status) && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          disabled={isCancellingPending}
-                          onClick={() => handleCancelPendingRegistration(userRegistration.id)}
-                          className="text-[11px] font-semibold text-[#8E92A4] hover:text-red-400 transition-colors cursor-pointer"
-                        >
-                          {isCancellingPending ? 'Cancelando...' : 'Cancelar y Recomenzar'}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setWizardInitialRegId(userRegistration.id);
-                            setIsWizardOpen(true);
-                          }}
-                          className="btn-primary py-1 px-3 text-[11px] font-bold cursor-pointer"
-                        >
-                          {userRegistration.status === 'REJECTED'
-                            ? 'Reintentar Comprobante'
-                            : userRegistration.status === 'CORRECTION_REQUIRED'
-                            ? 'Corregir Voucher'
-                            : 'Completar Pago'}
-                        </button>
+                            <div className="flex flex-col items-end gap-1 shrink-0 pl-2">
+                              <span className="px-2 py-0.5 rounded-sm font-mono text-[9px] font-bold uppercase bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                                {p.status === 'CONFIRMED' ? 'CONFIRMADO' : 'ESPERA'}
+                              </span>
+                              <span className="text-[10px] font-mono text-[var(--text-muted)] group-hover:text-[var(--text-primary)] pt-1">
+                                DOSSIER &rarr;
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
                       </div>
                     )}
                   </div>
                 </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        {/* RIGHT COLUMN: ARCHITECTURAL REGISTRATION CONSOLE */}
+        <div
+          className={`${
+            activeTab === 'brackets' && isBracketFullWidth ? 'lg:col-span-1' : 'lg:col-span-4'
+          } space-y-6`}
+        >
+          <div className="double-bezel sticky top-24">
+            <div className="double-bezel-inner p-6 sm:p-7 space-y-6">
+              <div className="space-y-1 pb-4 border-b border-[var(--border-card)]">
+                <span className="font-mono text-[10px] uppercase font-bold tracking-[0.2em] text-[var(--text-muted)]">
+                  DERECHO DE INSCRIPCIÓN
+                </span>
+                <div className="flex items-baseline gap-2">
+                  <span className="font-display text-4xl font-bold text-[var(--text-primary)] uppercase tabular-nums">
+                    {tournament.cost !== undefined &&
+                    tournament.cost !== null &&
+                    Number(tournament.cost) > 0
+                      ? `S/ ${Number(tournament.cost).toFixed(2)} ${tournament.currency || 'PEN'}`
+                      : 'ENTRADA LIBRE'}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                    /{' '}
+                    {tournament.team_size && Number(tournament.team_size) > 1
+                      ? 'POR ESCUADRA'
+                      : 'POR COMPETIDOR'}
+                  </span>
+                </div>
               </div>
-            ) : effectiveStatus === 'REGISTRATION_OPEN' ? (
-              <div className="space-y-2">
-                {isFull && isFreeTournament ? (
+
+              <TournamentCountdown
+                targetDate={tournament.tournament_start_at}
+                status={tournament.status}
+              />
+
+              {userRegistration ? (
+                <div className="space-y-3">
+                  <div
+                    className={`p-4 rounded-sm border space-y-2.5 ${
+                      userRegistration.status === 'CONFIRMED'
+                        ? 'bg-emerald-500/10 border-emerald-500/35'
+                        : userRegistration.status === 'REJECTED'
+                          ? 'bg-[#D9232E]/10 border-[#D9232E]/35'
+                          : 'bg-[#C5A059]/10 border-[#C5A059]/35'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2 font-mono font-bold text-xs uppercase tracking-wider">
+                      {userRegistration.status === 'CONFIRMED' ? (
+                        <div className="flex items-center gap-2 text-emerald-400">
+                          <CheckCircle2 className="w-4 h-4" />
+                          <span>CUPO CONFIRMADO</span>
+                        </div>
+                      ) : userRegistration.status === 'PENDING_PAYMENT' ? (
+                        <div className="flex items-center gap-2 text-[#C5A059]">
+                          <Clock className="w-4 h-4" />
+                          <span>PAGO PENDIENTE DE VOUCHER</span>
+                        </div>
+                      ) : userRegistration.status === 'CORRECTION_REQUIRED' ? (
+                        <div className="flex items-center gap-2 text-[#C5A059]">
+                          <AlertCircle className="w-4 h-4" />
+                          <span>VOUCHER OBSERVADO</span>
+                        </div>
+                      ) : userRegistration.status === 'REJECTED' ? (
+                        <div className="flex items-center gap-2 text-[#D9232E]">
+                          <XCircle className="w-4 h-4" />
+                          <span>VOUCHER RECHAZADO</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 text-[#C5A059]">
+                          <Clock className="w-4 h-4" />
+                          <span>COMPROBANTE EN AUDITORÍA</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <p className="text-xs text-[var(--text-secondary)] leading-relaxed">
+                      {userRegistration.status === 'CONFIRMED'
+                        ? 'Tu cupo en el cuadro de llaves está asegurado.'
+                        : userRegistration.status === 'PENDING_PAYMENT'
+                          ? 'Sube tu comprobante de pago o cancela la solicitud para recomenzar.'
+                          : userRegistration.status === 'CORRECTION_REQUIRED'
+                            ? userRegistration.payment?.reviews?.[0]?.public_observation ||
+                              'El organizador solicitó corregir tu comprobante.'
+                            : userRegistration.status === 'REJECTED'
+                              ? userRegistration.payment?.reviews?.[0]?.public_observation ||
+                                'Tu comprobante previo fue observado. Puedes adjuntar uno nuevo.'
+                              : 'Tu comprobante está siendo verificado por el comité organizador.'}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-1 text-xs">
+                      <Link
+                        href="/profile"
+                        className="font-mono text-[10px] font-bold uppercase tracking-wider text-[#D9232E] hover:underline"
+                      >
+                        MI DOSSIER &rarr;
+                      </Link>
+
+                      {['PENDING_PAYMENT', 'CORRECTION_REQUIRED', 'REJECTED'].includes(
+                        userRegistration.status
+                      ) && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            disabled={isCancellingPending}
+                            onClick={() => handleCancelPendingRegistration(userRegistration.id)}
+                            className="font-mono text-[10px] uppercase text-[var(--text-muted)] hover:text-[#D9232E] transition-colors cursor-pointer"
+                          >
+                            {isCancellingPending ? 'Cancelando...' : 'Cancelar'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setWizardInitialRegId(userRegistration.id);
+                              setIsWizardOpen(true);
+                            }}
+                            className="btn-primary py-1.5 px-3 text-[10px] font-mono font-bold uppercase cursor-pointer"
+                          >
+                            SUBIR VOUCHER
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ) : effectiveStatus === 'REGISTRATION_OPEN' ? (
+                <div className="space-y-2">
+                  {isFull && isFreeTournament ? (
+                    <button
+                      type="button"
+                      disabled
+                      className="btn-secondary w-full py-4 text-xs font-mono font-bold uppercase tracking-[0.16em] flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
+                    >
+                      <Users className="w-4 h-4" />
+                      <span>CUPOS AGOTADOS</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleRegisterClick}
+                      className="btn-primary w-full py-4 text-xs font-mono font-bold uppercase tracking-[0.18em] flex items-center justify-center gap-2.5 cursor-pointer"
+                    >
+                      <Swords className="w-4 h-4" />
+                      <span>
+                        {isFull
+                          ? 'CUPOS LLENOS • LISTA DE ESPERA'
+                          : 'CONFIRMAR INSCRIPCIÓN AL TORNEO'}
+                      </span>
+                    </button>
+                  )}
+                  {registrationCloseMs - nowMs <= 72 * 60 * 60 * 1000 && (
+                    <p
+                      role="timer"
+                      className="text-center text-[10px] font-mono font-bold uppercase text-[#C5A059] flex items-center justify-center gap-1.5 pt-1"
+                    >
+                      <Clock className="w-3 h-3" />
+                      CIERRA EN {formatCountdown(registrationCloseMs - nowMs)}
+                    </p>
+                  )}
+                </div>
+              ) : effectiveStatus === 'PUBLISHED' ? (
+                <div className="space-y-2">
                   <button
                     type="button"
                     disabled
-                    className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 opacity-60 cursor-not-allowed"
+                    className="btn-secondary w-full py-4 text-xs font-mono font-bold uppercase tracking-[0.16em] flex items-center justify-center gap-2 opacity-70 cursor-not-allowed"
                   >
-                    <Users className="w-4 h-4" aria-hidden="true" />
-                    Cupos llenos
+                    <Clock className="w-4 h-4 text-[#C5A059]" />
+                    <span>APERTURA PRÓXIMAMENTE</span>
                   </button>
-                ) : (
-                  <button
-                    onClick={handleRegisterClick}
-                    className="btn-primary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-[#E63946]/30"
-                  >
-                    <Swords className="w-4 h-4" aria-hidden="true" />
-                    {isFull ? 'Cupos llenos • Unirme a lista de espera' : 'Inscribirme al Torneo'}
-                  </button>
-                )}
-                {registrationCloseMs - nowMs <= 72 * 60 * 60 * 1000 && (
-                  <p
-                    role="timer"
-                    className="text-center text-[11px] font-mono font-semibold text-amber-400 flex items-center justify-center gap-1.5"
-                  >
-                    <Clock className="w-3 h-3" aria-hidden="true" />
-                    Las inscripciones cierran en {formatCountdown(registrationCloseMs - nowMs)}
+                  <p className="text-center font-mono text-[10px] uppercase text-[var(--text-secondary)]">
+                    ABRE EL {openDate} ({formatCountdown(registrationOpenMs - nowMs)})
                   </p>
-                )}
-              </div>
-            ) : effectiveStatus === 'PUBLISHED' ? (
-              <div className="space-y-2">
+                </div>
+              ) : (
                 <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 opacity-70 cursor-not-allowed"
+                  onClick={() => setActiveTab('brackets')}
+                  className="btn-secondary w-full py-4 text-xs font-mono font-bold uppercase tracking-[0.16em] flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <Clock className="w-4 h-4 text-[#38BDF8]" aria-hidden="true" />
-                  Inscripciones aún no abren
+                  <BracketTreeIcon className="w-4 h-4 text-[#D9232E]" />
+                  <span>INSCRIPCIONES CERRADAS • VER LLAVES</span>
                 </button>
-                <p className="text-center text-[11px] text-[var(--text-secondary)] capitalize">
-                  Abren el {openDate}
-                </p>
-                <p
-                  role="timer"
-                  className="text-center text-[11px] font-mono font-bold text-[#38BDF8]"
-                >
-                  Faltan {formatCountdown(registrationOpenMs - nowMs)}
-                </p>
-              </div>
-            ) : (
-              <button
-                onClick={() => setActiveTab('brackets')}
-                className="btn-secondary w-full py-3.5 text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
-              >
-                <GitBranch className="w-4 h-4 text-[#E63946]" aria-hidden="true" />
-                Inscripciones Cerradas • Ver Brackets
-              </button>
-            )}
+              )}
 
-            {/* Technical Checklist */}
-            <div className="space-y-3.5 text-xs">
-              
-              <div className="flex items-start gap-3">
-                <Calendar className="w-4 h-4 text-[#E63946] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[var(--text-primary)]">Inicio del Torneo</p>
-                  <p className="text-[var(--text-secondary)] capitalize">{startDate}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <Clock className="w-4 h-4 text-[#457B9D] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[var(--text-primary)]">Cierre de Inscripciones</p>
-                  <p className="text-[var(--text-secondary)]">{closeDate}</p>
-                </div>
-              </div>
-
-              {/* Animated Live Capacity Bar */}
-              <div className="space-y-2 pt-1 border-t border-[var(--border-card)]">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-4 h-4 text-amber-500 shrink-0" />
-                    <span className="font-semibold text-[var(--text-primary)]">Cupos Disponibles</span>
-                  </div>
-                  <div className="font-mono text-xs font-bold text-[var(--text-primary)] flex items-center gap-1">
-                    <AnimatedCounter target={tournament.current_participants} /> / {tournament.max_slots}
+              {/* Technical Checklist */}
+              <div className="space-y-4 text-xs pt-2 border-t border-[var(--border-card)]">
+                <div className="flex items-start gap-3">
+                  <Calendar className="w-4 h-4 text-[#D9232E] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                      FECHA DE INICIO
+                    </p>
+                    <p className="font-bold text-[var(--text-primary)] capitalize">{startDate}</p>
                   </div>
                 </div>
-                <div className="w-full h-2 bg-[var(--bg-arena)] dark:bg-black/50 rounded-full overflow-hidden border border-[var(--border-card)]">
-                  <motion.div 
-                    className="h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.min(100, Math.round((tournament.current_participants / tournament.max_slots) * 100))}%` }}
-                    transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
-                    style={{ 
-                      background: tournament.current_participants >= tournament.max_slots 
-                        ? '#E63946' 
-                        : 'linear-gradient(90deg, #10B981, #059669)',
-                    }}
-                  />
+
+                <div className="flex items-start gap-3">
+                  <Clock className="w-4 h-4 text-[#C5A059] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                      CIERRE DE REGISTRO
+                    </p>
+                    <p className="font-bold text-[var(--text-primary)]">{closeDate}</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-[var(--border-card)]">
+                  <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.16em]">
+                    <span className="text-[var(--text-muted)]">OCUPACIÓN DE ARENA</span>
+                    <span className="font-bold text-[var(--text-primary)] tabular-nums">
+                      <AnimatedCounter target={tournament.current_participants} /> /{' '}
+                      {tournament.max_slots} CUPOS
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 bg-[var(--bg-arena)] overflow-hidden border border-[var(--border-card)]">
+                    <motion.div
+                      className="h-full bg-[#D9232E]"
+                      initial={{ width: 0 }}
+                      animate={{
+                        width: `${Math.min(
+                          100,
+                          Math.round((tournament.current_participants / tournament.max_slots) * 100)
+                        )}%`,
+                      }}
+                      transition={{ duration: 0.9, ease: [0.23, 1, 0.32, 1] }}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3 pt-1">
+                  <Mail className="w-4 h-4 text-[var(--text-muted)] shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--text-muted)]">
+                      CONTACTO DE ARBITRAJE
+                    </p>
+                    <p className="font-mono text-xs text-[var(--text-secondary)] truncate">
+                      {tournament.contact_email}
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              <div className="flex items-start gap-3 pt-1">
-                <Mail className="w-4 h-4 text-[#A8DADC] shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-semibold text-[var(--text-primary)]">Organización y Soporte</p>
-                  <p className="text-[var(--text-secondary)] truncate">{tournament.contact_email}</p>
-                </div>
-              </div>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
 
       {/* Registration Wizard Modal */}
@@ -1165,7 +1218,9 @@ export default function TournamentDetailPage() {
         }}
         initialRegistrationId={wizardInitialRegId || undefined}
         initialStep={wizardInitialRegId ? 3 : 1}
-        rejectionObservation={userRegistration?.payment?.reviews?.[0]?.public_observation || undefined}
+        rejectionObservation={
+          userRegistration?.payment?.reviews?.[0]?.public_observation || undefined
+        }
         tournament={{
           id: tournament.id,
           name: tournament.name,
@@ -1185,7 +1240,7 @@ export default function TournamentDetailPage() {
         }}
       />
 
-      {/* Edit Tournament Modal (Organizers & Admin) */}
+      {/* Edit Tournament Modal */}
       <EditTournamentModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
@@ -1196,7 +1251,7 @@ export default function TournamentDetailPage() {
         }}
       />
 
-      {/* Delete Tournament Modal (Organizers & Admin) */}
+      {/* Delete Tournament Modal */}
       <DeleteTournamentModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
@@ -1204,107 +1259,120 @@ export default function TournamentDetailPage() {
         tournamentName={tournament.name}
       />
 
-      {/* OVER-EXPOSED TEAM ROSTER LIGHTBOX MODAL */}
+      {/* TEAM ROSTER LIGHTBOX MODAL */}
       {selectedTeamRoster && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in"
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in"
           onClick={() => setSelectedTeamRoster(null)}
         >
-          <div 
-            className="relative max-w-lg w-full arena-card bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl shadow-2xl p-6 space-y-5 max-h-[85vh] overflow-y-auto"
+          <div
+            className="relative max-w-lg w-full double-bezel"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header */}
-            <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-indigo-500/20 text-2xl flex items-center justify-center border border-indigo-500/30">
-                  {selectedTeamRoster.roster_members?.team_emblem || '🐉'}
-                </div>
-                <div>
-                  <h3 className="text-base font-black text-[var(--text-primary)]">
-                    {selectedTeamRoster.team_name || 'Escuadra'}
-                  </h3>
-                  <p className="text-xs text-[var(--text-secondary)]">
-                    Integrantes de la escuadra
-                  </p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedTeamRoster(null)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Members List */}
-            <div className="space-y-3">
-              {/* Capitán */}
-              <div className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-indigo-500/40 flex items-center justify-between">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 font-bold flex items-center justify-center border border-indigo-500/30 overflow-hidden shrink-0">
-                    {selectedTeamRoster.avatar_url ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={selectedTeamRoster.avatar_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <span>{selectedTeamRoster.competitor_name?.charAt(0) || 'C'}</span>
-                    )}
+            <div className="double-bezel-inner p-6 space-y-5 max-h-[85vh] overflow-y-auto">
+              <div className="flex items-center justify-between border-b border-[var(--border-card)] pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-sm bg-[var(--bg-arena)] text-2xl flex items-center justify-center border border-[var(--border-card)]">
+                    {selectedTeamRoster.roster_members?.team_emblem || '🛡️'}
                   </div>
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs font-bold text-[var(--text-primary)] truncate">
-                        {selectedTeamRoster.competitor_name}
+                  <div>
+                    <h3 className="font-display text-xl font-bold uppercase text-[var(--text-primary)]">
+                      {selectedTeamRoster.team_name || 'Escuadra'}
+                    </h3>
+                    <p className="font-mono text-[10px] uppercase tracking-wider text-[var(--text-secondary)]">
+                      ROSTER OFICIAL DE ESCUADRA
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedTeamRoster(null)}
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 rounded-sm hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {/* Capitán */}
+                <div className="p-3.5 bg-[var(--bg-arena)] rounded-sm border border-[#D9232E]/45 flex items-center justify-between">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 rounded-sm bg-[var(--bg-card)] text-[#D9232E] font-bold flex items-center justify-center border border-[var(--border-card)] overflow-hidden shrink-0">
+                      {selectedTeamRoster.avatar_url ? (
+                        <img
+                          src={selectedTeamRoster.avatar_url}
+                          alt=""
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span>{selectedTeamRoster.competitor_name?.charAt(0) || 'C'}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 space-y-0.5">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs font-bold text-[var(--text-primary)] truncate uppercase">
+                          {selectedTeamRoster.competitor_name}
+                        </p>
+                        <span className="px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-bold uppercase bg-[#D9232E] text-white">
+                          CAPITÁN
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">
+                        {selectedTeamRoster.email}
                       </p>
-                      <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-indigo-500/20 text-indigo-400 dark:text-indigo-300 border border-indigo-500/30">
-                        Capitán
-                      </span>
                     </div>
-                    <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{selectedTeamRoster.email}</p>
                   </div>
+
+                  {selectedTeamRoster.user_id && (
+                    <Link
+                      href={`/profile/${selectedTeamRoster.user_id}`}
+                      className="btn-secondary py-1.5 px-3 text-[10px] font-mono font-bold uppercase shrink-0 ml-2"
+                    >
+                      DOSSIER
+                    </Link>
+                  )}
                 </div>
 
-                {selectedTeamRoster.user_id && (
-                  <Link
-                    href={`/profile/${selectedTeamRoster.user_id}`}
-                    className="btn-secondary py-1 px-2.5 text-[10px] shrink-0 ml-2"
-                  >
-                    Ver Perfil
-                  </Link>
-                )}
-              </div>
+                {/* Compañeros */}
+                {(() => {
+                  const members = Array.isArray(selectedTeamRoster.roster_members?.members)
+                    ? selectedTeamRoster.roster_members.members
+                    : Array.isArray(selectedTeamRoster.roster_members)
+                      ? selectedTeamRoster.roster_members
+                      : [];
 
-              {/* Compañeros */}
-              {(() => {
-                const members = Array.isArray(selectedTeamRoster.roster_members?.members)
-                  ? selectedTeamRoster.roster_members.members
-                  : Array.isArray(selectedTeamRoster.roster_members)
-                  ? selectedTeamRoster.roster_members
-                  : [];
-
-                return members.map((m: any, idx: number) => (
-                  <div key={idx} className="p-3.5 bg-[var(--bg-arena)] rounded-xl border border-[var(--border-card)] flex items-center justify-between">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="w-10 h-10 rounded-full bg-[var(--bg-card)] text-[var(--text-secondary)] font-bold flex items-center justify-center border border-[var(--border-card)] shrink-0">
-                        {m.name?.charAt(0) || 'J'}
-                      </div>
-                      <div className="min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2">
-                          <p className="text-xs font-bold text-[var(--text-primary)] truncate">{m.name || `Compañero ${idx + 1}`}</p>
-                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-card)]">
-                            {m.role || `Jugador ${idx + 2}`}
-                          </span>
+                  return members.map((m: any, idx: number) => (
+                    <div
+                      key={idx}
+                      className="p-3.5 bg-[var(--bg-arena)] rounded-sm border border-[var(--border-card)] flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-sm bg-[var(--bg-card)] text-[var(--text-secondary)] font-bold flex items-center justify-center border border-[var(--border-card)] shrink-0">
+                          {m.name?.charAt(0) || 'J'}
                         </div>
-                        <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">{m.email || 'correo@tecsup.edu.pe'}</p>
+                        <div className="min-w-0 space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs font-bold text-[var(--text-primary)] truncate uppercase">
+                              {m.name || `Compañero ${idx + 1}`}
+                            </p>
+                            <span className="px-1.5 py-0.5 rounded-sm font-mono text-[9px] font-bold uppercase bg-[var(--bg-card)] text-[var(--text-secondary)] border border-[var(--border-card)]">
+                              {m.role || `JUGADOR ${idx + 2}`}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-[var(--text-secondary)] font-mono truncate">
+                            {m.email || 'correo@tecsup.edu.pe'}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ));
-              })()}
+                  ));
+                })()}
+              </div>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

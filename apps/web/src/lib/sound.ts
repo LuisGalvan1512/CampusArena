@@ -11,7 +11,9 @@ class SoundEffects {
   private ensureMuteLoaded() {
     if (this.isInitialized || typeof window === 'undefined') return;
     try {
-      const saved = localStorage.getItem('campus_arena_muted');
+      const saved =
+        localStorage.getItem('campus_arena_muted') ??
+        localStorage.getItem('sound_muted');
       this.muted = saved === 'true';
     } catch {}
     this.isInitialized = true;
@@ -43,7 +45,13 @@ class SoundEffects {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('campus_arena_muted', String(this.muted));
+        localStorage.setItem('sound_muted', String(this.muted));
       } catch {}
+      window.dispatchEvent(
+        new CustomEvent('campus-sound-mute-change', {
+          detail: { muted: this.muted },
+        })
+      );
     }
     if (!this.muted) {
       this.playClick();
@@ -171,6 +179,10 @@ class SoundEffects {
     } catch {}
   }
 
+  public playLaunchWoosh() {
+    this.playWhoosh();
+  }
+
   // 5. Pleasant notification chime
   public playNotification() {
     if (this.muted) return;
@@ -283,6 +295,87 @@ class SoundEffects {
       osc.stop(ctx.currentTime + 0.9);
     } catch {}
   }
+
+  // 10. Playbook Section 7.1: Tactile wood / organic mechanical click
+  public playWoodClick() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(140, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(45, ctx.currentTime + 0.045);
+
+      gain.gain.setValueAtTime(0.18, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.045);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.045);
+    } catch {}
+  }
+
+  // 11. Playbook Section 7.1: Metallic / drawer slide (white noise + bandpass filter)
+  public playMetalSlide() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      const bufferSize = Math.floor(ctx.sampleRate * 0.12);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+
+      const noise = ctx.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(900, ctx.currentTime);
+      filter.frequency.linearRampToValueAtTime(2200, ctx.currentTime + 0.12);
+      filter.Q.value = 3.5;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.06, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(ctx.destination);
+      noise.start();
+    } catch {}
+  }
+
+  // 12. Playbook Section 7.1: Harmonic Success Chime (523.25Hz -> 659.25Hz -> 783.99Hz)
+  public playSuccessChime() {
+    if (this.muted) return;
+    const ctx = this.getContext();
+    if (!ctx) return;
+    try {
+      [523.25, 659.25, 783.99].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        const start = ctx.currentTime + i * 0.07;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(0.08, start);
+        gain.gain.exponentialRampToValueAtTime(0.001, start + 0.35);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(start);
+        osc.stop(start + 0.35);
+      });
+    } catch {}
+  }
 }
 
 export const sounds = new SoundEffects();
+
+export const playWoodClick = () => sounds.playWoodClick();
+export const playMetalSlide = () => sounds.playMetalSlide();
+export const playSuccessChime = () => sounds.playSuccessChime();

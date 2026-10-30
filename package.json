@@ -6,7 +6,9 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "lint": "turbo run lint"
+    "lint": "turbo run lint",
+    "assets": "node scripts/asset-fetcher.js",
+    "debt": "git grep --no-index --exclude-standard -nE \"(#|//|/[*]) ?(shortcut|ponytail):\" -- apps packages scripts || echo \"No shortcut debt. Clean ledger.\""
   },
   "devDependencies": {
     "turbo": "^2.10.12"

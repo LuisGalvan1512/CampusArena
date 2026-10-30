@@ -1,0 +1,30 @@
+{
+  "name": "Campus Arena Design System",
+  "version": "1.0.0",
+  "target": "apps/web",
+  "aesthetic": "Midnight Sapphire & Tecsup Crimson Esports",
+  "themes": {
+    "default": "dark",
+    "supported": ["dark", "light"]
+  },
+  "tokens": {
+    "colors": {
+      "bgArena": "#080B12",
+      "bgCard": "#0E1424",
+      "bgCardHover": "#141C33",
+      "redArena": "#E63946",
+      "blueStrategy": "#1D3557",
+      "cyanAccent": "#38BDF8",
+      "textPrimary": "#F8FAFC",
+      "textSecondary": "#94A3B8",
+      "textMuted": "#64748B"
+    },
+    "typography": {
+      "sans": "Inter",
+      "display": "Clash Display, Outfit",
+      "editorial": "Cabinet Grotesk, Inter",
+      "mono": "JetBrains Mono, Fira Code"
+    }
+  }
+}
+

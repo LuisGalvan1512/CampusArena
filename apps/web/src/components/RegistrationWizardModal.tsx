@@ -6,21 +6,16 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import { 
   X, 
-  Swords, 
-  Gamepad2, 
   CheckCircle2, 
   AlertCircle, 
   Loader2, 
-  QrCode, 
   UploadCloud, 
   ShieldCheck, 
   ArrowRight,
-  ArrowLeft,
   FileCheck,
-  Trophy,
-  ExternalLink,
   Users,
   AlertTriangle,
+  MessageCircle,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -28,6 +23,7 @@ import { uploadPaymentVoucher } from '@/lib/storage';
 import { GAME_CATALOG, GameCode } from '@/lib/games';
 import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
+import { sendTournamentRegistrationToWhatsApp } from '@/lib/whatsapp';
 
 interface GameProfile {
   id: string;
@@ -135,13 +131,43 @@ export function RegistrationWizardModal({
     }
   }, [isOpen, tournament.game_code]);
 
+  // WCAG 2.2 AA Keyboard Accessibility: Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (showCancelConfirm) {
+          setShowCancelConfirm(false);
+        } else if (step === 4) {
+          handleClose();
+        } else {
+          setShowCancelConfirm(true);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, step, showCancelConfirm]);
+
   if (!isOpen) return null;
 
   const gameDef = GAME_CATALOG[tournament.game_code as GameCode];
   const gameName = gameDef?.name || (tournament.game_code === 'CLASH_ROYALE' ? 'Clash Royale' : 'Brawl Stars');
-  const matchingGameProfile = gameProfiles.find(
-    (gp) => gp.game_code === tournament.game_code
-  );
+
+  const handleWhatsAppNotify = () => {
+    sounds.playSuccessChime();
+    sendTournamentRegistrationToWhatsApp({
+      tournamentName: tournament.name,
+      competitorName: `${user?.first_name || ''} ${user?.last_name || ''}`.trim() || 'Competidor Tecsup',
+      competitorEmail: user?.email,
+      isTeamBased: isTeamTournament,
+      teamName: teamName.trim() || undefined,
+      entryFee: Number(tournament.cost) || 0,
+      paymentReference: operationReference.trim() || undefined,
+      paymentMethod: paymentMethod === 'YAPE' ? 'Yape' : paymentMethod === 'PLIN' ? 'Plin' : 'Transferencia',
+    });
+  };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -260,7 +286,7 @@ export function RegistrationWizardModal({
     setIsLoading(false);
   };
 
-  const handleClose = () => {
+  function handleClose() {
     setStep(1);
     setErrorMessage(null);
     setRegistrationResult(null);
@@ -278,7 +304,7 @@ export function RegistrationWizardModal({
       { name: '', email: '', role: 'Jugador 5' },
     ]);
     onClose();
-  };
+  }
 
   const handleRequestClose = () => {
     if (step === 4) {
@@ -310,7 +336,12 @@ export function RegistrationWizardModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="registration-wizard-title"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in"
+    >
       <div className="relative w-full max-w-lg arena-card p-6 sm:p-8 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-2xl space-y-6 max-h-[90vh] overflow-y-auto">
         
         {/* Abandonment Confirmation Overlay */}
@@ -361,23 +392,25 @@ export function RegistrationWizardModal({
 
         {/* Close Button */}
         <button
+          type="button"
           onClick={handleRequestClose}
-          className="absolute top-4 right-4 p-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
+          aria-label="Cerrar ventana de inscripción"
+          className="absolute top-4 right-4 p-2 min-w-[44px] min-h-[44px] flex items-center justify-center text-[var(--text-muted)] hover:text-[var(--text-primary)] rounded-lg hover:bg-[var(--bg-arena)] transition-colors cursor-pointer"
           title="Cerrar ventana"
         >
-          <X className="w-5 h-5" />
+          <X className="w-5 h-5" aria-hidden="true" />
         </button>
 
         {/* Header with Steps */}
         <div className="space-y-2">
-          <div className="flex items-center justify-between text-xs text-[var(--text-muted)]">
+          <div className="flex items-center justify-between text-xs text-[var(--text-muted)] pr-8">
             <span className="font-bold text-[#E63946] uppercase tracking-wider">
               Inscripción al Torneo
             </span>
-            <span>Paso {step} de 4</span>
+            <span className="tabular-nums">Paso {step} de 4</span>
           </div>
 
-          <h3 className="text-xl font-black text-[var(--text-primary)]">
+          <h3 id="registration-wizard-title" className="text-xl font-black text-[var(--text-primary)]">
             {tournament.name}
           </h3>
 
@@ -721,7 +754,7 @@ export function RegistrationWizardModal({
             <div className="space-y-1">
               <h4 className="text-sm font-bold text-[var(--text-primary)]">3. Pago y Comprobante</h4>
               <p className="text-xs text-[var(--text-secondary)]">
-                Monto a pagar: <strong className="text-[var(--text-primary)]">S/ {tournament.cost !== undefined && tournament.cost !== null ? Number(tournament.cost).toFixed(2) : '0.00'} {tournament.currency || 'PEN'}</strong>
+                Monto a pagar: <strong className="text-[var(--text-primary)] tabular-nums">S/ {tournament.cost !== undefined && tournament.cost !== null ? Number(tournament.cost).toFixed(2) : '0.00'} {tournament.currency || 'PEN'}</strong>
                 <span className="ml-1 text-[var(--text-secondary)]">
                   ({(tournament.team_size && Number(tournament.team_size) > 1) || (tournament.format && (tournament.format.toLowerCase().includes('equipo') || tournament.format.toLowerCase().includes('escuadra') || /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.format))) || (tournament.name && /\b(2|3|4|5)\s*(vs|v)\s*(2|3|4|5)\b/i.test(tournament.name)) ? 'por equipo' : 'por competidor'})
                 </span>
@@ -733,7 +766,7 @@ export function RegistrationWizardModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod('YAPE')}
-                className={`py-2 rounded-xl text-xs font-bold transition-all border ${
+                className={`py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                   paymentMethod === 'YAPE'
                     ? 'bg-[#74008E] border-[#74008E] text-white shadow-md'
                     : 'bg-[var(--bg-arena)] border-[var(--border-card)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'
@@ -744,7 +777,7 @@ export function RegistrationWizardModal({
               <button
                 type="button"
                 onClick={() => setPaymentMethod('PLIN')}
-                className={`py-2 rounded-xl text-xs font-bold transition-all border ${
+                className={`py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
                   paymentMethod === 'PLIN'
                     ? 'bg-[#003883] border-[#003883] text-white shadow-md'
                     : 'bg-[var(--bg-arena)] border-[var(--border-card)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]'
@@ -778,7 +811,7 @@ export function RegistrationWizardModal({
                 <p className="font-bold text-[#E63946] uppercase tracking-wider">
                   Escanea para pagar con {paymentMethod}
                 </p>
-                <p className="text-xl font-black text-[var(--text-primary)] font-mono tracking-widest mt-1">
+                <p className="text-xl font-black text-[var(--text-primary)] font-mono tracking-widest mt-1 tabular-nums">
                   994 058 442
                 </p>
                 <p className="text-xs text-[var(--text-secondary)] mt-2">
@@ -786,6 +819,15 @@ export function RegistrationWizardModal({
                     {paymentMethod === 'YAPE' ? 'Luis Enrique Galvan Morales' : 'Luis Galvan'}
                   </span>
                 </p>
+                <button
+                  type="button"
+                  data-no-sound
+                  onClick={handleWhatsAppNotify}
+                  className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-[11px] font-bold transition-colors cursor-pointer"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" aria-hidden="true" />
+                  Validar Comprobante por WhatsApp
+                </button>
               </div>
             </div>
 
@@ -954,6 +996,16 @@ export function RegistrationWizardModal({
                 <span className="font-bold text-amber-500 dark:text-amber-400 uppercase">En Revisión</span>
               </div>
             </div>
+
+            <button
+              type="button"
+              data-no-sound
+              onClick={handleWhatsAppNotify}
+              className="w-full py-2.5 px-4 rounded-xl bg-[#25D366]/15 hover:bg-[#25D366]/25 border border-[#25D366]/40 text-[#25D366] text-xs font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              <MessageCircle className="w-4 h-4" aria-hidden="true" />
+              Notificar Inscripción al Comité por WhatsApp
+            </button>
 
             <div className="grid grid-cols-2 gap-3">
               <Link

@@ -1,45 +1,132 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Fira+Code:wght@600;700&family=Montserrat:wght@800;900&family=Orbitron:wght@700;900&family=Permanent+Marker&family=Press+Start+2P&family=Russo+One&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Cinzel+Decorative:wght@700;900&family=Fira+Code:wght@500;600;700&family=JetBrains+Mono:wght@500;600;700;800&family=Orbitron:wght@700;900&family=Permanent+Marker&family=Press+Start+2P&family=Russo+One&display=swap');
 @import "tailwindcss";
 
+/* ============================================================================
+   1. TYPOGRAPHY ARCHITECTURE (Fontshare Clash Display + Cabinet Grotesk + Satoshi + Outfit + JetBrains Mono)
+   ============================================================================ */
+:root {
+  --font-display-stack: 'Clash Display', 'Cabinet Grotesk', 'Outfit', sans-serif;
+  --font-sans-stack: 'Cabinet Grotesk', 'Satoshi', 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono-stack: 'JetBrains Mono', 'Fira Code', monospace;
+  --ease-out-expo: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
 /* Custom Competitor Name Fonts */
-.font-name-default { font-family: 'Outfit', var(--font-sans), sans-serif; }
+.font-name-default { font-family: 'Clash Display', 'Outfit', sans-serif; }
 .font-name-gamer { font-family: 'Russo One', sans-serif; }
 .font-name-scifi { font-family: 'Orbitron', sans-serif; }
 .font-name-pixel { font-family: 'Press Start 2P', monospace; }
 .font-name-gothic { font-family: 'Cinzel Decorative', serif; }
 .font-name-graffiti { font-family: 'Permanent Marker', cursive; }
-.font-name-terminal { font-family: 'Fira Code', monospace; }
-.font-name-impact { font-family: 'Montserrat', sans-serif; font-weight: 900; }
+.font-name-terminal { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+.font-name-impact { font-family: 'Clash Display', 'Outfit', sans-serif; font-weight: 800; }
 
+/* High-End Display & Editorial Typography Classes */
+.font-display {
+  font-family: var(--font-display-stack);
+  letter-spacing: -0.03em;
+}
 
+.font-editorial {
+  font-family: var(--font-sans-stack);
+  letter-spacing: -0.015em;
+}
+
+.font-mono-data,
+.font-mono {
+  font-family: var(--font-mono-stack);
+  font-variant-numeric: tabular-nums;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Global Heading Upgrade: Every H1-H4 automatically uses Clash Display / Cabinet Grotesk */
+h1, h2, h3, h4 {
+  font-family: var(--font-display-stack);
+  letter-spacing: -0.028em;
+}
+
+/* ============================================================================
+   2. MOBILE-NATIVE & CRAFT FLOOR BROWSER SURFACE BASELINES
+   ============================================================================ */
+html {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: rgba(230, 57, 70, 0.32);
+  color: var(--text-primary);
+}
+
+input,
+textarea {
+  caret-color: var(--red-arena);
+}
+
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+button,
+[role="button"] {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Prevent iOS Safari auto-zoom on focus when input font-size is below 16px */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+/* ============================================================================
+   3. COLOR TOKENS: SOBER MATTE CARBON, WARM BONE & ANODIZED TITANIUM (ZERO AI NEON)
+   ============================================================================ */
 :root {
   color-scheme: dark;
-  /* Default to Dark theme tokens - Midnight Sapphire & Crimson High-Craft Palette */
-  --bg-arena: #080B12;
-  --bg-card: #0E1424;
-  --bg-card-hover: #141C33;
-  --border-card: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(230, 57, 70, 0.45);
+  --bg-arena: #070709;
+  --bg-card: #0D0D10;
+  --bg-card-hover: #131318;
+  --border-card: rgba(244, 242, 237, 0.09);
+  --border-active: rgba(217, 35, 46, 0.55);
   
-  --red-arena: #E63946;
-  --red-hover: #D62839;
-  --red-glow: rgba(230, 57, 70, 0.18);
+  --red-arena: #D9232E;
+  --red-hover: #E63946;
+  --red-glow: rgba(217, 35, 46, 0.22);
 
-  --blue-strategy: #1D3557;
-  --blue-tecsup: #1E40AF;
-  --blue-accent: #2563EB;
-  --blue-glow: rgba(37, 99, 235, 0.22);
-  --cyan-accent: #38BDF8;
-  --cyan-light: #BAE6FD;
+  --gold-brass: #C5A059;
+  --blue-strategy: #1C1C22;
+  --blue-tecsup: #27272A;
+  --blue-accent: #D9232E;
+  --blue-glow: rgba(197, 160, 89, 0.16);
+  --cyan-accent: #C5A059;
+  --cyan-light: #E5D3A7;
 
-  --text-primary: #F8FAFC;
-  --text-secondary: #94A3B8;
-  --text-muted: #64748B;
+  --text-primary: #F4F2ED;
+  --text-secondary: #A3A19A;
+  --text-muted: #686662;
 
-  --input-bg: #0A0F1D;
-  --input-border: rgba(255, 255, 255, 0.1);
-  --nav-bg: rgba(8, 11, 18, 0.88);
-  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.45);
+  --input-bg: #09090C;
+  --input-border: rgba(244, 242, 237, 0.12);
+  --nav-bg: rgba(9, 9, 12, 0.9);
+  --card-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(244, 242, 237, 0.07);
+  --bezel-bg: rgba(244, 242, 237, 0.02);
+  --bezel-border: rgba(244, 242, 237, 0.08);
 }
 
 html.light,
@@ -47,35 +134,37 @@ html[data-theme='light'],
 .light, 
 [data-theme='light'] {
   color-scheme: only light !important;
-  /* Warm Slate / Titanium Light Theme with Subtle Sapphire Depth */
-  --bg-arena: #F8FAFC;
-  --bg-card: #FFFFFF;
-  --bg-card-hover: #F1F5F9;
-  --border-card: rgba(15, 23, 42, 0.08);
-  --border-active: rgba(220, 38, 38, 0.55);
+  --bg-arena: #F2F0EA;
+  --bg-card: #FAF9F6;
+  --bg-card-hover: #FFFFFF;
+  --border-card: rgba(18, 18, 22, 0.11);
+  --border-active: rgba(217, 35, 46, 0.55);
 
-  --red-arena: #E63946;
-  --red-hover: #DC2626;
-  --red-glow: rgba(230, 57, 70, 0.15);
+  --red-arena: #D9232E;
+  --red-hover: #B91C1C;
+  --red-glow: rgba(217, 35, 46, 0.14);
 
-  --blue-strategy: #1E293B;
-  --blue-tecsup: #1D4ED8;
-  --blue-accent: #2563EB;
-  --blue-glow: rgba(37, 99, 235, 0.15);
-  --cyan-accent: #0284C7;
-  --cyan-light: #0369A1;
+  --gold-brass: #9A7B38;
+  --blue-strategy: #18181B;
+  --blue-tecsup: #27272A;
+  --blue-accent: #D9232E;
+  --blue-glow: rgba(154, 123, 56, 0.12);
+  --cyan-accent: #9A7B38;
+  --cyan-light: #785E27;
 
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --text-muted: #64748B;
+  --text-primary: #111114;
+  --text-secondary: #52514E;
+  --text-muted: #787672;
 
   --input-bg: #FFFFFF;
-  --input-border: rgba(15, 23, 42, 0.14);
-  --nav-bg: rgba(255, 255, 255, 0.92);
-  --card-shadow: 0 2px 10px -1px rgba(15, 23, 42, 0.05), 0 0 0 1px rgba(15, 23, 42, 0.04);
+  --input-border: rgba(18, 18, 22, 0.15);
+  --nav-bg: rgba(242, 240, 234, 0.92);
+  --card-shadow: 0 16px 32px -12px rgba(17, 17, 20, 0.08), 0 0 0 1px rgba(17, 17, 20, 0.05);
+  --bezel-bg: rgba(17, 17, 20, 0.025);
+  --bezel-border: rgba(17, 17, 20, 0.09);
 }
 
-/* Light Mode Global Safeguards to eliminate white-on-white text & black boxes */
+/* Light Mode Global Safeguards */
 .light h1:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
 .light h2:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
 .light h3:not([class*="text-amber"]):not([class*="text-emerald"]):not([class*="text-red"]):not(.btn-primary *),
@@ -90,15 +179,20 @@ html[data-theme='light'],
 .light .bg-\[\#161B28\],
 .light .bg-\[\#0B0C10\],
 .light .bg-\[\#07080B\],
+.light .bg-\[\#09090B\],
+.light .bg-\[\#0D0D10\],
 .light [class*="bg-[#111520]"],
 .light [class*="bg-[#0A0D14]"],
 .light [class*="bg-[#0B0C10]"],
-.light [class*="bg-[#111622]"] {
+.light [class*="bg-[#111622]"],
+.light [class*="bg-[#09090B]"],
+.light [class*="bg-[#0D0D10]"] {
   background-color: var(--bg-card) !important;
 }
 
 .light .bg-\[\#0A0D14\],
-.light .bg-\[\#0D1018\] {
+.light .bg-\[\#0D1018\],
+.light .bg-\[\#070709\] {
   background-color: var(--bg-arena) !important;
 }
 
@@ -134,7 +228,6 @@ html[data-theme='light'],
   border-color: var(--border-card) !important;
 }
 
-/* Guard against invisible text in light mode */
 .light .arena-card h1.text-white,
 .light .arena-card h2.text-white,
 .light .arena-card h3.text-white,
@@ -160,75 +253,158 @@ html[data-theme='light'],
 }
 
 .light .text-\[\#8E92A4\],
-.light .text-\[\#CBD5E1\] {
+.light .text-\[\#CBD5E1\],
+.light .text-\[\#A3A19A\] {
   color: var(--text-secondary) !important;
 }
 
 .light .text-\[\#A8DADC\] {
-  color: var(--cyan-accent) !important;
+  color: var(--gold-brass) !important;
 }
 
+/* ============================================================================
+   4. BODY & SOBER ARCHITECTURAL ATMOSPHERE (MATTE CARBON + WARM TUNGSTEN)
+   ============================================================================ */
 body {
   background-color: var(--bg-arena);
-  background-image: radial-gradient(ellipse 90% 55% at 50% -10%, rgba(30, 64, 175, 0.15) 0%, rgba(8, 11, 18, 0) 75%);
+  background-image:
+    radial-gradient(ellipse 90% 45% at 50% -15%, rgba(217, 35, 46, 0.08) 0%, transparent 65%),
+    radial-gradient(ellipse 65% 40% at 88% 12%, rgba(197, 160, 89, 0.05) 0%, transparent 65%);
   background-attachment: fixed;
   color: var(--text-primary);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-sans-stack);
   overflow-x: hidden;
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.25s var(--ease-out-expo), color 0.25s var(--ease-out-expo);
 }
 
 .light body,
 [data-theme='light'] body {
-  background-image: radial-gradient(ellipse 90% 50% at 50% -8%, rgba(37, 99, 235, 0.05) 0%, transparent 70%);
+  background-image:
+    radial-gradient(ellipse 80% 45% at 50% -10%, rgba(217, 35, 46, 0.04) 0%, transparent 65%),
+    radial-gradient(ellipse 70% 45% at 85% 15%, rgba(154, 123, 56, 0.04) 0%, transparent 65%);
 }
 
-/* Custom Esports Utilities - Refined, Clean & Tactile */
+/* Monumental Widescreen Layout & Hollow Architectural Numerals */
+.widescreen-container {
+  width: 100%;
+  max-width: 1720px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .widescreen-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .widescreen-container {
+    padding-left: 3rem;
+    padding-right: 3rem;
+  }
+}
+
+.monolith-numeral {
+  font-family: var(--font-display-stack);
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(244, 242, 237, 0.12);
+  line-height: 0.82;
+  user-select: none;
+  pointer-events: none;
+}
+
+.light .monolith-numeral {
+  -webkit-text-stroke: 1px rgba(17, 17, 20, 0.12);
+}
+
+/* ============================================================================
+   5. ARCHITECTURAL HARDWARE FRAMES (SHARP CHAMFERED ANODIZED CARBON — ZERO PLASTIC)
+   ============================================================================ */
+.double-bezel {
+  background-color: var(--bezel-bg);
+  border: 1px solid var(--bezel-border);
+  padding: 4px;
+  border-radius: 4px;
+  box-shadow: 0 24px 54px -18px rgba(0, 0, 0, 0.75);
+}
+
+.double-bezel-inner {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(244, 242, 237, 0.07);
+}
+
 .arena-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 4px;
+  transition:
+    transform 0.22s var(--ease-out-expo),
+    border-color 0.22s var(--ease-out-expo),
+    background-color 0.22s var(--ease-out-expo),
+    box-shadow 0.22s var(--ease-out-expo);
   box-shadow: var(--card-shadow);
 }
 
-.arena-card:hover {
-  background-color: var(--bg-card-hover);
-  border-color: rgba(255, 255, 255, 0.14);
-  transform: translateY(-2px);
-}
+@media (hover: hover) and (pointer: fine) {
+  .arena-card:hover {
+    background-color: var(--bg-card-hover);
+    border-color: rgba(244, 242, 237, 0.18);
+    transform: translateY(-2px);
+  }
 
-.light .arena-card:hover {
-  border-color: rgba(15, 23, 42, 0.12);
-  box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
-}
+  .light .arena-card:hover {
+    border-color: rgba(17, 17, 20, 0.2);
+    box-shadow: 0 18px 38px -8px rgba(17, 17, 20, 0.1), 0 0 0 1px rgba(17, 17, 20, 0.06);
+  }
 
-.dark .arena-card:hover {
-  box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.45);
-}
+  .dark .arena-card:hover {
+    box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(244, 242, 237, 0.12);
+  }
 
-.arena-card-glow:hover {
-  border-color: var(--border-active);
+  .arena-card-glow:hover {
+    border-color: var(--border-active);
+  }
 }
 
 .glass-panel {
   background: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 12px;
+  border-radius: 4px;
 }
 
+/* ============================================================================
+   6. ARCHITECTURAL TACTILE BUTTONS & CONSOLE INPUTS (NO PLASTIC PILLS)
+   ============================================================================ */
 .btn-primary {
-  background: #E63946;
-  color: #FFFFFF;
-  font-weight: 600;
-  border-radius: 8px;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  background-color: #D9232E;
+  color: #F4F2ED;
+  font-weight: 700;
+  border-radius: 3px;
+  border: 1px solid rgba(244, 242, 237, 0.2);
+  letter-spacing: 0.03em;
+  transition:
+    transform 0.18s var(--ease-out-expo),
+    background-color 0.18s var(--ease-out-expo),
+    box-shadow 0.18s var(--ease-out-expo);
+  box-shadow:
+    0 10px 24px -8px rgba(217, 35, 46, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.22);
 }
 
-.btn-primary:hover {
-  background: #D62839;
-  transform: translateY(-1px);
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: #E63946;
+    transform: translateY(-1.5px);
+    box-shadow:
+      0 14px 28px -6px rgba(217, 35, 46, 0.6),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
 }
 
 .btn-primary:active {
@@ -236,17 +412,25 @@ body {
 }
 
 .btn-secondary {
-  background-color: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-card);
+  background-color: rgba(244, 242, 237, 0.035);
+  border: 1px solid rgba(244, 242, 237, 0.14);
   color: var(--text-primary);
-  font-weight: 500;
-  border-radius: 8px;
-  transition: all 0.15s ease;
+  font-weight: 600;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+  box-shadow: inset 0 1px 0 rgba(244, 242, 237, 0.06);
+  transition:
+    transform 0.18s var(--ease-out-expo),
+    background-color 0.18s var(--ease-out-expo),
+    border-color 0.18s var(--ease-out-expo);
 }
 
-.btn-secondary:hover {
-  background-color: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.16);
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background-color: rgba(244, 242, 237, 0.08);
+    border-color: rgba(244, 242, 237, 0.28);
+    transform: translateY(-1px);
+  }
 }
 
 .btn-secondary:active {
@@ -254,42 +438,32 @@ body {
 }
 
 .light .btn-secondary {
-  background-color: rgba(15, 23, 42, 0.04);
-  border-color: rgba(15, 23, 42, 0.1);
-  color: #0F172A;
+  background-color: rgba(17, 17, 20, 0.04);
+  border-color: rgba(17, 17, 20, 0.16);
+  color: #111114;
 }
 
-.light .btn-secondary:hover {
-  background-color: rgba(15, 23, 42, 0.08);
-  border-color: rgba(15, 23, 42, 0.16);
-}
-
-.text-gradient-red {
-  background: linear-gradient(135deg, var(--text-primary) 30%, #E63946 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-cyan {
-  background: linear-gradient(135deg, var(--cyan-light) 0%, var(--cyan-accent) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+@media (hover: hover) and (pointer: fine) {
+  .light .btn-secondary:hover {
+    background-color: rgba(17, 17, 20, 0.08);
+    border-color: rgba(17, 17, 20, 0.28);
+  }
 }
 
 .input-arena {
   background-color: var(--input-bg);
   border: 1px solid var(--input-border);
   color: var(--text-primary);
-  border-radius: 10px;
-  padding: 0.65rem 0.95rem;
+  border-radius: 3px;
+  padding: 0.7rem 1rem;
   width: 100%;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s var(--ease-out-expo), box-shadow 0.2s var(--ease-out-expo);
 }
 
 .input-arena:focus {
   outline: none;
-  border-color: #E63946;
-  box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.18);
+  border-color: #D9232E;
+  box-shadow: 0 0 0 2px rgba(217, 35, 46, 0.22);
 }
 
 .input-arena::placeholder {
@@ -307,12 +481,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.2);
+  background: rgba(148, 163, 184, 0.22);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(150, 150, 150, 0.35);
+  background: rgba(230, 57, 70, 0.55);
 }
 
 /* Skeleton Shimmer Loading Effect */
@@ -328,13 +502,13 @@ body {
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.05) 0%,
-    rgba(255, 255, 255, 0.14) 50%,
-    rgba(255, 255, 255, 0.05) 100%
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.04) 100%
   );
   background-size: 200% 100%;
   animation: shimmerSweep 1.6s infinite ease-in-out;
-  border-radius: 8px;
+  border-radius: 12px;
 }
 
 .light .skeleton-shimmer {
@@ -394,10 +568,9 @@ body {
 
 /* Steam-style Gamer Profile Background Textures */
 .banner-cyberpunk {
-  background-image: 
-    linear-gradient(to right, rgba(230, 57, 70, 0.12) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(6, 182, 212, 0.12) 1px, transparent 1px);
-  background-size: 28px 28px;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(230, 57, 70, 0.22) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(56, 189, 248, 0.2) 0%, transparent 50%);
 }
 
 .banner-carbon {
@@ -423,17 +596,15 @@ body {
 }
 
 .banner-retro {
-  background: linear-gradient(180deg, rgba(168, 85, 247, 0.12) 0%, transparent 60%),
-              linear-gradient(to right, rgba(236, 72, 153, 0.08) 1px, transparent 1px),
-              linear-gradient(to bottom, rgba(168, 85, 247, 0.08) 1px, transparent 1px);
-  background-size: auto, 32px 32px, 32px 32px;
+  background:
+    radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.18) 0%, transparent 50%),
+    linear-gradient(180deg, rgba(168, 85, 247, 0.14) 0%, transparent 70%);
 }
 
 .banner-matrix {
-  background-image: 
-    linear-gradient(to bottom, rgba(16, 185, 129, 0.12) 1px, transparent 1px),
-    radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.15) 0%, transparent 60%);
-  background-size: 100% 16px, auto;
+  background:
+    radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.2) 0%, transparent 60%),
+    linear-gradient(180deg, rgba(6, 78, 59, 0.25) 0%, transparent 80%);
 }
 
 .banner-arena {
@@ -455,11 +626,13 @@ body {
 }
 
 /* Scrollbar-hide utility for horizontal tab strips */
-.scrollbar-hide {
+.scrollbar-hide,
+.scrollbar-none {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar,
+.scrollbar-none::-webkit-scrollbar {
   display: none;
 }
 
@@ -477,7 +650,7 @@ body {
   color: #0F172A;
 }
 
-/* Smooth link underline hover for footer and nav */
+/* GPU-safe link underline hover (uses transform scaleX instead of width) */
 .link-hover-underline {
   position: relative;
 }
@@ -486,16 +659,18 @@ body {
   position: absolute;
   bottom: -2px;
   left: 0;
-  width: 0%;
+  width: 100%;
   height: 2px;
   background: #E63946;
-  transition: width 0.25s ease;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.25s var(--ease-out-expo);
 }
 .link-hover-underline:hover::after {
-  width: 100%;
+  transform: scaleX(1);
 }
 
-/* Animated Gradient Border (for profile customization accent colors) */
+/* Animated Gradient Border */
 @keyframes gradientRotate {
   0% { --angle: 0deg; }
   100% { --angle: 360deg; }
@@ -540,7 +715,7 @@ body {
   animation: float 3s ease-in-out infinite;
 }
 
-/* Pulse Ring (for status indicators) */
+/* Pulse Ring */
 @keyframes pulseRing {
   0% { transform: scale(0.9); opacity: 0.8; }
   50% { transform: scale(1.1); opacity: 0.4; }
@@ -558,7 +733,7 @@ body {
 }
 
 .slide-in-right {
-  animation: slideInFromRight 0.4s ease-out forwards;
+  animation: slideInFromRight 0.4s var(--ease-out-expo) forwards;
 }
 
 /* Glass morphism improvements */
@@ -584,6 +759,44 @@ body {
   font-size: 12px;
   animation: sparkle 2s ease-in-out infinite;
   pointer-events: none;
+}
+
+/* Playbook Section 8.2 & 8.3: High-Performance Video Background & Alpha WebM Utilities */
+.video-hero-container {
+  position: relative;
+  width: 100%;
+  min-height: 100dvh;
+  overflow: hidden;
+  background-color: var(--bg-arena);
+}
+
+.video-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.65;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.video-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, transparent 20%, rgba(6, 9, 17, 0.9) 100%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.floating-model {
+  position: absolute;
+  width: 340px;
+  height: auto;
+  pointer-events: none;
+  z-index: 20;
+  filter: drop-shadow(0 25px 35px rgba(0, 0, 0, 0.45));
+  will-change: transform;
 }
 
 /* Accessibility: Support prefers-reduced-motion */

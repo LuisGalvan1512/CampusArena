@@ -1,17 +1,26 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useInView, useSpring, useMotionValue, motion } from 'framer-motion';
+import { useInView, useSpring, useMotionValue } from 'framer-motion';
 
 interface AnimatedCounterProps {
-  target: number;
+  target?: number;
+  value?: number;
   suffix?: string;
   prefix?: string;
   duration?: number;
   className?: string;
 }
 
-export function AnimatedCounter({ target, suffix = '', prefix = '', duration = 1.5, className = '' }: AnimatedCounterProps) {
+export function AnimatedCounter({
+  target,
+  value,
+  suffix = '',
+  prefix = '',
+  duration = 1.5,
+  className = '',
+}: AnimatedCounterProps) {
+  const resolvedTarget = target ?? value ?? 0;
   const ref = useRef<HTMLSpanElement>(null);
   const isInView = useInView(ref, { once: true, margin: '-50px' });
   const [displayValue, setDisplayValue] = useState(0);
@@ -25,9 +34,9 @@ export function AnimatedCounter({ target, suffix = '', prefix = '', duration = 1
 
   useEffect(() => {
     if (isInView) {
-      motionValue.set(target);
+      motionValue.set(resolvedTarget);
     }
-  }, [isInView, target, motionValue]);
+  }, [isInView, resolvedTarget, motionValue]);
 
   useEffect(() => {
     const unsubscribe = spring.on('change', (latest) => {
@@ -38,7 +47,9 @@ export function AnimatedCounter({ target, suffix = '', prefix = '', duration = 1
 
   return (
     <span ref={ref} className={className}>
-      {prefix}{displayValue.toLocaleString()}{suffix}
+      {prefix}
+      {displayValue.toLocaleString()}
+      {suffix}
     </span>
   );
 }

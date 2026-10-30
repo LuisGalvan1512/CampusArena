@@ -30,6 +30,7 @@ import { fireCelebration } from '@/lib/confetti';
 import { sounds } from '@/lib/sound';
 import { toast } from 'sonner';
 import { CompetitorName } from '@/components/CompetitorName';
+import { LivingBanner } from '@/components/LivingBanner';
 
 type UserProfile = {
   nickname?: string;
@@ -502,7 +503,39 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-[var(--bg-arena)] pt-8 pb-12 transition-colors">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 flex flex-col lg:flex-row gap-8">
+      <div className="widescreen-container space-y-8">
+        <LivingBanner
+          imageSrc="/assets/banner_pro_gear.jpg"
+          alt="Foro Comunidad Campus Arena"
+          telemetryTag="05 // FORO Y COMUNIDAD TECSUP ESPORTS"
+          minHeightClass="min-h-[240px] sm:min-h-[270px]"
+        >
+          <div className="p-6 sm:p-10 flex flex-col lg:flex-row lg:items-end justify-between gap-6">
+            <div className="space-y-2.5 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-sm bg-[#070709]/85 border border-[#C5A059]/40 text-[10px] font-mono-data font-bold uppercase tracking-[0.2em] text-[#C5A059]">
+                <MessageSquare className="w-3.5 h-3.5 text-[#D9232E]" />
+                <span>MURO SOCIAL Y BOLSA DE ESCUADRAS</span>
+              </div>
+              <h1 className="font-display text-3xl sm:text-5xl font-black text-white uppercase tracking-tight leading-[0.95]">
+                Comunidad Universitaria.
+              </h1>
+              <p className="text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl">
+                Comparte jugadas, recluta integrantes para tu escuadra de Dota 2 o L4D2 y participa en el debate competitivo entre las sedes Lima, Arequipa y Trujillo.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                if (!isAuthenticated) return toast.error('Debes iniciar sesión primero');
+                setIsPosting(!isPosting);
+              }}
+              className="btn-primary py-3 px-6 text-xs flex items-center justify-center gap-2 cursor-pointer shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              Publicar en el Muro
+            </button>
+          </div>
+        </LivingBanner>
+        <div className="flex flex-col lg:flex-row gap-8">
         
         {/* SIDEBAR (Desktop) */}
         <div className="lg:w-64 shrink-0 space-y-6">
@@ -543,7 +576,7 @@ export default function CommunityPage() {
         </div>
 
         {/* MAIN FEED */}
-        <div className="flex-1 max-w-2xl space-y-6">
+        <div className="flex-1 max-w-4xl space-y-6">
           
           {/* Create Post Input */}
           {isPosting && (
@@ -1278,7 +1311,7 @@ export default function CommunityPage() {
           )}
 
         </div>
-
+        </div>
       </div>
     </div>
   );

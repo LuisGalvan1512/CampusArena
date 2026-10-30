@@ -643,7 +643,7 @@ export default function ProfilePage() {
         </div>
       )}
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
+      <div className="relative z-10 widescreen-container space-y-8 animate-in fade-in duration-300">
       
       {/* 1. TOP QUICK ACTION TOOLBAR */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
@@ -652,7 +652,7 @@ export default function ProfilePage() {
             <ShieldCheck className="w-3.5 h-3.5" />
             Identidad Competitiva Tecsup
           </span>
-          <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+          <h1 className="font-display text-2xl sm:text-4xl font-black text-white uppercase tracking-tight">
             Carnet del Jugador
           </h1>
         </div>

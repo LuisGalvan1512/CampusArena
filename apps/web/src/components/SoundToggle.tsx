@@ -11,6 +11,18 @@ export function SoundToggle() {
   useEffect(() => {
     setMounted(true);
     setIsMuted(sounds.isMuted());
+
+    const handleSync = (event: Event) => {
+      const custom = event as CustomEvent<{ muted: boolean }>;
+      if (custom.detail && typeof custom.detail.muted === 'boolean') {
+        setIsMuted(custom.detail.muted);
+      } else {
+        setIsMuted(sounds.isMuted());
+      }
+    };
+
+    window.addEventListener('campus-sound-mute-change', handleSync);
+    return () => window.removeEventListener('campus-sound-mute-change', handleSync);
   }, []);
 
   const handleToggle = () => {
@@ -26,18 +38,22 @@ export function SoundToggle() {
 
   return (
     <button
+      type="button"
+      data-no-sound
       onClick={handleToggle}
+      aria-label={isMuted ? 'Activar efectos de sonido' : 'Silenciar efectos de sonido'}
+      aria-pressed={!isMuted}
       title={isMuted ? 'Activar Efectos de Sonido Gamer' : 'Silenciar Efectos de Sonido'}
-      className={`relative w-9 h-9 rounded-xl border transition-all duration-300 flex items-center justify-center cursor-pointer ${
+      className={`relative w-9 h-9 rounded-xl border transition-all duration-300 flex items-center justify-center cursor-pointer focus-visible:ring-2 focus-visible:ring-[#E63946] focus-visible:ring-offset-2 ${
         isMuted
           ? 'bg-[var(--bg-card)] border-[var(--border-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-red-500/30'
           : 'bg-[var(--bg-card)] border-[var(--border-card)] text-emerald-500 dark:text-emerald-400 hover:border-emerald-500/50 shadow-sm'
       }`}
     >
       {isMuted ? (
-        <VolumeX className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
+        <VolumeX className="w-4 h-4 transition-transform duration-300 hover:scale-110" aria-hidden="true" />
       ) : (
-        <Volume2 className="w-4 h-4 transition-transform duration-300 hover:scale-110" />
+        <Volume2 className="w-4 h-4 transition-transform duration-300 hover:scale-110" aria-hidden="true" />
       )}
     </button>
   );

@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useEffect, useRef } from 'react';
 import { sounds } from '@/lib/sound';
@@ -7,7 +7,8 @@ import { sounds } from '@/lib/sound';
  * GlobalButtonSound
  * Mounts a single document-level capture listener that fires whenever the user
  * clicks any <button> or element with role="button".
- * Uses a pre-loaded <audio> pool so the sound plays with minimal latency.
+ * Uses a pre-loaded <audio> pool so the sound plays with minimal latency,
+ * with a zero-latency Web Audio API synthesizer fallback (sounds.playWoodClick).
  * No CSS or visual properties are touched — purely audio side-effect.
  *
  * To exclude a button from this global sound, add data-no-sound to it:
@@ -46,10 +47,15 @@ export function GlobalButtonSound() {
       const idx = poolIndexRef.current % POOL_SIZE;
       poolIndexRef.current++;
       const audio = poolRef.current[idx];
-      if (!audio) return;
+      if (!audio) {
+        sounds.playWoodClick();
+        return;
+      }
 
       audio.currentTime = 0;
-      audio.play().catch(() => {});
+      audio.play().catch(() => {
+        sounds.playWoodClick();
+      });
     };
 
     document.addEventListener('click', handleClick, { capture: true });
