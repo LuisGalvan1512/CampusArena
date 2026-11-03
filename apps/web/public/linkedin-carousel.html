@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus Arena — LinkedIn Carousel (1080x1350)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@600,700,800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #050507;
+      color: #F4F2ED;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 40px;
+      padding: 40px 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Print settings for instant 1080x1350 PDF export */
+    @page {
+      size: 1080px 1350px;
+      margin: 0;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        gap: 0;
+        background: transparent;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .slide {
+        page-break-after: always;
+        break-after: page;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
+
+    .instructions-bar {
+      max-width: 1080px;
+      width: 100%;
+      background: #111116;
+      border: 1px solid #D9232E;
+      border-radius: 8px;
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 14px;
+    }
+
+    .instructions-bar button {
+      background: #D9232E;
+      color: #FFF;
+      border: none;
+      padding: 10px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    /* SLIDE CONTAINER (1080 x 1350 - Ratio 4:5 LinkedIn) */
+    .slide {
+      width: 1080px;
+      height: 1350px;
+      background: #070709;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 80px 70px 60px 70px;
+      border: 1px solid rgba(244, 242, 237, 0.1);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Architectural Crosshairs */
+    .crosshair {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      pointer-events: none;
+      opacity: 0.35;
+    }
+    .crosshair::before {
+      content: '';
+      position: absolute;
+      top: 6px;
+      left: 0;
+      width: 14px;
+      height: 2px;
+      background: #F4F2ED;
+    }
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 6px;
+      width: 2px;
+      height: 14px;
+      background: #F4F2ED;
+    }
+    .ch-tl { top: 24px; left: 24px; }
+    .ch-tr { top: 24px; right: 24px; }
+    .ch-bl { bottom: 24px; left: 24px; }
+    .ch-br { bottom: 24px; right: 24px; }
+
+    /* Hairlines */
+    .hairline-top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #D9232E 0%, #C5A059 40%, transparent 100%);
+    }
+
+    /* Badge */
+    .tag-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(217, 35, 46, 0.12);
+      border: 1px solid rgba(217, 35, 46, 0.35);
+      border-radius: 2px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #D9232E;
+      width: fit-content;
+    }
+
+    .tag-badge.gold {
+      background: rgba(197, 160, 89, 0.12);
+      border-color: rgba(197, 160, 89, 0.4);
+      color: #C5A059;
+    }
+
+    /* Typography */
+    .title-monumental {
+      font-family: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+      font-size: 58px;
+      font-weight: 800;
+      line-height: 1.04;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
+      color: #F4F2ED;
+      margin-top: 24px;
+    }
+
+    .title-monumental span.accent {
+      color: #D9232E;
+    }
+
+    .title-monumental span.gold {
+      color: #C5A059;
+    }
+
+    .subtitle-editorial {
+      font-size: 24px;
+      line-height: 1.5;
+      color: #9C9A93;
+      margin-top: 18px;
+      max-width: 900px;
+      font-weight: 400;
+    }
+
+    /* Slide Card Graphic Center */
+    .graphic-frame {
+      width: 100%;
+      height: 620px;
+      background: #0D0D10;
+      border: 1px solid rgba(244, 242, 237, 0.14);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+    }
+
+    .graphic-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.85;
+      filter: contrast(1.08) saturate(0.92);
+    }
+
+    .graphic-overlay-gradient {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7,7,9,0.1) 0%, rgba(7,7,9,0.7) 70%, #070709 100%);
+    }
+
+    /* Cards Grid on Slide 2 & 4 */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .feature-card {
+      background: #0D0D10;
+      border: 1px solid rgba(244, 242, 237, 0.12);
+      border-radius: 4px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 220px;
+    }
+
+    .feature-card .num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 700;
+      color: #D9232E;
+      letter-spacing: 0.16em;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      font-family: 'Clash Display', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      color: #F4F2ED;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 17px;
+      line-height: 1.45;
+      color: #9C9A93;
+    }
+
+    /* Footer Meta */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 24px;
+      border-top: 1px solid rgba(244, 242, 237, 0.1);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #686661;
+    }
+
+    .slide-footer .author {
+      color: #F4F2ED;
+      font-weight: 700;
+    }
+
+    .slide-footer .page-indicator {
+      color: #D9232E;
+      font-weight: 800;
+    }
+
+    .swipe-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #F4F2ED;
+      color: #070709;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 2px;
+      letter-spacing: 0.14em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- No-print helper toolbar -->
+  <div class="instructions-bar no-print">
+    <div>
+      <strong>Exportador de Carrusel LinkedIn (1080x1350):</strong>
+      <p style="color: #9C9A93; margin-top: 4px;">Presiona el botón para generar el PDF listo para arrastrar como Documento en LinkedIn.</p>
+    </div>
+    <button onclick="window.print()">Descargar PDF Ahora (Ctrl + P)</button>
+  </div>
+
+  <!-- ==========================================
+       SLIDE 1: PORTADA / HOOK
+       ========================================== -->
+  <div class="slide">
+    <div class="hairline-top"></div>
+    <div class="crosshair ch-tl"></div>
+    <div class="crosshair ch-tr"></div>
+    <div class="crosshair ch-bl"></div>
+    <div class="crosshair ch-br"></div>
+
+    <div class="slide-header">
+      <div class="tag-badge">CASE STUDY // INGENIERÍA DE PRODUCTO</div>
+      <h1 class="title-monumental">
+        De 0 a una Plataforma de Esports <span class="accent">Universitaria.</span>
+      </h1>
+      <p class="subtitle-editorial">
+        Cómo rediseñamos Campus Arena para Tecsup con arquitectura de hardware, cero estética genérica de IA y rendimiento extremo.
+      </p>
+    </div>
+
+    <div class="graphic-frame">
+      <img src="/assets/banner_stadium_tunnel.jpg" alt="Campus Arena Stadium Stage">
+      <div class="graphic-overlay-gradient"></div>
+      <div style="position: absolute; bottom: 40px; left: 40px; right: 40px; display: flex; justify-content: space-between; align-items: flex-end;">
+        <div>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 0.2em; color: #D9232E; font-weight: 700; text-transform: uppercase;">INFRAESTRUCTURA COMPETITIVA</span>
+          <h2 style="font-family: 'Clash Display', sans-serif; font-size: 36px; text-transform: uppercase; color: #FFF; margin-top: 6px;">7 Disciplinas • 3 Sedes</h2>
+        </div>
+        <div style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 2px;">
+          LIMA • AREQUIPA • TRUJILLO
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="author">CAMPUS ARENA // TECSUP ESPORTS</span>
+      <span class="swipe-pill">DESLIZA →</span>
+      <span class="page-indicator">01 / 05</span>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SLIDE 2: DIRECCIÓN DE ARTE & ANTI-SLOP
+       ========================================== -->
+  <div class="slide">
+    <div class="hairline-top"></div>
+    <div class="crosshair ch-tl"></div>
+    <div class="crosshair ch-tr"></div>
+    <div class="crosshair ch-bl"></div>
+    <div class="crosshair ch-br"></div>
+
+    <div class="slide-header">
+      <div class="tag-badge">01 // SISTEMA VISUAL</div>
+      <h1 class="title-monumental">
+        Basta de interfaces <span class="accent">"plásticas"</span> de IA.
+      </h1>
+      <p class="subtitle-editorial">
+        Erradicamos bordes tipo píldora inflada y degradados cian/púrpura genéricos. Diseñamos un lenguaje físico inspirado en hardware de audio y Steam.
+      </p>
+    </div>
+
+    <div class="features-grid" style="margin-top: 20px; margin-bottom: 20px;">
+      <div class="feature-card">
+        <span class="num">01 // PALETA FÍSICA</span>
+        <h3>Matte Carbon & Warm Bone</h3>
+        <p>Bases en carbón mate (#070709), texto en hueso (#F4F2ED), carmesí institucional (#D9232E) y bronce (#C5A059).</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">02 // GEOMETRÍA DE HARDWARE</span>
+        <h3>Biselado Preciso de 2px</h3>
+        <p>Bordes mecánicos con crucetas de mira en esquinas (+), micro-biseles y elevación sobria sin desenfoques sucios.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">03 // ESCALA WIDESCREEN</span>
+        <h3>1720px y Tipografía Brutal</h3>
+        <p>Titulares en Clash Display, datos en JetBrains Mono y numerales monolíticos huecos (#01 a #04) con alta jerarquía.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">04 // ACCESIBILIDAD PURA</span>
+        <h3>WCAG 2.2 Nivel AA</h3>
+        <p>Contraste mínimo 4.5:1, navegación completa por teclado, touch targets de 44px+ y 0 layout shift (CLS = 0).</p>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="author">DIRECCIÓN DE ARTE & CRAFT</span>
+      <span class="swipe-pill">DESLIZA →</span>
+      <span class="page-indicator">02 / 05</span>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SLIDE 3: MOTOR DE BRACKETS & MODO ESCENARIO
+       ========================================== -->
+  <div class="slide">
+    <div class="hairline-top"></div>
+    <div class="crosshair ch-tl"></div>
+    <div class="crosshair ch-tr"></div>
+    <div class="crosshair ch-bl"></div>
+    <div class="crosshair ch-br"></div>
+
+    <div class="slide-header">
+      <div class="tag-badge gold">02 // INGENIERÍA DE COMPETICIÓN</div>
+      <h1 class="title-monumental">
+        Motor de Brackets y <span class="gold">Modo Escenario OBS.</span>
+      </h1>
+      <p class="subtitle-editorial">
+        Las eliminatorias se sortean al instante (aleatorio o por seeding de medallas) y se proyectan limpias en 1920x1080 sin headers ni distracciones.
+      </p>
+    </div>
+
+    <div class="graphic-frame">
+      <img src="/assets/banner_command_center.jpg" alt="Broadcast Control Room">
+      <div class="graphic-overlay-gradient"></div>
+      <div style="position: absolute; inset: 40px; display: flex; flex-direction: column; justify-content: flex-end; gap: 14px;">
+        <div style="display: flex; gap: 10px;">
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #D9232E; color: #FFF; padding: 6px 12px; font-weight: 700;">OBS BROWSER SOURCE READY</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 11px; background: #070709; color: #C5A059; border: 1px solid #C5A059; padding: 6px 12px; font-weight: 700;">CONECTORES LÁSER SVG</span>
+        </div>
+        <h3 style="font-family: 'Clash Display', sans-serif; font-size: 32px; text-transform: uppercase; color: #FFF;">Arbitraje de Marcadores en 1 Clic</h3>
+        <p style="font-size: 16px; color: #9C9A93; max-width: 750px;">Presets rápidos para jueces (2-0, 2-1, 3-2), cálculo automático de finalistas y entrega de medallas de oro, plata y bronce.</p>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="author">MOTOR DE TORNEOS EN TIEMPO REAL</span>
+      <span class="swipe-pill">DESLIZA →</span>
+      <span class="page-indicator">03 / 05</span>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SLIDE 4: ESTUDIO DE ORGANIZADOR (2 COLUMNAS)
+       ========================================== -->
+  <div class="slide">
+    <div class="hairline-top"></div>
+    <div class="crosshair ch-tl"></div>
+    <div class="crosshair ch-tr"></div>
+    <div class="crosshair ch-bl"></div>
+    <div class="crosshair ch-br"></div>
+
+    <div class="slide-header">
+      <div class="tag-badge">03 // EXPERIENCIA DE ORGANIZADOR</div>
+      <h1 class="title-monumental">
+        Estudio de Creación con <span class="accent">Live Preview.</span>
+      </h1>
+      <p class="subtitle-editorial">
+        Los organizadores configuran torneos en un layout interactivo de 2 columnas donde cada cambio se previsualiza en vivo con calidad de catálogo.
+      </p>
+    </div>
+
+    <div class="features-grid" style="margin-top: 20px; margin-bottom: 20px;">
+      <div class="feature-card">
+        <span class="num">01 // FEEDBACK REACTIVO</span>
+        <h3>Previsualización en Directo</h3>
+        <p>Ajusta el pozo, los cupos mínimos/máximos y las fechas mientras observas la tarjeta final tal como la verá el estudiante.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">02 // CHECKOUT S/. 0.00</span>
+        <h3>Auditoría Yape / Plin</h3>
+        <p>Sin pasarelas bancarias ni comisiones. Flujo con carga de comprobante y confirmación directa por WhatsApp oficial.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">03 // SEÑAL MULTICÁMARA</span>
+        <h3>Kick, YouTube & TikTok</h3>
+        <p>Conexión fluida con canales de streaming y chat sincronizado nativo para la comunidad estudiantil de Tecsup.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="num">04 // TRIBUNAL DISCIPLINARIO</span>
+        <h3>Control Root de Moderación</h3>
+        <p>Panel para gestionar permisos, sanciones graduales (silencios/baneos) y evaluación de descargos en tiempo real.</p>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="author">CONSOLA OPERATIVA DE ALTO RENDIMIENTO</span>
+      <span class="swipe-pill">DESLIZA →</span>
+      <span class="page-indicator">04 / 05</span>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       SLIDE 5: STACK & TAKEAWAYS
+       ========================================== -->
+  <div class="slide">
+    <div class="hairline-top"></div>
+    <div class="crosshair ch-tl"></div>
+    <div class="crosshair ch-tr"></div>
+    <div class="crosshair ch-bl"></div>
+    <div class="crosshair ch-br"></div>
+
+    <div class="slide-header">
+      <div class="tag-badge gold">04 // INGENIERÍA & STACK</div>
+      <h1 class="title-monumental">
+        Tecnología Sólida. <br><span class="gold">Coste de Operación S/. 0.00.</span>
+      </h1>
+      <p class="subtitle-editorial">
+        Apalancado en las mejores herramientas gratuitas y principios de ingeniería disciplinada (TDD, YAGNI y 0 deuda técnica).
+      </p>
+    </div>
+
+    <div style="background: #0D0D10; border: 1px solid rgba(244, 242, 237, 0.12); padding: 40px; border-radius: 4px; display: flex; flex-direction: column; gap: 24px;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-family: 'JetBrains Mono', monospace; font-size: 13px;">
+        <div style="background: #070709; padding: 20px; border: 1px solid rgba(255,255,255,0.06);">
+          <span style="color: #D9232E; font-weight: 700; display: block; margin-bottom: 6px;">FRONTEND</span>
+          <strong style="font-size: 16px; color: #FFF; display: block;">Next.js 16</strong>
+          <span style="color: #686661;">Turbopack • Tailwind</span>
+        </div>
+
+        <div style="background: #070709; padding: 20px; border: 1px solid rgba(255,255,255,0.06);">
+          <span style="color: #C5A059; font-weight: 700; display: block; margin-bottom: 6px;">AUDIO MOTOR</span>
+          <strong style="font-size: 16px; color: #FFF; display: block;">Web Audio API</strong>
+          <span style="color: #686661;">Síntesis 0ms • Cero MP3</span>
+        </div>
+
+        <div style="background: #070709; padding: 20px; border: 1px solid rgba(255,255,255,0.06);">
+          <span style="color: #10B981; font-weight: 700; display: block; margin-bottom: 6px;">BACKEND & DB</span>
+          <strong style="font-size: 16px; color: #FFF; display: block;">NestJS + Prisma</strong>
+          <span style="color: #686661;">PostgreSQL Supabase</span>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 24px;">
+        <h4 style="font-family: 'Clash Display', sans-serif; font-size: 26px; text-transform: uppercase; color: #F4F2ED; margin-bottom: 10px;">
+          ¿Tienes feedback o quieres conocer más del proyecto?
+        </h4>
+        <p style="font-size: 18px; line-height: 1.5; color: #9C9A93;">
+          Conectemos en los comentarios de este post. Estaré compartiendo detalles sobre el motor de brackets y el sintetizador de sonido en navegador.
+        </p>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="author">LUIS GALVÁN // CAMPUS ARENA</span>
+      <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #C5A059; font-weight: 700;">FIN DEL CARRUSEL</span>
+      <span class="page-indicator">05 / 05</span>
+    </div>
+  </div>
+
+</body>
+</html>
